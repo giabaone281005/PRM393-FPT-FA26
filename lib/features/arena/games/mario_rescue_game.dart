@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../data/providers/app_state_provider.dart';
 
 class MarioPrincessRescueGame extends StatefulWidget {
