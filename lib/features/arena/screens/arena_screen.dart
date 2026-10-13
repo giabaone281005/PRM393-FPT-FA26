@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +8,8 @@ import '../../../data/providers/app_state_provider.dart';
 import '../../../data/repositories/arena_repository.dart';
 import '../popups/arena_challenge_dialog.dart';
 import '../popups/league_rules_sheet.dart';
+import '../games/mario_rescue_game.dart';
+import '../games/pixel_racing_game.dart';
 
 class ArenaScreen extends StatefulWidget {
   const ArenaScreen({super.key});
@@ -36,17 +39,34 @@ class _ArenaScreenState extends State<ArenaScreen> {
       _loading = false;
     });
   }
-
   void _openChallenge(AppStateProvider state) {
+    // Ngẫu nhiên chọn 1 trong các tựa game pixel cute vừa học vừa chơi:
+    // 0: Mario Cứu Công Chúa
+    // 1: Đua Xe Pixel Turbo Math Racing
+    // 2: Thử Thách Đấu Trường Tiêu Chuẩn
+    final randomGame = Random().nextInt(3);
+
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => ArenaChallengeDialog(
-        state: state,
-        onScoreSubmitted: () {
-          _loadLeaderboard();
-        },
-      ),
+      builder: (_) {
+        if (randomGame == 0) {
+          return MarioPrincessRescueGame(
+            state: state,
+            onGameOver: _loadLeaderboard,
+          );
+        } else if (randomGame == 1) {
+          return PixelTurboMathRacingGame(
+            state: state,
+            onGameOver: _loadLeaderboard,
+          );
+        } else {
+          return ArenaChallengeDialog(
+            state: state,
+            onScoreSubmitted: _loadLeaderboard,
+          );
+        }
+      },
     );
   }
 
