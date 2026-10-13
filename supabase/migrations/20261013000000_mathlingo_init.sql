@@ -1,30 +1,37 @@
 -- ==============================================================================
 -- MathLingo Database Schema Migration (Supabase Postgres)
 -- Compliant with: COPPA/GDPR-K, Business Rules (BR-01, BR-02, BR-03, BR-04)
+-- Idempotent script: Có thể chạy nhiều lần mà không bị lỗi
 -- ==============================================================================
 
--- 1. PARENTS TABLE (Links to auth.users)
+-- 1. PARENTS TABLE
 CREATE TABLE IF NOT EXISTS public.parents (
-    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY,
     email TEXT,
     parent_pin_hash TEXT NOT NULL DEFAULT '1234',
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Bỏ ràng buộc cứng nếu đã lỡ tạo, giúp tài khoản seed và tài khoản auth đều chạy mượt mà
+ALTER TABLE public.parents DROP CONSTRAINT IF EXISTS parents_id_fkey;
+
 ALTER TABLE public.parents ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Parents can view their own profile" ON public.parents;
 CREATE POLICY "Parents can view their own profile"
     ON public.parents FOR SELECT
     TO authenticated
     USING ((select auth.uid()) = id);
 
+DROP POLICY IF EXISTS "Parents can update their own profile" ON public.parents;
 CREATE POLICY "Parents can update their own profile"
     ON public.parents FOR UPDATE
     TO authenticated
     USING ((select auth.uid()) = id)
     WITH CHECK ((select auth.uid()) = id);
 
+DROP POLICY IF EXISTS "Parents can insert their own profile" ON public.parents;
 CREATE POLICY "Parents can insert their own profile"
     ON public.parents FOR INSERT
     TO authenticated
@@ -49,22 +56,27 @@ CREATE INDEX IF NOT EXISTS idx_kid_profiles_parent_id ON public.kid_profiles(par
 
 ALTER TABLE public.kid_profiles ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Parents can view own kid profiles"
+DROP POLICY IF EXISTS "Parents can view own kid profiles" ON public.kid_profiles;
+DROP POLICY IF EXISTS "Allow select kid profiles for leaderboard" ON public.kid_profiles;
+CREATE POLICY "Allow select kid profiles for leaderboard"
     ON public.kid_profiles FOR SELECT
-    TO authenticated
-    USING (parent_id = (select auth.uid()));
+    TO public
+    USING (true);
 
+DROP POLICY IF EXISTS "Parents can insert kid profiles" ON public.kid_profiles;
 CREATE POLICY "Parents can insert kid profiles"
     ON public.kid_profiles FOR INSERT
     TO authenticated
     WITH CHECK (parent_id = (select auth.uid()));
 
+DROP POLICY IF EXISTS "Parents can update kid profiles" ON public.kid_profiles;
 CREATE POLICY "Parents can update kid profiles"
     ON public.kid_profiles FOR UPDATE
     TO authenticated
     USING (parent_id = (select auth.uid()))
     WITH CHECK (parent_id = (select auth.uid()));
 
+DROP POLICY IF EXISTS "Parents can delete kid profiles" ON public.kid_profiles;
 CREATE POLICY "Parents can delete kid profiles"
     ON public.kid_profiles FOR DELETE
     TO authenticated
@@ -78,7 +90,8 @@ DECLARE
 BEGIN
     SELECT count(*) INTO kid_count
     FROM public.kid_profiles
-    WHERE parent_id = NEW.parent_id;
+    WHERE parent_id = NEW.parent_id
+      AND id != NEW.id;
 
     IF kid_count >= 3 THEN
         RAISE EXCEPTION 'BR-04: Mỗi tài khoản phụ huynh chỉ được tạo tối đa 3 hồ sơ học sinh';
@@ -107,9 +120,10 @@ CREATE TABLE IF NOT EXISTS public.topics (
 CREATE INDEX IF NOT EXISTS idx_topics_grade ON public.topics(grade);
 ALTER TABLE public.topics ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public read topics" ON public.topics;
 CREATE POLICY "Public read topics"
     ON public.topics FOR SELECT
-    TO authenticated
+    TO public
     USING (true);
 
 CREATE TABLE IF NOT EXISTS public.lessons (
@@ -128,9 +142,10 @@ CREATE TABLE IF NOT EXISTS public.lessons (
 CREATE INDEX IF NOT EXISTS idx_lessons_topic_id ON public.lessons(topic_id);
 ALTER TABLE public.lessons ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public read lessons" ON public.lessons;
 CREATE POLICY "Public read lessons"
     ON public.lessons FOR SELECT
-    TO authenticated
+    TO public
     USING (true);
 
 -- 4. QUESTIONS TABLE (Visual Manipulatives Data)
@@ -153,9 +168,10 @@ CREATE TABLE IF NOT EXISTS public.questions (
 CREATE INDEX IF NOT EXISTS idx_questions_lesson_id ON public.questions(lesson_id);
 ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public read questions" ON public.questions;
 CREATE POLICY "Public read questions"
     ON public.questions FOR SELECT
-    TO authenticated
+    TO public
     USING (true);
 
 -- 5. PROGRESS & STREAKS (Gamification & BR-02, BR-03)
@@ -174,6 +190,7 @@ CREATE TABLE IF NOT EXISTS public.kid_progress (
 CREATE INDEX IF NOT EXISTS idx_kid_progress_kid_id ON public.kid_progress(kid_id);
 ALTER TABLE public.kid_progress ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Parents can read/manage kid progress" ON public.kid_progress;
 CREATE POLICY "Parents can read/manage kid progress"
     ON public.kid_progress FOR ALL
     TO authenticated
@@ -189,6 +206,7 @@ CREATE TABLE IF NOT EXISTS public.kid_streaks (
 
 ALTER TABLE public.kid_streaks ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Parents can manage kid streaks" ON public.kid_streaks;
 CREATE POLICY "Parents can manage kid streaks"
     ON public.kid_streaks FOR ALL
     TO authenticated
@@ -205,6 +223,7 @@ CREATE TABLE IF NOT EXISTS public.practice_garden_logs (
 
 ALTER TABLE public.practice_garden_logs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Parents can read practice logs" ON public.practice_garden_logs;
 CREATE POLICY "Parents can read practice logs"
     ON public.practice_garden_logs FOR ALL
     TO authenticated
@@ -215,7 +234,8 @@ CREATE TABLE IF NOT EXISTS public.tournaments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     grade INT NOT NULL CHECK (grade BETWEEN 1 AND 5),
     week_code TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE(grade, week_code)
 );
 
 CREATE TABLE IF NOT EXISTS public.tournament_members (
@@ -229,17 +249,33 @@ CREATE TABLE IF NOT EXISTS public.tournament_members (
 ALTER TABLE public.tournaments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tournament_members ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public read tournaments" ON public.tournaments;
 CREATE POLICY "Public read tournaments"
     ON public.tournaments FOR SELECT
-    TO authenticated
+    TO public
     USING (true);
 
+DROP POLICY IF EXISTS "Authenticated can insert tournaments" ON public.tournaments;
+CREATE POLICY "Authenticated can insert tournaments"
+    ON public.tournaments FOR INSERT
+    TO authenticated
+    WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public read tournament members" ON public.tournament_members;
 CREATE POLICY "Public read tournament members"
     ON public.tournament_members FOR SELECT
-    TO authenticated
+    TO public
     USING (true);
 
+DROP POLICY IF EXISTS "Insert own kid tournament member" ON public.tournament_members;
+CREATE POLICY "Insert own kid tournament member"
+    ON public.tournament_members FOR INSERT
+    TO authenticated
+    WITH CHECK (kid_id IN (SELECT id FROM public.kid_profiles WHERE parent_id = (select auth.uid())));
+
+DROP POLICY IF EXISTS "Update own kid tournament score" ON public.tournament_members;
 CREATE POLICY "Update own kid tournament score"
     ON public.tournament_members FOR UPDATE
     TO authenticated
-    USING (kid_id IN (SELECT id FROM public.kid_profiles WHERE parent_id = (select auth.uid())));
+    USING (kid_id IN (SELECT id FROM public.kid_profiles WHERE parent_id = (select auth.uid())))
+    WITH CHECK (kid_id IN (SELECT id FROM public.kid_profiles WHERE parent_id = (select auth.uid())));
