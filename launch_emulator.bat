@@ -1,0 +1,3 @@
+@echo off
+echo Dang khoi dong Android Emulator Pixel 9...
+start "" "C:\Users\kzrok\AppData\Local\Android\sdk\emulator\emulator.exe" -avd Pixel_9
