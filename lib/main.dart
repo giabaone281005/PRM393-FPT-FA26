@@ -28,11 +28,17 @@ class MathLingoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'MathLingo - Học Toán Vui Cùng Cú',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      home: const _SplashWrapper(),
+    return Consumer<AppStateProvider>(
+      builder: (context, appState, child) {
+        return MaterialApp(
+          title: 'MathLingo - Học Toán Vui Cùng Cú',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: appState.themeMode,
+          home: const _SplashWrapper(),
+        );
+      },
     );
   }
 }

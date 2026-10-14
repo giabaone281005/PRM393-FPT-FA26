@@ -49,6 +49,7 @@ class AppStateProvider extends ChangeNotifier {
   }
 
   int _currentNavIndex = 0;
+  ThemeMode _themeMode = ThemeMode.light;
 
   List<KidProfile> get kidProfiles => _kidProfiles;
   KidProfile get currentKid => _kidProfiles[_selectedKidIndex];
@@ -60,6 +61,13 @@ class AppStateProvider extends ChangeNotifier {
   bool get isLoadingFromCloud => _isLoadingFromCloud;
   String get parentPin => _parentPin;
   int get currentNavIndex => _currentNavIndex;
+  ThemeMode get themeMode => _themeMode;
+  bool get isDarkMode => _themeMode == ThemeMode.dark;
+
+  void toggleTheme() {
+    _themeMode = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    notifyListeners();
+  }
 
   void setNavIndex(int index) {
     _currentNavIndex = index;

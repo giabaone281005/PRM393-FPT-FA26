@@ -69,4 +69,51 @@ class AppTheme {
       ),
     );
   }
+
+  static ThemeData get darkTheme {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      primaryColor: AppColors.primary,
+      scaffoldBackgroundColor: AppColors.darkBackground,
+      fontFamily: 'Plus Jakarta Sans',
+      fontFamilyFallback: const ['Nunito', 'Roboto', 'Arial', 'sans-serif'],
+      colorScheme: const ColorScheme.dark(
+        primary: AppColors.primary,
+        secondary: AppColors.accentGold,
+        surface: AppColors.darkSurface,
+        error: AppColors.accentRed,
+        onPrimary: Colors.white,
+        onSurface: AppColors.darkTextPrimary,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          minimumSize: const Size(64, AppDimens.buttonHeight),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppDimens.radiusMedium),
+          ),
+          elevation: 2,
+          shadowColor: Colors.black.withAlpha(80),
+          textStyle: AppTypography.titleMedium.copyWith(color: Colors.white),
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: AppColors.darkSurface,
+        elevation: 2,
+        shadowColor: Colors.black.withAlpha(50),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimens.radiusLarge),
+          side: const BorderSide(color: AppColors.darkBorderSubtle, width: 1),
+        ),
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: AppColors.darkSurface,
+        elevation: 0,
+        centerTitle: false,
+        iconTheme: IconThemeData(color: AppColors.darkTextPrimary),
+      ),
+    );
+  }
 }
