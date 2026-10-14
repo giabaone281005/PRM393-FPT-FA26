@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/theme/app_colors.dart';
 import '../../data/providers/app_state_provider.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../main/main_screen.dart';
+import 'widgets/mascot_owl_3d.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -14,8 +14,8 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  // Mode: 0 = Hero/Welcome, 1 = Login, 2 = Sign Up
-  int _screenMode = 1; // Default directly into Login sheet for convenience
+  // Mode: 1 = Login, 2 = Sign Up
+  int _screenMode = 1;
   bool _loading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -25,10 +25,43 @@ class _AuthScreenState extends State<AuthScreen> {
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   final _confirmPassCtrl = TextEditingController();
+
+  final _emailFocus = FocusNode();
+  final _passFocus = FocusNode();
+  final _confirmPassFocus = FocusNode();
+
+  MascotState _mascotState = MascotState.idle;
+  String _mascotSpeech = 'Chào bạn! Mình là bạn Cú Toán Học ✨';
   String _errorMsg = '';
 
   @override
+  void initState() {
+    super.initState();
+    _emailFocus.addListener(_handleFocusChange);
+    _passFocus.addListener(_handleFocusChange);
+    _confirmPassFocus.addListener(_handleFocusChange);
+  }
+
+  void _handleFocusChange() {
+    setState(() {
+      if (_passFocus.hasFocus || _confirmPassFocus.hasFocus) {
+        _mascotState = MascotState.typingPassword;
+        _mascotSpeech = 'Suỵt! Mình bịt mắt lại giữ bí mật mật khẩu nhé 🙈';
+      } else if (_emailFocus.hasFocus) {
+        _mascotState = MascotState.typingEmail;
+        _mascotSpeech = 'Nhập đúng địa chỉ email nha! ✉️';
+      } else {
+        _mascotState = MascotState.idle;
+        _mascotSpeech = 'Chạm vào mình để nhận lời chúc nào! ✨';
+      }
+    });
+  }
+
+  @override
   void dispose() {
+    _emailFocus.dispose();
+    _passFocus.dispose();
+    _confirmPassFocus.dispose();
     _nameCtrl.dispose();
     _emailCtrl.dispose();
     _passCtrl.dispose();
@@ -36,23 +69,46 @@ class _AuthScreenState extends State<AuthScreen> {
     super.dispose();
   }
 
+  void _onMascotTap() {
+    setState(() {
+      _mascotState = MascotState.tapped;
+      _mascotSpeech = 'MathLingo chúc bạn và bé học thật vui! 🚀';
+    });
+    Future.delayed(const Duration(milliseconds: 1600), () {
+      if (mounted && _mascotState == MascotState.tapped) {
+        setState(() {
+          _mascotState = MascotState.idle;
+          _mascotSpeech = 'Sẵn sàng học toán cùng mình chưa? 🎉';
+        });
+      }
+    });
+  }
+
   Future<void> _submit() async {
     final email = _emailCtrl.text.trim();
     final pass = _passCtrl.text;
 
     if (email.isEmpty || pass.isEmpty) {
-      setState(() => _errorMsg = 'Vui lòng điền email và mật khẩu');
+      setState(() {
+        _errorMsg = 'Vui lòng điền email và mật khẩu';
+        _mascotSpeech = 'Ơ, bạn chưa điền đủ thông tin kìa! 🤔';
+      });
       return;
     }
 
     if (_screenMode == 2 && pass != _confirmPassCtrl.text) {
-      setState(() => _errorMsg = 'Mật khẩu xác nhận không khớp');
+      setState(() {
+        _errorMsg = 'Mật khẩu xác nhận không khớp';
+        _mascotSpeech = 'Mật khẩu 2 lần chưa trùng nhau rồi! ✍️';
+      });
       return;
     }
 
     setState(() {
       _loading = true;
       _errorMsg = '';
+      _mascotState = MascotState.celebrate;
+      _mascotSpeech = 'Đang kiểm tra tài khoản, đợi mình tí nhé... ⏳';
     });
 
     final result = _screenMode == 1
@@ -63,12 +119,21 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() => _loading = false);
 
     if (result.success) {
+      setState(() {
+        _mascotSpeech = 'Hoan hô! Đăng nhập thành công! 🌟';
+      });
+      await Future.delayed(const Duration(milliseconds: 600));
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const MainScreen()),
       );
     } else {
-      setState(() => _errorMsg = result.error ?? 'Có lỗi xảy ra');
+      setState(() {
+        _errorMsg = result.error ?? 'Có lỗi xảy ra';
+        _mascotState = MascotState.idle;
+        _mascotSpeech = 'Đăng nhập chưa được rồi, thử lại nhé! 💡';
+      });
     }
   }
 
@@ -82,7 +147,10 @@ class _AuthScreenState extends State<AuthScreen> {
   void _fillDemoAccount() {
     _emailCtrl.text = 'parent@mathlingo.com';
     _passCtrl.text = '123456';
-    setState(() => _errorMsg = '');
+    setState(() {
+      _errorMsg = '';
+      _mascotSpeech = 'Đã điền tài khoản mẫu! Bấm Đăng Nhập luôn nào ⚡';
+    });
   }
 
   @override
@@ -90,7 +158,7 @@ class _AuthScreenState extends State<AuthScreen> {
     final appState = context.watch<AppStateProvider>();
     final isDark = appState.isDarkMode;
 
-    // Harmonious Colors according to AppColors & Theme
+    // Harmonious Colors according to UI/UX Pro Max Claymorphism Guidelines
     final headerBg = isDark ? const Color(0xFF0F172A) : const Color(0xFF0284C7); // MathLingo Ocean Blue
     final sheetBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     final primaryAccent = const Color(0xFFF97316); // MathLingo Orange
@@ -99,33 +167,34 @@ class _AuthScreenState extends State<AuthScreen> {
     final inputBg = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC);
     final borderCol = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
 
+    final screenH = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: headerBg,
       body: Stack(
         children: [
-          // 1. TOP HEADER & HERO SECTION
+          // ================= 1. TOP HERO HEADER & MASCOT 3D ĐỨNG GIỮA TRANG =================
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            height: MediaQuery.of(context).size.height * 0.40,
+            height: screenH * 0.44,
             child: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Top Bar: Theme Toggle & Skip/Guest
+                    // Top App Bar: Brand Pill & Dark Theme Toggle
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // App Brand badge
+                        // MathLingo brand badge
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
+                            color: Colors.white.withValues(alpha: 0.16),
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.white.withOpacity(0.2)),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -152,93 +221,96 @@ class _AuthScreenState extends State<AuthScreen> {
                           ),
                         ),
 
-                        // Action buttons
-                        Row(
-                          children: [
-                            // Dark/Light toggle button
-                            GestureDetector(
-                              onTap: () => appState.toggleTheme(),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: Colors.white.withOpacity(0.2)),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-                                      size: 15,
-                                      color: Colors.white,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      isDark ? 'Sáng' : 'Tối',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                        // Modern Theme Switcher Pill
+                        GestureDetector(
+                          onTap: () => appState.toggleTheme(),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
                             ),
-                          ],
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                                  size: 15,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  isDark ? 'Sáng' : 'Tối',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
 
                     const Spacer(),
 
-                    // Catchy Headline
+                    // Speech Bubble positioned centered above mascot
                     AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      child: KeyedSubtree(
-                        key: ValueKey<int>(_screenMode),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _screenMode == 1
-                                  ? 'Đăng nhập để theo dõi\nhành trình học của bé.'
-                                  : 'Tạo tài khoản & bắt đầu\ntrải nghiệm MathLingo',
-                              style: GoogleFonts.inter(
-                                fontSize: 26,
-                                fontWeight: FontWeight.w800,
-                                height: 1.25,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Học toán vui qua trò chơi cùng MathLingo',
-                              style: GoogleFonts.inter(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.white.withOpacity(0.85),
-                              ),
+                      duration: const Duration(milliseconds: 250),
+                      child: Container(
+                        key: ValueKey<String>(_mascotSpeech),
+                        constraints: const BoxConstraints(maxWidth: 320),
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.15),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
                             ),
                           ],
                         ),
+                        child: Text(
+                          _mascotSpeech,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF0F172A),
+                          ),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+
+                    // MASCOT CON CÚ 3D ĐỨNG CHÍNH GIỮA TRANG
+                    Center(
+                      child: MascotOwl3D(
+                        size: 96,
+                        state: _mascotState,
+                        onTap: _onMascotTap,
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
             ),
           ),
 
-          // 2. INTERACTIVE BOTTOM SHEET (VUỐT LÊN / VUỐT XUỐNG)
+          // ================= 2. INTERACTIVE DRAGGABLE SHEET (VUỐT LÊN / XUỐNG) =================
           DraggableScrollableSheet(
-            initialChildSize: 0.65,
-            minChildSize: 0.55,
-            maxChildSize: 0.95,
+            initialChildSize: 0.58,
+            minChildSize: 0.50,
+            maxChildSize: 0.94,
             snap: true,
-            snapSizes: const [0.65, 0.95],
+            snapSizes: const [0.58, 0.94],
             builder: (context, scrollController) {
               return Container(
                 decoration: BoxDecoration(
@@ -249,7 +321,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.18),
+                      color: Colors.black.withValues(alpha: 0.18),
                       blurRadius: 24,
                       offset: const Offset(0, -6),
                     ),
@@ -265,7 +337,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       child: Container(
                         width: 44,
                         height: 5,
-                        margin: const EdgeInsets.only(bottom: 20),
+                        margin: const EdgeInsets.only(bottom: 18),
                         decoration: BoxDecoration(
                           color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1),
                           borderRadius: BorderRadius.circular(10),
@@ -300,6 +372,9 @@ class _AuthScreenState extends State<AuthScreen> {
                             setState(() {
                               _screenMode = _screenMode == 1 ? 2 : 1;
                               _errorMsg = '';
+                              _mascotSpeech = _screenMode == 1
+                                  ? 'Chào mừng bạn quay lại MathLingo! 🌟'
+                                  : 'Tuyệt vời! Cùng tạo tài khoản mới nào 🎉';
                             });
                           },
                           child: Text(
@@ -342,7 +417,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ],
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 22),
 
                     // Input: Full name (Sign Up only)
                     if (_screenMode == 2) ...[
@@ -361,6 +436,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     // Input: Email
                     _buildModernInput(
                       controller: _emailCtrl,
+                      focusNode: _emailFocus,
                       placeholder: 'Nhập địa chỉ email',
                       keyboardType: TextInputType.emailAddress,
                       prefixIcon: Icons.mail_outline_rounded,
@@ -375,6 +451,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     // Input: Password
                     _buildModernInput(
                       controller: _passCtrl,
+                      focusNode: _passFocus,
                       placeholder: 'Mật khẩu',
                       obscureText: _obscurePassword,
                       prefixIcon: Icons.lock_outline_rounded,
@@ -396,6 +473,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       const SizedBox(height: 14),
                       _buildModernInput(
                         controller: _confirmPassCtrl,
+                        focusNode: _confirmPassFocus,
                         placeholder: 'Nhập lại mật khẩu',
                         obscureText: _obscureConfirmPassword,
                         prefixIcon: Icons.lock_outline_rounded,
@@ -597,6 +675,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Widget _buildModernInput({
     required TextEditingController controller,
+    FocusNode? focusNode,
     required String placeholder,
     TextInputType? keyboardType,
     bool obscureText = false,
@@ -616,6 +695,7 @@ class _AuthScreenState extends State<AuthScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 14),
       child: TextField(
         controller: controller,
+        focusNode: focusNode,
         obscureText: obscureText,
         keyboardType: keyboardType,
         style: GoogleFonts.inter(
