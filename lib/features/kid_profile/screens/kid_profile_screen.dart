@@ -9,6 +9,7 @@ import '../../mascot_wardrobe/screens/mascot_wardrobe_screen.dart';
 import '../popups/kid_switch_sheet.dart';
 import '../popups/edit_kid_dialog.dart';
 import '../../../data/repositories/auth_repository.dart';
+import '../../auth/widgets/mascot_owl_3d.dart';
 import '../../auth/auth_screen.dart';
 
 class KidProfileScreen extends StatelessWidget {
@@ -62,20 +63,24 @@ class KidProfileScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Avatar circle with gear edit
+                  // Avatar circle with dynamic 3D Mascot wearing equipped gear
                   Stack(
                     alignment: Alignment.center,
                     children: [
                       Container(
-                        width: 90,
-                        height: 90,
+                        width: 100,
+                        height: 100,
                         decoration: BoxDecoration(
                           color: Colors.white.withAlpha(40),
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 3),
                         ),
-                        child: const Center(
-                          child: Text('🦉', style: TextStyle(fontSize: 44)),
+                        child: Center(
+                          child: MascotOwl3D(
+                            size: 80,
+                            hat: state.currentHat,
+                            glasses: state.currentGlasses,
+                          ),
                         ),
                       ),
                       Positioned(

@@ -68,20 +68,13 @@ class _SplashWrapperState extends State<_SplashWrapper> with SingleTickerProvide
     );
     _ctrl.forward();
 
-    // Auto-navigate after splash
-    _splashTimer = Timer(const Duration(milliseconds: 2200), () {
+    // Auto-navigate after splash directly to MainScreen
+    _splashTimer = Timer(const Duration(milliseconds: 1500), () {
       if (!mounted) return;
-
-      final isLoggedIn = SupabaseService.isLoggedIn;
+      context.read<AppStateProvider>().setNavIndex(3); // Hồ sơ bé
       Navigator.pushReplacement(
         context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              isLoggedIn ? const MainScreen() : const OnboardingScreen(),
-          transitionsBuilder: (context, anim, secondary, child) =>
-              FadeTransition(opacity: anim, child: child),
-          transitionDuration: const Duration(milliseconds: 400),
-        ),
+        MaterialPageRoute(builder: (_) => const MainScreen()),
       );
     });
   }
