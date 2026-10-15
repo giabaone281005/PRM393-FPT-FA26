@@ -32,7 +32,10 @@ class HomeScreen extends StatelessWidget {
       appBar: const AppHeader(),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 130),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
