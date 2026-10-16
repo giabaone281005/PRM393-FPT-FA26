@@ -3,7 +3,10 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/models/subscription_model.dart';
 import '../../data/repositories/admin_repository.dart';
+import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/subscription_repository.dart';
+import '../main/main_screen.dart';
+import '../auth/auth_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -180,6 +183,29 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             icon: const Icon(Icons.refresh_rounded),
             tooltip: 'Làm mới',
             onPressed: _loadData,
+          ),
+          IconButton(
+            icon: const Icon(Icons.school_rounded, color: AppColors.primary),
+            tooltip: 'Xem giao diện Bé & Phụ Huynh',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MainScreen()),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout_rounded, color: Colors.red),
+            tooltip: 'Đăng xuất',
+            onPressed: () async {
+              await AuthRepository.signOut();
+              if (!context.mounted) return;
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const AuthScreen()),
+                (route) => false,
+              );
+            },
           ),
         ],
       ),

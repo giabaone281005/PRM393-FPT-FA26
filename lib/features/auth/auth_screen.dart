@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../data/providers/app_state_provider.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../../data/repositories/subscription_repository.dart';
 import '../main/main_screen.dart';
+import '../admin/admin_dashboard_screen.dart';
 import 'widgets/mascot_owl_3d.dart';
 import 'widgets/otp_verification_dialog.dart';
 
@@ -156,10 +158,22 @@ class _AuthScreenState extends State<AuthScreen> {
       });
       await Future.delayed(const Duration(milliseconds: 600));
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MainScreen()),
-      );
+
+      // Kiểm tra quyền Admin để phân luồng UI riêng
+      final isAdmin = await SubscriptionRepository.checkIfAdmin();
+      if (!mounted) return;
+
+      if (isAdmin) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainScreen()),
+        );
+      }
     } else {
       setState(() {
         _errorMsg = result.error ?? 'Có lỗi xảy ra';
