@@ -57,29 +57,39 @@ class AdminRepository {
     }
 
     try {
-      // Truy vấn danh sách parents kèm subscriptions và kid_profiles
-      var query = client
+      // Truy vấn danh sách parents kèm subscriptions và kid_profiles từ Supabase Cloud
+      final List<dynamic> parentsData = await client
           .from('parents')
-          .select('id, email, created_at, subscriptions(*), kid_profiles(id)')
+          .select('id, email, created_at')
           .order('created_at', ascending: false);
 
-      final List<dynamic> data = await query;
+      // Lấy toàn bộ subscriptions
+      List<dynamic> allSubs = [];
+      try {
+        allSubs = await client.from('subscriptions').select();
+      } catch (_) {}
 
-      final results = data.map<AdminParentUser>((item) {
-        final subsList = item['subscriptions'];
-        final subMap = (subsList is List && subsList.isNotEmpty)
-            ? subsList.first as Map<String, dynamic>
-            : (subsList is Map<String, dynamic> ? subsList : null);
+      // Lấy toàn bộ kid_profiles để đếm số bé thật
+      List<dynamic> allKids = [];
+      try {
+        allKids = await client.from('kid_profiles').select('id, parent_id');
+      } catch (_) {}
+
+      final results = parentsData.map<AdminParentUser>((item) {
+        final parentId = item['id']?.toString() ?? '';
+        final subMap = allSubs.cast<Map<String, dynamic>?>().firstWhere(
+          (s) => s != null && s['parent_id'] == parentId,
+          orElse: () => null,
+        );
 
         final subscription = subMap != null
             ? SubscriptionModel.fromMap(subMap)
-            : SubscriptionModel.defaultBasic(item['id']);
+            : SubscriptionModel.defaultBasic(parentId);
 
-        final kids = item['kid_profiles'];
-        final kidCount = (kids is List) ? kids.length : 0;
+        final kidCount = allKids.where((k) => k['parent_id'] == parentId).length;
 
         return AdminParentUser(
-          id: item['id']?.toString() ?? '',
+          id: parentId,
           email: item['email']?.toString() ?? 'Không có email',
           createdAt: DateTime.tryParse(item['created_at'].toString()) ?? DateTime.now(),
           subscription: subscription,
@@ -87,7 +97,7 @@ class AdminRepository {
         );
       }).toList();
 
-      // Áp dụng bộ lọc bộ nhớ nếu có
+      // Áp dụng bộ lọc
       return results.where((u) {
         if (searchQuery != null && searchQuery.trim().isNotEmpty) {
           final q = searchQuery.toLowerCase().trim();
@@ -101,35 +111,7 @@ class AdminRepository {
         return true;
       }).toList();
     } catch (e) {
-      // Fallback danh sách mẫu nếu chưa cấu hình RLS Admin trên Cloud
-      return [
-        AdminParentUser(
-          id: 'a0000000-0000-0000-0000-000000000001',
-          email: 'phuhuynh@mathlingo.vn',
-          createdAt: DateTime.now().subtract(const Duration(days: 30)),
-          subscription: SubscriptionModel(
-            id: 'sub_1',
-            parentId: 'a0000000-0000-0000-0000-000000000001',
-            tier: SubscriptionTier.plus,
-            maxKids: 3,
-            startDate: DateTime.now().subtract(const Duration(days: 30)),
-          ),
-          kidCount: 3,
-        ),
-        AdminParentUser(
-          id: 'a0000000-0000-0000-0000-000000000002',
-          email: 'parent.demo@mathlingo.vn',
-          createdAt: DateTime.now().subtract(const Duration(days: 10)),
-          subscription: SubscriptionModel(
-            id: 'sub_2',
-            parentId: 'a0000000-0000-0000-0000-000000000002',
-            tier: SubscriptionTier.basic,
-            maxKids: 1,
-            startDate: DateTime.now().subtract(const Duration(days: 10)),
-          ),
-          kidCount: 1,
-        ),
-      ];
+      return [];
     }
   }
 }

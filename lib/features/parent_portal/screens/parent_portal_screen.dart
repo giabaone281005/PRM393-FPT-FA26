@@ -8,7 +8,6 @@ import '../popups/change_pin_dialog.dart';
 import '../popups/upgrade_plus_dialog.dart';
 import '../../kid_profile/popups/add_kid_dialog.dart';
 import '../../auth/auth_screen.dart';
-import '../../admin/admin_dashboard_screen.dart';
 
 class ParentPortalScreen extends StatefulWidget {
   const ParentPortalScreen({super.key});
@@ -48,18 +47,6 @@ class _ParentPortalScreenState extends State<ParentPortalScreen> {
         backgroundColor: Colors.white,
         elevation: 1,
         actions: [
-          // Nút Admin nếu tài khoản có quyền Admin
-          if (state.isAdmin || AuthRepository.isLoggedIn)
-            IconButton(
-              icon: const Icon(Icons.admin_panel_settings_rounded, color: Colors.orange),
-              tooltip: 'Quản trị Admin',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
-                );
-              },
-            ),
           IconButton(
             icon: _isSyncing
                 ? const SizedBox(

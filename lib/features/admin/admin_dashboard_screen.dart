@@ -185,16 +185,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             onPressed: _loadData,
           ),
           IconButton(
-            icon: const Icon(Icons.school_rounded, color: AppColors.primary),
-            tooltip: 'Xem giao diện Bé & Phụ Huynh',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const MainScreen()),
-              );
-            },
-          ),
-          IconButton(
             icon: const Icon(Icons.logout_rounded, color: Colors.red),
             tooltip: 'Đăng xuất',
             onPressed: () async {
