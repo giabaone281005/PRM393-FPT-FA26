@@ -19,7 +19,8 @@ BEGIN
     VALUES 
       ('a0000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'phuhuynh@mathlingo.vn', '$2a$10$abcdefghijklmnopqrstuvwxyzABCDEF', now(), '{"provider":"email","providers":["email"]}', '{}', false, now(), now()),
       ('a0000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'parent.demo@mathlingo.vn', '$2a$10$abcdefghijklmnopqrstuvwxyzABCDEF', now(), '{"provider":"email","providers":["email"]}', '{}', false, now(), now()),
-      ('a0000000-0000-0000-0000-000000000009', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin@mathlingo.vn', '$2a$10$abcdefghijklmnopqrstuvwxyzABCDEF', now(), '{"provider":"email","providers":["email"]}', '{}', false, now(), now())
+      ('a0000000-0000-0000-0000-000000000009', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin@mathlingo.vn', '$2a$10$abcdefghijklmnopqrstuvwxyzABCDEF', now(), '{"provider":"email","providers":["email"]}', '{}', false, now(), now()),
+      ('894804fe-9215-4550-aa82-0f0000000001', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin.moi@mathlingo.vn', '$2a$10$abcdefghijklmnopqrstuvwxyzABCDEF', now(), '{"provider":"email","providers":["email"]}', '{}', false, now(), now())
     ON CONFLICT (id) DO NOTHING;
   END IF;
 EXCEPTION WHEN OTHERS THEN
@@ -35,12 +36,26 @@ VALUES
 ON CONFLICT (id) DO UPDATE 
 SET email = EXCLUDED.email, parent_pin_hash = EXCLUDED.parent_pin_hash, updated_at = now();
 
--- 1.1 USER ROLES (Phân quyền Admin - An toàn nếu bảng đã tạo)
+-- 1.1 ADMINS TABLE (Đồng bộ tài khoản Admin Quản Trị)
+DO $$
+BEGIN
+  IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'admins') THEN
+    INSERT INTO public.admins (id, email, full_name, created_at)
+    VALUES 
+      ('894804fe-9215-4550-aa82-0f0000000001', 'admin.moi@mathlingo.vn', 'Quản Trị Viên Mới', now()),
+      ('a0000000-0000-0000-0000-000000000009', 'admin@mathlingo.vn', 'Admin Hệ Thống', now())
+    ON CONFLICT (email) DO NOTHING;
+  END IF;
+END $$;
+
+-- 1.2 USER ROLES (Phân quyền Admin - An toàn nếu bảng đã tạo)
 DO $$
 BEGIN
   IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'user_roles') THEN
     INSERT INTO public.user_roles (user_id, role)
-    VALUES ('a0000000-0000-0000-0000-000000000009', 'admin')
+    VALUES 
+      ('894804fe-9215-4550-aa82-0f0000000001', 'admin'),
+      ('a0000000-0000-0000-0000-000000000009', 'admin')
     ON CONFLICT (user_id, role) DO NOTHING;
   END IF;
 END $$;

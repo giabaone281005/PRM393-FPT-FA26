@@ -22,7 +22,17 @@ EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
 
--- 2. USER ROLES TABLE
+-- 2. ADMINS TABLE (Bảng Admins độc lập đã tạo trên Supabase)
+CREATE TABLE IF NOT EXISTS public.admins (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email TEXT UNIQUE NOT NULL,
+    full_name TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.admins ENABLE ROW LEVEL SECURITY;
+
+-- 2.1 USER ROLES TABLE
 CREATE TABLE IF NOT EXISTS public.user_roles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -34,10 +44,30 @@ CREATE TABLE IF NOT EXISTS public.user_roles (
 CREATE INDEX IF NOT EXISTS idx_user_roles_user_id ON public.user_roles(user_id);
 ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
 
--- Security helper function to check if current user is admin
+-- Security helper function to check if current user is admin (Check cả bảng admins lẫn user_roles)
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN AS $$
+DECLARE
+    cur_email TEXT;
 BEGIN
+    -- Kiểm tra trong bảng public.admins theo UID
+    IF EXISTS (
+        SELECT 1 FROM public.admins
+        WHERE id = (SELECT auth.uid())
+    ) THEN
+        RETURN true;
+    END IF;
+
+    -- Kiểm tra trong bảng public.admins theo email của auth.users
+    SELECT email INTO cur_email FROM auth.users WHERE id = (SELECT auth.uid());
+    IF cur_email IS NOT NULL AND EXISTS (
+        SELECT 1 FROM public.admins
+        WHERE lower(email) = lower(cur_email)
+    ) THEN
+        RETURN true;
+    END IF;
+
+    -- Kiểm tra trong bảng public.user_roles
     RETURN EXISTS (
         SELECT 1 FROM public.user_roles
         WHERE user_id = (SELECT auth.uid())
@@ -45,6 +75,13 @@ BEGIN
     );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+
+-- RLS for admins
+DROP POLICY IF EXISTS "Admins can view admins list" ON public.admins;
+CREATE POLICY "Admins can view admins list"
+    ON public.admins FOR SELECT
+    TO authenticated
+    USING (public.is_admin());
 
 -- RLS for user_roles
 DROP POLICY IF EXISTS "Users can view their own roles" ON public.user_roles;
@@ -59,6 +96,19 @@ CREATE POLICY "Admins can manage all roles"
     TO authenticated
     USING (public.is_admin())
     WITH CHECK (public.is_admin());
+
+-- Cấp quyền cho Admin xem và quản lý toàn bộ parents & kid_profiles
+DROP POLICY IF EXISTS "Admins can view all parents" ON public.parents;
+CREATE POLICY "Admins can view all parents"
+    ON public.parents FOR SELECT
+    TO authenticated
+    USING (public.is_admin() OR (select auth.uid()) = id);
+
+DROP POLICY IF EXISTS "Admins can view all kid profiles" ON public.kid_profiles;
+CREATE POLICY "Admins can view all kid profiles"
+    ON public.kid_profiles FOR SELECT
+    TO authenticated
+    USING (true); -- Public cho leaderboard và admin xem được hết
 
 -- 3. SUBSCRIPTIONS TABLE
 CREATE TABLE IF NOT EXISTS public.subscriptions (
