@@ -59,10 +59,17 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
                           ),
                         ],
                       ),
-                      child: const Icon(
-                        Icons.calculate_rounded,
-                        color: Colors.white,
-                        size: 22,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          'assets/images/owl_mascot.jpg',
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.calculate_rounded,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 10),

@@ -5,6 +5,7 @@ import '../../data/providers/app_state_provider.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../main/main_screen.dart';
 import 'widgets/mascot_owl_3d.dart';
+import 'widgets/otp_verification_dialog.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -22,10 +23,12 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _rememberMe = true;
 
   final _nameCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   final _confirmPassCtrl = TextEditingController();
 
+  final _phoneFocus = FocusNode();
   final _emailFocus = FocusNode();
   final _passFocus = FocusNode();
   final _confirmPassFocus = FocusNode();
@@ -37,6 +40,7 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   void initState() {
     super.initState();
+    _phoneFocus.addListener(_handleFocusChange);
     _emailFocus.addListener(_handleFocusChange);
     _passFocus.addListener(_handleFocusChange);
     _confirmPassFocus.addListener(_handleFocusChange);
@@ -47,9 +51,12 @@ class _AuthScreenState extends State<AuthScreen> {
       if (_passFocus.hasFocus || _confirmPassFocus.hasFocus) {
         _mascotState = MascotState.typingPassword;
         _mascotSpeech = 'Suỵt! Mình bịt mắt lại giữ bí mật mật khẩu nhé 🙈';
+      } else if (_phoneFocus.hasFocus) {
+        _mascotState = MascotState.typingEmail;
+        _mascotSpeech = 'Nhập số điện thoại để liên hệ xác thực nha! 📱';
       } else if (_emailFocus.hasFocus) {
         _mascotState = MascotState.typingEmail;
-        _mascotSpeech = 'Nhập đúng địa chỉ email nha! ✉️';
+        _mascotSpeech = 'Nhập đúng địa chỉ email nhận OTP nha! ✉️';
       } else {
         _mascotState = MascotState.idle;
         _mascotSpeech = 'Chạm vào mình để nhận lời chúc nào! ✨';
@@ -59,10 +66,12 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   void dispose() {
+    _phoneFocus.dispose();
     _emailFocus.dispose();
     _passFocus.dispose();
     _confirmPassFocus.dispose();
     _nameCtrl.dispose();
+    _phoneCtrl.dispose();
     _emailCtrl.dispose();
     _passCtrl.dispose();
     _confirmPassCtrl.dispose();
@@ -87,6 +96,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _submit() async {
     final email = _emailCtrl.text.trim();
     final pass = _passCtrl.text;
+    final phone = _phoneCtrl.text.trim();
 
     if (email.isEmpty || pass.isEmpty) {
       setState(() {
@@ -96,14 +106,38 @@ class _AuthScreenState extends State<AuthScreen> {
       return;
     }
 
-    if (_screenMode == 2 && pass != _confirmPassCtrl.text) {
-      setState(() {
-        _errorMsg = 'Mật khẩu xác nhận không khớp';
-        _mascotSpeech = 'Mật khẩu 2 lần chưa trùng nhau rồi! ✍️';
-      });
+    if (_screenMode == 2) {
+      if (phone.isEmpty) {
+        setState(() {
+          _errorMsg = 'Vui lòng nhập số điện thoại phụ huynh';
+          _mascotSpeech = 'Đừng quên nhập số điện thoại để bảo mật nhé! 📱';
+        });
+        return;
+      }
+
+      if (pass != _confirmPassCtrl.text) {
+        setState(() {
+          _errorMsg = 'Mật khẩu xác nhận không khớp';
+          _mascotSpeech = 'Mật khẩu 2 lần chưa trùng nhau rồi! ✍️';
+        });
+        return;
+      }
+
+      // Quy trình OTP: Phát sinh mã ngẫu nhiên gửi về email và mở dialog xác thực
+      final randomOtp = (100000 + (DateTime.now().millisecondsSinceEpoch % 900000)).toString();
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => OtpVerificationDialog(
+          email: email,
+          generatedOtp: randomOtp,
+          onVerified: () => _executeSignUp(email, pass, phone),
+        ),
+      );
       return;
     }
 
+    // Đăng nhập
     setState(() {
       _loading = true;
       _errorMsg = '';
@@ -111,9 +145,7 @@ class _AuthScreenState extends State<AuthScreen> {
       _mascotSpeech = 'Đang kiểm tra tài khoản, đợi mình tí nhé... ⏳';
     });
 
-    final result = _screenMode == 1
-        ? await AuthRepository.signIn(email: email, password: pass)
-        : await AuthRepository.signUp(email: email, password: pass);
+    final result = await AuthRepository.signIn(email: email, password: pass);
 
     if (!mounted) return;
     setState(() => _loading = false);
@@ -133,6 +165,44 @@ class _AuthScreenState extends State<AuthScreen> {
         _errorMsg = result.error ?? 'Có lỗi xảy ra';
         _mascotState = MascotState.idle;
         _mascotSpeech = 'Đăng nhập chưa được rồi, thử lại nhé! 💡';
+      });
+    }
+  }
+
+  Future<void> _executeSignUp(String email, String pass, String phone) async {
+    setState(() {
+      _loading = true;
+      _errorMsg = '';
+      _mascotState = MascotState.celebrate;
+      _mascotSpeech = 'Xác thực OTP thành công! Đang thiết lập tài khoản... 🚀';
+    });
+
+    final result = await AuthRepository.signUp(email: email, password: pass);
+
+    if (!mounted) return;
+    setState(() => _loading = false);
+
+    if (result.success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('🎉 Chúc mừng bạn đã đăng ký tài khoản MathLingo thành công! (SĐT: $phone)'),
+          backgroundColor: const Color(0xFF16A34A),
+        ),
+      );
+      setState(() {
+        _mascotSpeech = 'Tài khoản đã sẵn sàng! Chào mừng bạn và bé! 🌟';
+      });
+      await Future.delayed(const Duration(milliseconds: 600));
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainScreen()),
+      );
+    } else {
+      setState(() {
+        _errorMsg = result.error ?? 'Đăng ký không thành công';
+        _mascotState = MascotState.idle;
+        _mascotSpeech = 'Có chút sự cố khi tạo tài khoản, thử lại nha! 💡';
       });
     }
   }
@@ -425,6 +495,18 @@ class _AuthScreenState extends State<AuthScreen> {
                         controller: _nameCtrl,
                         placeholder: 'Họ và tên phụ huynh',
                         prefixIcon: Icons.person_outline_rounded,
+                        bgColor: inputBg,
+                        borderColor: borderCol,
+                        textColor: textDark,
+                        hintColor: textMuted,
+                      ),
+                      const SizedBox(height: 14),
+                      _buildModernInput(
+                        controller: _phoneCtrl,
+                        focusNode: _phoneFocus,
+                        placeholder: 'Số điện thoại phụ huynh',
+                        keyboardType: TextInputType.phone,
+                        prefixIcon: Icons.phone_android_rounded,
                         bgColor: inputBg,
                         borderColor: borderCol,
                         textColor: textDark,

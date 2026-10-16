@@ -5,8 +5,10 @@ import '../../../core/theme/app_typography.dart';
 import '../../../data/providers/app_state_provider.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../popups/change_pin_dialog.dart';
-import '../../kid_profile/popups/kid_switch_sheet.dart';
+import '../popups/upgrade_plus_dialog.dart';
+import '../../kid_profile/popups/add_kid_dialog.dart';
 import '../../auth/auth_screen.dart';
+import '../../admin/admin_dashboard_screen.dart';
 
 class ParentPortalScreen extends StatefulWidget {
   const ParentPortalScreen({super.key});
@@ -35,6 +37,9 @@ class _ParentPortalScreenState extends State<ParentPortalScreen> {
   Widget build(BuildContext context) {
     final state = context.watch<AppStateProvider>();
     final kid = state.currentKid;
+    final allKids = state.kidProfiles;
+    final isPlus = state.isPlusActive;
+    final maxKids = state.maxAllowedKids;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -43,6 +48,18 @@ class _ParentPortalScreenState extends State<ParentPortalScreen> {
         backgroundColor: Colors.white,
         elevation: 1,
         actions: [
+          // Nút Admin nếu tài khoản có quyền Admin
+          if (state.isAdmin || AuthRepository.isLoggedIn)
+            IconButton(
+              icon: const Icon(Icons.admin_panel_settings_rounded, color: Colors.orange),
+              tooltip: 'Quản trị Admin',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
+                );
+              },
+            ),
           IconButton(
             icon: _isSyncing
                 ? const SizedBox(
@@ -69,87 +86,280 @@ class _ParentPortalScreenState extends State<ParentPortalScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Thẻ Bé đang chọn + Nút đổi bé
+            // Banner Gói Dịch Vụ: Basic / Plus
             Container(
               padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 20),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.borderSubtle),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(8),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                gradient: LinearGradient(
+                  colors: isPlus
+                      ? [const Color(0xFFFFF8E1), const Color(0xFFFFECB3)]
+                      : [Colors.blue.shade50, Colors.indigo.shade50],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: isPlus ? const Color(0xFFFFD54F) : Colors.blue.shade200,
+                  width: 1.5,
+                ),
               ),
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 28,
-                    backgroundColor: AppColors.primaryLight,
-                    child: Text(
-                      kid.nickname.isNotEmpty ? kid.nickname.substring(0, 1) : 'B',
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isPlus ? const Color(0xFFE6A100) : AppColors.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      isPlus ? Icons.workspace_premium_rounded : Icons.star_border_rounded,
+                      color: Colors.white,
+                      size: 26,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Text(kid.nickname, style: AppTypography.titleMedium),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryLight,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                'LỚP ${kid.grade}',
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primaryHover,
-                                ),
+                            Text(
+                              isPlus ? 'GÓI CAO CẤP PLUS' : 'GÓI CƠ BẢN BASIC',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: isPlus ? const Color(0xFFB78103) : AppColors.primary,
                               ),
                             ),
+                            const SizedBox(width: 6),
+                            if (isPlus)
+                              const Icon(Icons.verified_rounded, size: 16, color: Color(0xFFE6A100)),
                           ],
                         ),
+                        const SizedBox(height: 2),
                         Text(
-                          'Hôm nay đã học: ${kid.usedScreenTimeMinutes}/${kid.screenTimeLimitMinutes} phút',
-                          style: AppTypography.bodySmall,
+                          isPlus
+                              ? 'Hỗ trợ tối đa 3 bé • Trọn bộ Lớp 1-5 • AI Không giới hạn'
+                              : 'Giới hạn 1 bé • Nâng cấp để mở khóa tối đa 3 bé',
+                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                         ),
                       ],
                     ),
                   ),
-                  OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  const SizedBox(width: 8),
+                  if (!isPlus)
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE6A100),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => UpgradePlusDialog(state: state),
+                        );
+                      },
+                      child: const Text('Nâng Cấp', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                     ),
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (_) => const KidSwitchSheet(),
-                      );
-                    },
-                    child: const Text('Đổi Bé', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                  ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+
+            // Header Quản Lý Bé: Số lượng bé & Nút Thêm Bé
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Danh Sách Bé Đang Học', style: AppTypography.titleMedium),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Quản lý ${allKids.length}/$maxKids bé theo gói (${isPlus ? "Plus" : "Basic"})',
+                      style: AppTypography.bodySmall,
+                    ),
+                  ],
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: () {
+                    if (allKids.length >= maxKids) {
+                      showDialog(
+                        context: context,
+                        builder: (_) => UpgradePlusDialog(state: state),
+                      );
+                    } else {
+                      showDialog(
+                        context: context,
+                        builder: (_) => AddKidDialog(state: state),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.person_add_rounded, size: 16),
+                  label: const Text('Thêm Bé', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+
+            // Danh sách các bé kèm theo khối lớp đã đăng ký cố định & tiến độ
+            ...List.generate(allKids.length, (idx) {
+              final k = allKids[idx];
+              final isCurrent = state.selectedKidIndex == idx;
+              // Tính toán số mốc hoàn thành
+              final completedLessons = (k.energyStars / 30).clamp(1, 30).toInt();
+              final progressPct = (completedLessons / 30).clamp(0.0, 1.0);
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isCurrent ? AppColors.primary : AppColors.borderSubtle,
+                    width: isCurrent ? 2 : 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(isCurrent ? 12 : 5),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 24,
+                          backgroundColor: isCurrent ? AppColors.primary : AppColors.primaryLight,
+                          child: Text(
+                            k.nickname.isNotEmpty ? k.nickname.substring(0, 1) : 'B',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: isCurrent ? Colors.white : AppColors.primary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    k.nickname,
+                                    style: AppTypography.titleMedium.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  // Huy hiệu Lớp Cố Định
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFEFF6FF),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: const Color(0xFFBFDBFE)),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.lock_rounded, size: 10, color: AppColors.primary),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'LỚP ${k.grade} (Cố định)',
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.primaryHover,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Thời gian hôm nay: ${k.usedScreenTimeMinutes}/${k.screenTimeLimitMinutes} phút • Chuỗi: ${k.streakCount} ngày',
+                                style: AppTypography.bodySmall.copyWith(fontSize: 11),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (!isCurrent)
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            ),
+                            onPressed: () => state.switchKid(idx),
+                            child: const Text('Chọn học', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                          )
+                        else
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.accentGreen.withAlpha(30),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              'Đang chọn',
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.accentGreen),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // Thanh tiến độ lộ trình bài học
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Tiến độ lộ trình học Toán Lớp ${k.grade}:',
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                        ),
+                        Text(
+                          '$completedLessons/30 Bài (${(progressPct * 100).toInt()}%)',
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: LinearProgressIndicator(
+                        value: progressPct,
+                        backgroundColor: const Color(0xFFF1F5F9),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          progressPct > 0.6 ? AppColors.accentGreen : AppColors.primary,
+                        ),
+                        minHeight: 7,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+
+            const SizedBox(height: 16),
 
             // Thiết lập giới hạn thời gian học (Screen Time Limit)
             Container(

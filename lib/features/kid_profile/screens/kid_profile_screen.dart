@@ -214,6 +214,100 @@ class KidProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
+            const SizedBox(height: 20),
+
+            // Mục Cài đặt & Cổng chuyển đổi Phụ Huynh (Tab / Nút chuyển giao diện Phụ Huynh)
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.borderSubtle),
+              ),
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryLight,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.supervised_user_circle_rounded, color: AppColors.primary, size: 22),
+                    ),
+                    title: const Text(
+                      'Cổng Quản Lý Phụ Huynh',
+                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                    ),
+                    subtitle: const Text(
+                      'Xem tiến độ bài học, số lượng bé và cài đặt thời gian',
+                      style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                    ),
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.lock_open_rounded, size: 14, color: Colors.white),
+                          SizedBox(width: 4),
+                          Text('Mở UI', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                    onTap: () => showDialog(
+                      context: context,
+                      builder: (_) => const ParentGateDialog(),
+                    ),
+                  ),
+                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.phonelink_lock_rounded, color: Color(0xFF64748B), size: 22),
+                    ),
+                    title: const Text(
+                      'Bảo Vệ Mã PIN Cổng Phụ Huynh',
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                    ),
+                    subtitle: Text(
+                      state.isParentUnlocked ? 'Trạng thái: Đang mở' : 'Trạng thái: Đang khóa bảo vệ',
+                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                    ),
+                    trailing: Switch.adaptive(
+                      value: state.isParentUnlocked,
+                      activeTrackColor: AppColors.primary,
+                      onChanged: (val) {
+                        if (val) {
+                          showDialog(
+                            context: context,
+                            builder: (_) => const ParentGateDialog(),
+                          );
+                        } else {
+                          state.lockParentPortal();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('🔒 Đã khóa Cổng Phụ Huynh'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ).animate().fadeIn(delay: 550.ms),
+
+            const SizedBox(height: 20),
+
             // Đăng xuất tài khoản
             Center(
               child: TextButton.icon(

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import '../models/kid_profile.dart';
 import '../models/lesson.dart';
+import '../models/subscription_model.dart';
 import '../datasources/sample_curriculum.dart';
 import '../repositories/kid_repository.dart';
 import '../repositories/arena_repository.dart';
 import '../repositories/mascot_repository.dart';
+import '../repositories/lesson_repository.dart';
+import '../repositories/subscription_repository.dart';
 
 class AppStateProvider extends ChangeNotifier {
   // Dual Account: Parent & Kids (Max 3 – BR-04)
@@ -35,6 +38,10 @@ class AppStateProvider extends ChangeNotifier {
   String _parentPin = '1234'; // BR-01
   bool _isParentUnlocked = false;
 
+  // Subscription & Admin Role
+  SubscriptionModel _subscription = SubscriptionModel.defaultBasic('default_parent');
+  bool _isAdmin = false;
+
   // Mascot Customization
   String _currentHat = 'Mũ Thám Tử';
   String _currentGlasses = 'Kính Tri Thức';
@@ -63,6 +70,10 @@ class AppStateProvider extends ChangeNotifier {
   int get currentNavIndex => _currentNavIndex;
   ThemeMode get themeMode => _themeMode;
   bool get isDarkMode => _themeMode == ThemeMode.dark;
+  SubscriptionModel get subscription => _subscription;
+  bool get isAdmin => _isAdmin;
+  bool get isPlusActive => _subscription.isPlusActive;
+  int get maxAllowedKids => _subscription.maxKids;
 
   void toggleTheme() {
     _themeMode = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
@@ -95,7 +106,7 @@ class AppStateProvider extends ChangeNotifier {
     _currentLessons = SampleCurriculum.getLessonsForGrade(currentKid.grade);
   }
 
-  /// Try to load real kid profiles from Supabase; fallback to local demo data
+  /// Try to load real kid profiles and curriculum lessons from Supabase; fallback to local demo data
   Future<void> _syncFromSupabase() async {
     _isLoadingFromCloud = true;
     notifyListeners();
@@ -106,6 +117,13 @@ class AppStateProvider extends ChangeNotifier {
         _kidProfiles.clear();
         _kidProfiles.addAll(cloudKids);
         _selectedKidIndex = 0;
+      }
+
+      // Nạp danh sách bài học & câu hỏi động từ database Supabase
+      final dynamicLessons = await LessonRepository.fetchLessonsForGrade(currentKid.grade);
+      if (dynamicLessons.isNotEmpty) {
+        _currentLessons = dynamicLessons;
+      } else {
         _loadLessonsForCurrentKid();
       }
 
@@ -113,11 +131,21 @@ class AppStateProvider extends ChangeNotifier {
       final gear = await MascotRepository.fetchMascotGear(currentKid.id);
       _currentHat = gear.hat;
       _currentGlasses = gear.glasses;
+
+      // Load Subscription & Admin Role
+      _subscription = await SubscriptionRepository.fetchCurrentSubscription();
+      _isAdmin = await SubscriptionRepository.checkIfAdmin();
     } catch (_) {
-      // Keep local demo data
+      _loadLessonsForCurrentKid();
     }
 
     _isLoadingFromCloud = false;
+    notifyListeners();
+  }
+
+  /// Cập nhật subscription cục bộ (sau khi admin nâng cấp hoặc mua gói)
+  void updateLocalSubscription(SubscriptionModel newSub) {
+    _subscription = newSub;
     notifyListeners();
   }
 
@@ -128,6 +156,12 @@ class AppStateProvider extends ChangeNotifier {
     if (index >= 0 && index < _kidProfiles.length) {
       _selectedKidIndex = index;
       _loadLessonsForCurrentKid();
+      LessonRepository.fetchLessonsForGrade(currentKid.grade).then((dynamicLessons) {
+        if (dynamicLessons.isNotEmpty) {
+          _currentLessons = dynamicLessons;
+          notifyListeners();
+        }
+      });
       MascotRepository.fetchMascotGear(currentKid.id).then((gear) {
         _currentHat = gear.hat;
         _currentGlasses = gear.glasses;

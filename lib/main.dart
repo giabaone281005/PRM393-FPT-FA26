@@ -122,8 +122,16 @@ class _SplashWrapperState extends State<_SplashWrapper> with SingleTickerProvide
                           ),
                         ],
                       ),
-                      child: const Center(
-                        child: Text('🦉', style: TextStyle(fontSize: 58)),
+                      child: ClipOval(
+                        child: Image.asset(
+                          'assets/images/owl_mascot.jpg',
+                          width: 110,
+                          height: 110,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Center(
+                            child: Text('🦉', style: TextStyle(fontSize: 58)),
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),

@@ -55,8 +55,15 @@ class _SocraticOwlSheetState extends State<SocraticOwlSheet> {
                     ),
                   ],
                 ),
-                child: const Center(
-                  child: Text('🦉', style: TextStyle(fontSize: 32)),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(
+                    'assets/images/owl_mascot.jpg',
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Center(
+                      child: Text('🦉', style: TextStyle(fontSize: 32)),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 14),

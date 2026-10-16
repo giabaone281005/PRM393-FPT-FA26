@@ -18,6 +18,10 @@ class Lesson {
   final int starReward;
   LessonStatus status;
   int starsEarned;
+  final String? theory;
+  final String? essayPrompt;
+  final String? essayGuidance;
+  final String? miniGameType;
   final List<Question> questions;
 
   Lesson({
@@ -31,6 +35,10 @@ class Lesson {
     this.starReward = 3,
     this.status = LessonStatus.locked,
     this.starsEarned = 0,
+    this.theory,
+    this.essayPrompt,
+    this.essayGuidance,
+    this.miniGameType,
     required this.questions,
   });
 }

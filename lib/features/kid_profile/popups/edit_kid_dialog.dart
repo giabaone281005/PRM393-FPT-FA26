@@ -120,24 +120,46 @@ class _EditKidDialogState extends State<EditKidDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<int>(
-              initialValue: _selectedGrade,
-              decoration: InputDecoration(
-                labelText: 'Khối Lớp',
-                prefixIcon: const Icon(Icons.school_rounded),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+            // Khối Lớp Cố Định (Không cho phép đổi khối lớp khi đã đăng ký ban đầu)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFCBD5E1)),
               ),
-              items: [1, 2, 3, 4, 5].map((g) {
-                return DropdownMenuItem(
-                  value: g,
-                  child: Text('Lớp $g (Tiểu học)'),
-                );
-              }).toList(),
-              onChanged: (val) {
-                if (val != null) setState(() => _selectedGrade = val);
-              },
+              child: Row(
+                children: [
+                  const Icon(Icons.school_rounded, color: Color(0xFF64748B), size: 22),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Khối Lớp (Đã cố định theo đăng ký)',
+                          style: TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'Lớp $_selectedGrade (Tiểu học)',
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Tooltip(
+                    message: 'Không thể đổi khối lớp khi đã đăng ký ban đầu',
+                    child: Icon(Icons.lock_rounded, color: Color(0xFF94A3B8), size: 18),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 6),
+            const Text(
+              '🔒 Quy tắc: Khối lớp được cố định theo lộ trình đăng ký ban đầu của phụ huynh để đảm bảo đúng tiến độ học của bé.',
+              style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8), fontStyle: FontStyle.italic),
+            ),
+            const SizedBox(height: 16),
             Center(
               child: TextButton.icon(
                 onPressed: _isLoading ? null : _deleteProfile,

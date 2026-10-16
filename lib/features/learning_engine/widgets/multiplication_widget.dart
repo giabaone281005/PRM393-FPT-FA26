@@ -17,29 +17,43 @@ class MultiplicationWidget extends StatefulWidget {
 }
 
 class _MultiplicationWidgetState extends State<MultiplicationWidget> {
-  int? _selectedAnswer;
-  late int _factorA;
-  late int _factorB;
-  late List<int> _options;
+  String? _selectedAnswer;
+  late String _expression;
+  late String _correctAnswer;
+  late List<String> _options;
 
   @override
   void initState() {
     super.initState();
-    _factorA = widget.data['factorA'] ?? 7;
-    _factorB = widget.data['factorB'] ?? 8;
-    _options = List<int>.from(widget.data['options'] ?? [48, 54, 56, 63]);
+    final factorA = widget.data['factorA'];
+    final factorB = widget.data['factorB'];
+    final formula = widget.data['formula']?.toString();
+
+    if (formula != null && formula.isNotEmpty) {
+      _expression = formula;
+    } else if (factorA != null && factorB != null) {
+      _expression = '$factorA × $factorB = ?';
+    } else {
+      _expression = widget.data['expression']?.toString() ?? 'Phép tính = ?';
+    }
+
+    final rawOptions = widget.data['options'] as List? ?? [];
+    _options = rawOptions.map((e) => e.toString()).toList();
+
+    _correctAnswer = (widget.data['correctAnswer'] ??
+            widget.data['answer'] ??
+            ((factorA is num && factorB is num) ? (factorA * factorB).toString() : (_options.isNotEmpty ? _options.first : '')))
+        .toString();
   }
 
   @override
   Widget build(BuildContext context) {
-    final correctAnswer = _factorA * _factorB;
-
     return Column(
       children: [
         // Khối hiển thị phép tính nổi bật
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 24),
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
@@ -55,16 +69,17 @@ class _MultiplicationWidgetState extends State<MultiplicationWidget> {
           child: Column(
             children: [
               Text(
-                '$_factorA × $_factorB = ?',
+                _expression,
+                textAlign: TextAlign.center,
                 style: AppTypography.displayLarge.copyWith(
                   color: AppColors.primary,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 40,
+                  letterSpacing: -1,
+                  fontSize: 28,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Text(
-                'Chọn kết quả đúng trong bảng cửu chương',
+                'Tính nhẩm và chọn kết quả đúng',
                 style: AppTypography.bodySmall,
               ),
             ],
@@ -72,7 +87,7 @@ class _MultiplicationWidgetState extends State<MultiplicationWidget> {
         ),
         const SizedBox(height: 24),
 
-        // Lưới các lựa chọn đáp án
+        // Grid 4 lựa chọn trắc nghiệm
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -104,7 +119,7 @@ class _MultiplicationWidgetState extends State<MultiplicationWidget> {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: isSelected ? AppColors.primary.withAlpha(60) : Colors.black.withAlpha(6),
+                      color: isSelected ? AppColors.primary.withAlpha(30) : Colors.black.withAlpha(5),
                       blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),
@@ -112,11 +127,11 @@ class _MultiplicationWidgetState extends State<MultiplicationWidget> {
                 ),
                 child: Center(
                   child: Text(
-                    '$option',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
+                    option,
+                    style: AppTypography.titleLarge.copyWith(
                       color: isSelected ? AppColors.primaryHover : AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
                     ),
                   ),
                 ),
@@ -124,8 +139,10 @@ class _MultiplicationWidgetState extends State<MultiplicationWidget> {
             );
           },
         ),
-        const SizedBox(height: 24),
 
+        const SizedBox(height: 32),
+
+        // Nút kiểm tra đáp án
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
@@ -136,9 +153,10 @@ class _MultiplicationWidgetState extends State<MultiplicationWidget> {
           onPressed: _selectedAnswer == null
               ? null
               : () {
-                  widget.onAnswerSubmitted(_selectedAnswer == correctAnswer);
+                  final isRight = _selectedAnswer?.trim() == _correctAnswer.trim();
+                  widget.onAnswerSubmitted(isRight);
                 },
-          child: const Text('XÁC NHẬN ĐÁP ÁN', style: TextStyle(fontWeight: FontWeight.bold)),
+          child: const Text('KIỂM TRA ĐÁP ÁN', style: TextStyle(fontWeight: FontWeight.bold)),
         ),
       ],
     );

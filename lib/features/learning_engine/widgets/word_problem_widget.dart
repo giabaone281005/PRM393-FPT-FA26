@@ -19,17 +19,25 @@ class WordProblemWidget extends StatefulWidget {
 class _WordProblemWidgetState extends State<WordProblemWidget> {
   String? _selectedOption;
   late List<String> _options;
+  late String _correctAnswer;
+  late String _highlightGiven;
+  late String _highlightAction;
+  late String _highlightTarget;
 
   @override
   void initState() {
     super.initState();
-    _options = List<String>.from(widget.data['options'] ?? []);
+    final rawOptions = widget.data['options'] as List? ?? [];
+    _options = rawOptions.map((e) => e.toString()).toList();
+    _correctAnswer = (widget.data['correctAnswer'] ?? widget.data['answer'] ?? (_options.isNotEmpty ? _options.first : '')).toString();
+
+    _highlightGiven = widget.data['given']?.toString() ?? 'Dữ kiện đề bài toán đã cho';
+    _highlightAction = widget.data['action']?.toString() ?? 'Phép tính hoặc thao tác phân tích';
+    _highlightTarget = widget.data['target']?.toString() ?? 'Đáp án hoặc kết quả cần tìm';
   }
 
   @override
   Widget build(BuildContext context) {
-    const correctAnswer = '24 ÷ 4 = 6';
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -54,29 +62,30 @@ class _WordProblemWidgetState extends State<WordProblemWidget> {
                     style: AppTypography.labelSmall.copyWith(
                       color: const Color(0xFF1D4ED8),
                       fontSize: 11,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               RichText(
-                text: const TextSpan(
-                  style: TextStyle(fontSize: 14, color: AppColors.textPrimary, height: 1.5),
+                text: TextSpan(
+                  style: const TextStyle(fontSize: 14, color: AppColors.textPrimary, height: 1.5),
                   children: [
-                    TextSpan(text: '• Dữ liệu đã cho: Có tổng cộng '),
+                    const TextSpan(text: '• Dữ liệu đã cho: '),
                     TextSpan(
-                      text: '24 quả cam\n',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryHover),
+                      text: '$_highlightGiven\n',
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryHover),
                     ),
-                    TextSpan(text: '• Hành động: Mẹ đem '),
+                    const TextSpan(text: '• Bản chất phép tính: '),
                     TextSpan(
-                      text: 'chia đều cho 4 người\n',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2563EB)),
+                      text: '$_highlightAction\n',
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2563EB)),
                     ),
-                    TextSpan(text: '• Mục tiêu: Tìm số cam của '),
+                    const TextSpan(text: '• Mục tiêu: '),
                     TextSpan(
-                      text: 'mỗi người.',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      text: _highlightTarget,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -87,7 +96,7 @@ class _WordProblemWidgetState extends State<WordProblemWidget> {
         const SizedBox(height: 20),
 
         Text(
-          'Chọn phép tính phù hợp nhất để giải bài toán:',
+          'Chọn đáp án chính xác nhất:',
           style: AppTypography.titleMedium.copyWith(fontSize: 15),
         ),
         const SizedBox(height: 12),
@@ -138,11 +147,13 @@ class _WordProblemWidgetState extends State<WordProblemWidget> {
                         : null,
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    option,
-                    style: AppTypography.titleMedium.copyWith(
-                      fontSize: 16,
-                      color: isSelected ? AppColors.primaryHover : AppColors.textPrimary,
+                  Expanded(
+                    child: Text(
+                      option,
+                      style: AppTypography.titleMedium.copyWith(
+                        fontSize: 15,
+                        color: isSelected ? AppColors.primaryHover : AppColors.textPrimary,
+                      ),
                     ),
                   ),
                 ],
@@ -162,9 +173,10 @@ class _WordProblemWidgetState extends State<WordProblemWidget> {
           onPressed: _selectedOption == null
               ? null
               : () {
-                  widget.onAnswerSubmitted(_selectedOption == correctAnswer);
+                  final isRight = _selectedOption?.trim() == _correctAnswer.trim();
+                  widget.onAnswerSubmitted(isRight);
                 },
-          child: const Text('CHỌN CÁCH GIẢI NÀY', style: TextStyle(fontWeight: FontWeight.bold)),
+          child: const Text('CHỌN ĐÁP ÁN NÀY', style: TextStyle(fontWeight: FontWeight.bold)),
         ),
       ],
     );

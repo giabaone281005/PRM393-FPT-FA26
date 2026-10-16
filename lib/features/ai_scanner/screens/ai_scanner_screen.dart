@@ -219,7 +219,16 @@ class _AiScannerScreenState extends State<AiScannerScreen> {
                 children: [
                   Row(
                     children: [
-                      const Text('🦉', style: TextStyle(fontSize: 26)),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.asset(
+                          'assets/images/owl_mascot.jpg',
+                          width: 30,
+                          height: 30,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Text('🦉', style: TextStyle(fontSize: 26)),
+                        ),
+                      ),
                       const SizedBox(width: 10),
                       Text('Phương Pháp Socratic Math AI', style: AppTypography.titleMedium.copyWith(fontSize: 15)),
                     ],

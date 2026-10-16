@@ -18,7 +18,8 @@ BEGIN
     )
     VALUES 
       ('a0000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'phuhuynh@mathlingo.vn', '$2a$10$abcdefghijklmnopqrstuvwxyzABCDEF', now(), '{"provider":"email","providers":["email"]}', '{}', false, now(), now()),
-      ('a0000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'parent.demo@mathlingo.vn', '$2a$10$abcdefghijklmnopqrstuvwxyzABCDEF', now(), '{"provider":"email","providers":["email"]}', '{}', false, now(), now())
+      ('a0000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'parent.demo@mathlingo.vn', '$2a$10$abcdefghijklmnopqrstuvwxyzABCDEF', now(), '{"provider":"email","providers":["email"]}', '{}', false, now(), now()),
+      ('a0000000-0000-0000-0000-000000000009', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin@mathlingo.vn', '$2a$10$abcdefghijklmnopqrstuvwxyzABCDEF', now(), '{"provider":"email","providers":["email"]}', '{}', false, now(), now())
     ON CONFLICT (id) DO NOTHING;
   END IF;
 EXCEPTION WHEN OTHERS THEN
@@ -29,9 +30,33 @@ END $$;
 INSERT INTO public.parents (id, email, parent_pin_hash, created_at, updated_at)
 VALUES 
   ('a0000000-0000-0000-0000-000000000001', 'phuhuynh@mathlingo.vn', '1234', now(), now()),
-  ('a0000000-0000-0000-0000-000000000002', 'parent.demo@mathlingo.vn', '1234', now(), now())
+  ('a0000000-0000-0000-0000-000000000002', 'parent.demo@mathlingo.vn', '1234', now(), now()),
+  ('a0000000-0000-0000-0000-000000000009', 'admin@mathlingo.vn', '9999', now(), now())
 ON CONFLICT (id) DO UPDATE 
 SET email = EXCLUDED.email, parent_pin_hash = EXCLUDED.parent_pin_hash, updated_at = now();
+
+-- 1.1 USER ROLES (Phân quyền Admin - An toàn nếu bảng đã tạo)
+DO $$
+BEGIN
+  IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'user_roles') THEN
+    INSERT INTO public.user_roles (user_id, role)
+    VALUES ('a0000000-0000-0000-0000-000000000009', 'admin')
+    ON CONFLICT (user_id, role) DO NOTHING;
+  END IF;
+END $$;
+
+-- 1.2 SUBSCRIPTIONS (Gói dịch vụ mẫu - An toàn nếu bảng đã tạo)
+DO $$
+BEGIN
+  IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'subscriptions') THEN
+    INSERT INTO public.subscriptions (parent_id, tier, status, max_kids, start_date)
+    VALUES 
+      ('a0000000-0000-0000-0000-000000000001', 'plus', 'active', 3, now()),
+      ('a0000000-0000-0000-0000-000000000002', 'basic', 'active', 1, now())
+    ON CONFLICT (parent_id) DO UPDATE
+    SET tier = EXCLUDED.tier, max_kids = EXCLUDED.max_kids, status = EXCLUDED.status;
+  END IF;
+END $$;
 
 -- 2. KID PROFILES (Hồ sơ học sinh: Tối đa 3 bé / phụ huynh theo BR-04)
 -- Dùng UUID chuẩn hex [0-9a-f]

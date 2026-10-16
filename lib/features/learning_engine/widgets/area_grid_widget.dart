@@ -19,20 +19,29 @@ class AreaGridWidget extends StatefulWidget {
 class _AreaGridWidgetState extends State<AreaGridWidget> {
   late int _rows;
   late int _cols;
-  final TextEditingController _answerController = TextEditingController();
+  late String _correctAnswer;
+  late List<String> _options;
+  String? _selectedOption;
   final Set<int> _tappedCells = {};
 
   @override
   void initState() {
     super.initState();
-    _rows = widget.data['rows'] ?? 3;
-    _cols = widget.data['cols'] ?? 5;
+    _rows = widget.data['rows'] ?? widget.data['gridHeight'] ?? 3;
+    _cols = widget.data['cols'] ?? widget.data['gridWidth'] ?? 4;
+
+    final rawOptions = widget.data['options'] as List? ?? [
+      (_rows * _cols).toString(),
+      ((_rows * _cols) - 2).toString(),
+      ((_rows * _cols) + 3).toString(),
+      ((_rows * _cols) + 1).toString(),
+    ];
+    _options = rawOptions.map((e) => e.toString()).toList();
+    _correctAnswer = (widget.data['correctAnswer'] ?? (_rows * _cols)).toString();
   }
 
   @override
   Widget build(BuildContext context) {
-    final expectedArea = _rows * _cols;
-
     return Column(
       children: [
         // Lưới ô vuông tương tác
@@ -42,12 +51,19 @@ class _AreaGridWidgetState extends State<AreaGridWidget> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: AppColors.borderSubtle),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(6),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
           child: Column(
             children: [
               Text(
                 'Lưới hình chữ nhật ($_cols cột × $_rows hàng)',
-                style: AppTypography.labelSmall.copyWith(fontSize: 12),
+                style: AppTypography.labelSmall.copyWith(fontSize: 13, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               Table(
@@ -69,19 +85,18 @@ class _AreaGridWidgetState extends State<AreaGridWidget> {
                           });
                         },
                         child: Container(
-                          height: 38,
-                          color: isTapped ? AppColors.accentGoldLight : AppColors.primaryLight.withAlpha(80),
+                          height: 48,
+                          color: isTapped ? AppColors.accentGreen.withAlpha(120) : Colors.transparent,
                           child: Center(
                             child: isTapped
-                                ? Text(
+                                ? const Icon(Icons.check, color: AppColors.accentGreen, size: 20)
+                                : Text(
                                     '${cellId + 1}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
+                                      color: Colors.grey.withAlpha(140),
                                       fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.primaryHover,
                                     ),
-                                  )
-                                : const SizedBox.shrink(),
+                                  ),
                           ),
                         ),
                       );
@@ -91,27 +106,62 @@ class _AreaGridWidgetState extends State<AreaGridWidget> {
               ),
               const SizedBox(height: 10),
               Text(
-                'Gợi ý: Bạn có thể chạm vào từng ô để đếm (${_tappedCells.length} ô đã chọn)',
-                style: AppTypography.bodySmall,
+                'Chạm vào các ô vuông để đếm nhẩm số lượng ô',
+                style: AppTypography.bodySmall.copyWith(fontSize: 11),
               ),
             ],
           ),
         ),
         const SizedBox(height: 20),
 
-        TextField(
-          controller: _answerController,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            labelText: 'Nhập diện tích (số ô vuông):',
-            suffixText: 'ô vuông',
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-          ),
+        // Trắc nghiệm lựa chọn đáp án
+        Text(
+          'Chọn diện tích / số ô vuông chính xác:',
+          style: AppTypography.titleMedium.copyWith(fontSize: 15),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 12),
 
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 2.2,
+          ),
+          itemCount: _options.length,
+          itemBuilder: (context, index) {
+            final opt = _options[index];
+            final isSel = _selectedOption == opt;
+
+            return GestureDetector(
+              onTap: () => setState(() => _selectedOption = opt),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isSel ? AppColors.primaryLight : Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isSel ? AppColors.primary : AppColors.borderSubtle,
+                    width: isSel ? 2 : 1,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    opt.contains('cm') ? opt : '$opt ô vuông',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: isSel ? AppColors.primaryHover : AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+
+        const SizedBox(height: 20),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
@@ -119,11 +169,13 @@ class _AreaGridWidgetState extends State<AreaGridWidget> {
             minimumSize: const Size.fromHeight(52),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
-          onPressed: () {
-            final val = int.tryParse(_answerController.text.trim());
-            widget.onAnswerSubmitted(val == expectedArea);
-          },
-          child: const Text('KIỂM TRA DIỆN TÍCH', style: TextStyle(fontWeight: FontWeight.bold)),
+          onPressed: _selectedOption == null
+              ? null
+              : () {
+                  final isRight = _selectedOption?.trim() == _correctAnswer.trim();
+                  widget.onAnswerSubmitted(isRight);
+                },
+          child: const Text('KIỂM TRA ĐÁP ÁN', style: TextStyle(fontWeight: FontWeight.bold)),
         ),
       ],
     );
