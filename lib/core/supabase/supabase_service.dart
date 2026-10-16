@@ -39,7 +39,8 @@ class SupabaseService {
     if (!_isInitialized) return null;
     try {
       return await _client!.auth.signUp(email: email, password: password);
-    } catch (_) {
+    } catch (e) {
+      print('SIGNUP ERROR: $e'); // tạm thời để xem lỗi thật
       return null;
     }
   }
@@ -55,7 +56,8 @@ class SupabaseService {
         email: email,
         password: password,
       );
-    } catch (_) {
+    } catch (e) {
+      print('SIGNIN ERROR: $e'); // tạm thời để xem lỗi thật
       return null;
     }
   }
