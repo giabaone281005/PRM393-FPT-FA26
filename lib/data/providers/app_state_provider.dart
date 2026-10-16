@@ -5,9 +5,29 @@ import '../datasources/sample_curriculum.dart';
 import '../repositories/kid_repository.dart';
 import '../repositories/arena_repository.dart';
 import '../repositories/mascot_repository.dart';
+import '../models/subscription_model.dart';
+import '../repositories/subscription_repository.dart';
+
 
 class AppStateProvider extends ChangeNotifier {
   // Dual Account: Parent & Kids (Max 3 – BR-04)
+  // ===== Gói dịch vụ Basic / Plus =====
+  SubscriptionModel _subscription = SubscriptionModel.defaultBasic('default_parent');
+  SubscriptionModel get subscription => _subscription;
+  bool get isPlusActive => _subscription.isPlusActive;
+  int get maxAllowedKids => _subscription.maxKids;
+
+  /// Cập nhật gói cục bộ (sau khi thanh toán thành công)
+  void updateLocalSubscription(SubscriptionModel newSub) {
+    _subscription = newSub;
+    notifyListeners();
+  }
+
+  /// Tải gói hiện tại từ Supabase
+  Future<void> loadSubscription() async {
+    _subscription = await SubscriptionRepository.fetchCurrentSubscription();
+    notifyListeners();
+  }
   final List<KidProfile> _kidProfiles = [
     KidProfile(
       id: 'kid-1',
