@@ -215,11 +215,20 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   void _fillDemoAccount() {
-    _emailCtrl.text = 'parent@mathlingo.com';
+    _emailCtrl.text = 'phuhuynh@mathlingo.vn';
     _passCtrl.text = '123456';
     setState(() {
       _errorMsg = '';
-      _mascotSpeech = 'Đã điền tài khoản mẫu! Bấm Đăng Nhập luôn nào ⚡';
+      _mascotSpeech = 'Đã điền tài khoản Phụ huynh mẫu! Bấm Đăng Nhập nào ⚡';
+    });
+  }
+
+  void _fillAdminAccount() {
+    _emailCtrl.text = 'admin@mathlingo.vn';
+    _passCtrl.text = '123456';
+    setState(() {
+      _errorMsg = '';
+      _mascotSpeech = 'Đã điền tài khoản Quản trị Admin! Bấm Đăng Nhập nào 👑';
     });
   }
 
@@ -679,7 +688,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     // Modern Flat Social / Fast Buttons
                     Row(
                       children: [
-                        // Apple / Demo
+                        // Nút Phụ Huynh Demo
                         Expanded(
                           child: SizedBox(
                             height: 48,
@@ -693,9 +702,9 @@ class _AuthScreenState extends State<AuthScreen> {
                                 backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
                               ),
                               child: Text(
-                                'Điền Demo',
+                                'Demo Mẹ',
                                 style: GoogleFonts.inter(
-                                  fontSize: 13,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   color: textDark,
                                 ),
@@ -703,7 +712,32 @@ class _AuthScreenState extends State<AuthScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 8),
+                        // Nút Admin Demo
+                        Expanded(
+                          child: SizedBox(
+                            height: 48,
+                            child: OutlinedButton(
+                              onPressed: _fillAdminAccount,
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(color: Colors.orange, width: 1.2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                backgroundColor: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFFFF8E1),
+                              ),
+                              child: Text(
+                                '👑 Admin',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange.shade800,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
                         // Guest mode
                         Expanded(
                           child: SizedBox(
@@ -720,7 +754,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               child: Text(
                                 'Vào Thử',
                                 style: GoogleFonts.inter(
-                                  fontSize: 13,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   color: textDark,
                                 ),

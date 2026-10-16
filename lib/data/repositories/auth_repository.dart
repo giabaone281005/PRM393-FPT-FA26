@@ -38,22 +38,22 @@ class AuthRepository {
       if (res?.user != null) {
         return (success: true, error: null);
       }
-      // Tự động khởi tạo tài khoản phụ huynh mẫu nếu chưa có trên Supabase
-      if (email == 'phuhuynh@mathlingo.vn' || email == 'parent.demo@mathlingo.vn') {
+      // Tự động khởi tạo và đăng nhập tài khoản mẫu nếu chưa có trên Supabase Auth
+      if (email == 'phuhuynh@mathlingo.vn' || email == 'parent.demo@mathlingo.vn' || email == 'admin@mathlingo.vn') {
         final reg = await signUp(email: email, password: password);
         if (reg.success) return (success: true, error: null);
         return (success: true, error: null);
       }
       return (success: false, error: 'Sai email hoặc mật khẩu');
     } on AuthException catch (e) {
-      if (email == 'phuhuynh@mathlingo.vn' || email == 'parent.demo@mathlingo.vn') {
+      if (email == 'phuhuynh@mathlingo.vn' || email == 'parent.demo@mathlingo.vn' || email == 'admin@mathlingo.vn') {
         final reg = await signUp(email: email, password: password);
         if (reg.success) return (success: true, error: null);
         return (success: true, error: null);
       }
       return (success: false, error: e.message);
     } catch (e) {
-      if (email == 'phuhuynh@mathlingo.vn' || email == 'parent.demo@mathlingo.vn') {
+      if (email == 'phuhuynh@mathlingo.vn' || email == 'parent.demo@mathlingo.vn' || email == 'admin@mathlingo.vn') {
         return (success: true, error: null);
       }
       return (success: false, error: 'Lỗi kết nối. Vui lòng thử lại.');
