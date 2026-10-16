@@ -32,14 +32,23 @@ class SubscriptionRepository {
   static Future<bool> checkIfAdmin() async {
     final client = SupabaseService.client;
     final uid = SupabaseService.currentUser?.id;
-    final email = SupabaseService.currentUser?.email;
+    final email = SupabaseService.currentUser?.email?.toLowerCase();
 
-    // Hardcode fallback cho email admin demo
-    if (email == 'admin@mathlingo.vn') return true;
+    // Fallback nhận diện trực tiếp qua email
+    if (email == 'admin@mathlingo.vn' || email == 'admin.moi@mathlingo.vn') return true;
 
     if (client == null || uid == null) return false;
 
     try {
+      // 1. Kiểm tra bảng public.admins (như trên Supabase Dashboard của bạn)
+      final adminRow = await client
+          .from('admins')
+          .select('id')
+          .or('id.eq.$uid,email.eq.${email ?? ""}')
+          .maybeSingle();
+      if (adminRow != null) return true;
+
+      // 2. Kiểm tra bảng public.user_roles
       final res = await client
           .from('user_roles')
           .select()

@@ -224,7 +224,7 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   void _fillAdminAccount() {
-    _emailCtrl.text = 'admin@mathlingo.vn';
+    _emailCtrl.text = 'admin.moi@mathlingo.vn';
     _passCtrl.text = '123456';
     setState(() {
       _errorMsg = '';
