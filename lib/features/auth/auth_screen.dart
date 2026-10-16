@@ -160,10 +160,12 @@ class _AuthScreenState extends State<AuthScreen> {
       if (!mounted) return;
 
       // Kiểm tra quyền Admin để phân luồng UI riêng
-      final isAdmin = await SubscriptionRepository.checkIfAdmin();
+      final isEmailAdmin = email.trim().toLowerCase() == 'admin.moi@mathlingo.vn' ||
+          email.trim().toLowerCase() == 'admin@mathlingo.vn';
+      final isAdminRole = await SubscriptionRepository.checkIfAdmin();
       if (!mounted) return;
 
-      if (isAdmin) {
+      if (isEmailAdmin || isAdminRole) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),

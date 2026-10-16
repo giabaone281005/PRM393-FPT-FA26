@@ -7,6 +7,7 @@ import 'core/supabase/supabase_service.dart';
 import 'data/providers/app_state_provider.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/main/main_screen.dart';
+import 'features/auth/auth_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,13 +69,12 @@ class _SplashWrapperState extends State<_SplashWrapper> with SingleTickerProvide
     );
     _ctrl.forward();
 
-    // Auto-navigate after splash directly to MainScreen
+    // Auto-navigate after splash directly to AuthScreen (Đăng Nhập)
     _splashTimer = Timer(const Duration(milliseconds: 1500), () {
       if (!mounted) return;
-      context.read<AppStateProvider>().setNavIndex(3); // Hồ sơ bé
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const MainScreen()),
+        MaterialPageRoute(builder: (_) => const AuthScreen()),
       );
     });
   }
