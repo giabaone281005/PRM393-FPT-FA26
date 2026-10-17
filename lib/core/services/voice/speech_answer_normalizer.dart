@@ -314,8 +314,7 @@ class SpeechAnswerNormalizer {
 
     // Nếu câu hỏi có danh sách options (WordProblem, Multiplication, AreaGrid)
     if (options != null && options.isNotEmpty) {
-      final matched = matchAgainstOptions(speech, options);
-      if (matched != null) return matched;
+      return matchAgainstOptions(speech, options);
     }
 
     // Nếu câu hỏi yêu cầu số nguyên (DragCounters, hoặc nhập số)
