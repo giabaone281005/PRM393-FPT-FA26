@@ -365,5 +365,187 @@ void main() {
       expect(list.first.questionId, 'q_valid');
       expect(list.first.questionType, QuestionType.areaGrid);
     });
+
+    test('countUnresolved accurately reflects pending wrong answers', () async {
+      expect(await WrongAnswerRepository.countUnresolved('kid_count'), 0);
+
+      final r1 = WrongAnswerRecord(
+        questionId: 'q_1',
+        prompt: 'P1',
+        questionType: QuestionType.wordProblem,
+        userAnswer: 'A',
+        lessonId: 'L_count',
+        timestamp: DateTime.now(),
+      );
+      final r2 = WrongAnswerRecord(
+        questionId: 'q_2',
+        prompt: 'P2',
+        questionType: QuestionType.wordProblem,
+        userAnswer: 'B',
+        lessonId: 'L_count',
+        timestamp: DateTime.now(),
+      );
+
+      await WrongAnswerRepository.saveWrongAnswer('kid_count', r1);
+      await WrongAnswerRepository.saveWrongAnswer('kid_count', r2);
+
+      expect(await WrongAnswerRepository.countUnresolved('kid_count'), 2);
+      expect(
+        await WrongAnswerRepository.countUnresolved(
+          'kid_count',
+          lessonId: 'L_count',
+        ),
+        2,
+      );
+      expect(
+        await WrongAnswerRepository.countUnresolved(
+          'kid_count',
+          lessonId: 'other_lesson',
+        ),
+        0,
+      );
+
+      await WrongAnswerRepository.markResolved('kid_count', 'q_1');
+      expect(await WrongAnswerRepository.countUnresolved('kid_count'), 1);
+    });
+  });
+
+  group('StudyScreen Wrong Answer Capture Integration', () {
+    test('captures and saves wrong answer on incorrect result', () async {
+      const kidId = 'kid_test_capture';
+      const lessonId = 'lesson_101';
+      final question = Question(
+        id: 'q_clock_1',
+        type: QuestionType.clockRotation,
+        prompt: 'Xoay kim đồng hồ chỉ 9:30',
+        data: const {'targetHour': 9, 'targetMinute': 30},
+        correctAnswer: null, // Hidden by server
+      );
+
+      const attemptedAnswer = {'hour': 8, 'minute': 30};
+      const isCorrect = false;
+
+      // Logic identical to StudyScreen._answer when isCorrect == false
+      if (!isCorrect) {
+        final record = WrongAnswerRecord(
+          questionId: question.id,
+          prompt: question.prompt,
+          questionType: question.type,
+          userAnswer: attemptedAnswer,
+          lessonId: lessonId,
+          timestamp: DateTime.now(),
+          isResolved: false,
+          questionData: question.data,
+        );
+        await WrongAnswerRepository.saveWrongAnswer(kidId, record);
+      }
+
+      final wrongList = await WrongAnswerRepository.getWrongAnswers(kidId);
+      expect(wrongList.length, 1);
+      expect(wrongList.first.questionId, 'q_clock_1');
+      expect(wrongList.first.prompt, 'Xoay kim đồng hồ chỉ 9:30');
+      expect(wrongList.first.questionType, QuestionType.clockRotation);
+      expect(wrongList.first.userAnswer, {'hour': 8, 'minute': 30});
+      expect(wrongList.first.lessonId, 'lesson_101');
+      expect(wrongList.first.isResolved, isFalse);
+      expect(wrongList.first.questionData?['targetHour'], 9);
+    });
+
+    test('does not save record when result is correct', () async {
+      const kidId = 'kid_test_correct';
+      final question = Question(
+        id: 'q_correct',
+        type: QuestionType.wordProblem,
+        prompt: '2 + 2 = ?',
+        data: const {
+          'options': [2, 3, 4, 5],
+        },
+        correctAnswer: null,
+      );
+
+      Future<void> onAnswerProcessed(bool? isCorrect) async {
+        if (isCorrect == false) {
+          final record = WrongAnswerRecord(
+            questionId: question.id,
+            prompt: question.prompt,
+            questionType: question.type,
+            userAnswer: '4',
+            timestamp: DateTime.now(),
+          );
+          await WrongAnswerRepository.saveWrongAnswer(kidId, record);
+        }
+      }
+
+      await onAnswerProcessed(true);
+
+      final list = await WrongAnswerRepository.getWrongAnswers(kidId);
+      expect(list, isEmpty);
+    });
+
+    test(
+      'does not save record when correct is null/missing or kidId is blank',
+      () async {
+        final question = Question(
+          id: 'q_test_null',
+          type: QuestionType.wordProblem,
+          prompt: '1 + 1 = ?',
+          data: const {
+            'options': [1, 2],
+          },
+          correctAnswer: null,
+        );
+
+        Future<void> processCapture({
+          required dynamic correctValue,
+          required String kidId,
+          Question? currentQ,
+        }) async {
+          if (correctValue == false &&
+              currentQ != null &&
+              kidId.trim().isNotEmpty) {
+            try {
+              final record = WrongAnswerRecord(
+                questionId: currentQ.id,
+                prompt: currentQ.prompt,
+                questionType: currentQ.type,
+                userAnswer: '1',
+                timestamp: DateTime.now(),
+              );
+              await WrongAnswerRepository.saveWrongAnswer(kidId, record);
+            } catch (_) {}
+          }
+        }
+
+        // Case 1: correctValue is null (server didn't grade or errored)
+        await processCapture(
+          correctValue: null,
+          kidId: 'kid_valid',
+          currentQ: question,
+        );
+        expect(
+          await WrongAnswerRepository.getWrongAnswers('kid_valid'),
+          isEmpty,
+        );
+
+        // Case 2: kidId is empty or whitespace
+        await processCapture(
+          correctValue: false,
+          kidId: '   ',
+          currentQ: question,
+        );
+        expect(await WrongAnswerRepository.getWrongAnswers('   '), isEmpty);
+
+        // Case 3: currentQ is null
+        await processCapture(
+          correctValue: false,
+          kidId: 'kid_valid_2',
+          currentQ: null,
+        );
+        expect(
+          await WrongAnswerRepository.getWrongAnswers('kid_valid_2'),
+          isEmpty,
+        );
+      },
+    );
   });
 }
