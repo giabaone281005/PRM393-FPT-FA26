@@ -16,6 +16,8 @@
 	<string>6.0</string>
 	<key>NSCameraUsageDescription</key><string>Chụp đề toán để nhận gợi ý học tập.</string>
     <key>NSPhotoLibraryUsageDescription</key><string>Chọn ảnh đề toán để nhận gợi ý học tập.</string>
+    <key>NSSpeechRecognitionUsageDescription</key><string>MathLingo cần nhận diện giọng nói để bé trả lời câu hỏi bằng lời nói.</string>
+    <key>NSMicrophoneUsageDescription</key><string>MathLingo cần micro để bé có thể nói câu trả lời.</string>
     <key>CFBundleURLTypes</key><array><dict><key>CFBundleURLSchemes</key><array><string>mathlingo</string></array></dict></array>
     <key>CFBundleName</key>
 	<string>mathlingo</string>

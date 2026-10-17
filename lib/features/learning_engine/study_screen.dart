@@ -7,19 +7,30 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/models/study_session.dart';
 import '../../data/models/question.dart';
+import '../../data/models/wrong_answer_record.dart';
 import '../../data/providers/app_state_provider.dart';
 import '../../data/repositories/study_repository.dart';
+import '../../data/repositories/wrong_answer_repository.dart';
 import 'widgets/drag_counters_widget.dart';
 import 'widgets/clock_rotation_widget.dart';
 import 'widgets/multiplication_widget.dart';
 import 'widgets/area_grid_widget.dart';
 import 'widgets/word_problem_widget.dart';
+import 'widgets/voice_answer_widget.dart';
+import '../../core/services/voice/speech_service.dart';
+import 'screens/review_wrong_answers_screen.dart';
 import '../parent_portal/popups/parent_gate_dialog.dart';
 
 class StudyScreen extends StatefulWidget {
   final String? lessonId;
   final String kind;
-  const StudyScreen({super.key, this.lessonId, this.kind = 'lesson'});
+  final SpeechService? speechService;
+  const StudyScreen({
+    super.key,
+    this.lessonId,
+    this.kind = 'lesson',
+    this.speechService,
+  });
   @override
   State<StudyScreen> createState() => _StudyScreenState();
 }
@@ -176,6 +187,14 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
     if (_busy || _session == null) return;
     _answerRequest ??= StudyRepository.requestId();
     _pendingAnswer ??= value;
+    final currentQ = _session!.currentQuestion;
+    final attemptedAnswer = _pendingAnswer;
+    final kidId = _session!.kidId.isNotEmpty
+        ? _session!.kidId
+        : (context.read<AppStateProvider>().hasKids
+              ? context.read<AppStateProvider>().currentKid.id
+              : '');
+    final lessonId = widget.lessonId ?? _session!.data['lesson_id']?.toString();
     setState(() {
       _busy = true;
       _error = null;
@@ -201,9 +220,29 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
       if (context.read<AppStateProvider>().soundEnabled) {
         SystemSound.play(SystemSoundType.click);
       }
-      _feedback = updated.data['correct'] == true
+      final isCorrect = updated.data['correct'] == true;
+      _feedback = isCorrect
           ? 'Chính xác! Em làm tốt lắm.'
           : 'Chưa đúng. Em thử xem gợi ý rồi tính lại nhé.';
+      if (updated.data['correct'] == false &&
+          currentQ != null &&
+          kidId.trim().isNotEmpty) {
+        try {
+          final record = WrongAnswerRecord(
+            questionId: currentQ.id,
+            prompt: currentQ.prompt,
+            questionType: currentQ.type,
+            userAnswer: attemptedAnswer,
+            lessonId: lessonId,
+            timestamp: DateTime.now(),
+            isResolved: false,
+            questionData: currentQ.data,
+          );
+          await WrongAnswerRepository.saveWrongAnswer(kidId, record);
+        } catch (_) {
+          // Never disrupt grading, progression, or completion on local storage error
+        }
+      }
       if (updated.data['out_of_hearts'] == true) {
         _feedback = 'Hết tim rồi. Vào vườn luyện tập miễn phí để hồi tim nhé.';
       }
@@ -370,6 +409,27 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
                 onPressed: () => Navigator.pop(context),
                 child: const Text('Tiếp tục hành trình'),
               ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () {
+                  final kId = s.kidId.isNotEmpty
+                      ? s.kidId
+                      : (context.read<AppStateProvider>().hasKids
+                            ? context.read<AppStateProvider>().currentKid.id
+                            : '');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ReviewWrongAnswersScreen(
+                        kidId: kId,
+                        lessonId: widget.lessonId ?? s.data['lesson_id']?.toString(),
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.history_edu_rounded),
+                label: const Text('Xem lại câu trả lời sai'),
+              ),
             ] else if (s != null) ...[
               LinearProgressIndicator(
                 value: s.questions.isEmpty ? 0 : s.index / s.questions.length,
@@ -446,6 +506,15 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
                       s.currentQuestion!.prompt,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
+                    const SizedBox(height: 8),
+                    VoiceAnswerWidget(
+                      key: ValueKey('voice_${s.currentQuestion!.id}'),
+                      question: s.currentQuestion!,
+                      speechService: widget.speechService,
+                      isBusy: _busy,
+                      onAnswerConfirmed: _answer,
+                    ),
+                    const SizedBox(height: 12),
                     AbsorbPointer(
                       absorbing: _busy,
                       child: _question(s.currentQuestion!),

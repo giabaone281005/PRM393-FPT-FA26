@@ -108,12 +108,8 @@ class _MathFlappyGameScreenState extends State<MathFlappyGameScreen>
       for (final g in _gates) {
         g.x -= _scrollSpeed * dt;
       }
-      if (_gates.last.x < .30) {
-        _gates.add(_gate(1.18));
-      }
-      if (_gates.first.x < -.28) {
-        _gates.removeAt(0);
-      }
+      if (_gates.last.x < .30) _gates.add(_gate(1.18));
+      if (_gates.first.x < -.28) _gates.removeAt(0);
       _collide();
     });
   }
