@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     }
     const amount = Number(order.amount_vnd);
     if (!Number.isSafeInteger(amount) || amount <= 0) throw new Error('Invalid amount');
-    const params = {
+    const params : Record<string, string> = {
       vnp_Version: '2.1.0', vnp_Command: 'pay', vnp_TmnCode: tmn,
       vnp_Amount: String(amount * 100), vnp_CurrCode: 'VND',
       vnp_TxnRef: order.id.replaceAll('-', ''), vnp_OrderInfo: `MathLingo order ${order.id.replaceAll('-', '')}`,
@@ -42,6 +42,7 @@ Deno.serve(async (req) => {
       vnp_IpAddr: req.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1',
       vnp_CreateDate: vnpDate(new Date(order.created_at)), vnp_ExpireDate: vnpDate(new Date(order.expires_at)),
     };
+    if (payload.method === 'qr') params.vnp_BankCode = 'VNPAYQR';
     const endpoint = Deno.env.get('VNPAY_PAYMENT_URL') || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
     if (!['https://sandbox.vnpayment.vn/paymentv2/vpcpay.html', 'https://pay.vnpay.vn/vpcpay.html'].includes(endpoint)) {
       throw new Error('Invalid payment endpoint');
