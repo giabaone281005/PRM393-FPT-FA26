@@ -1,3 +1,6 @@
+import 'package:mathlingo/features/learning_engine/screens/learning_screen.dart';
+import 'package:mathlingo/features/parent_portal/popups/parent_gate_dialog.dart';
+
 import '../../../data/repositories/kid_repository.dart';
 
 import 'package:flutter/material.dart';
@@ -146,13 +149,28 @@ class HomeScreen extends StatelessWidget {
 
               // Thẻ Bài Học Trọng Tâm Hôm Nay (Theo Stitch)
               GestureDetector(
-                onTap: () {
-                  showModalBottomSheet(
+                onTap: () async {
+                  final action = await showModalBottomSheet<LessonIntroAction>(
                     context: context,
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
                     builder: (_) => LessonIntroSheet(lesson: activeLesson),
                   );
+
+                  if (!context.mounted) return;
+
+                  if (action == LessonIntroAction.startLesson) {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => LearningScreen(lesson: activeLesson),
+                      ),
+                    );
+                  } else if (action == LessonIntroAction.unlockForParent) {
+                    await showDialog(
+                      context: context,
+                      builder: (_) => const ParentGateDialog(),
+                    );
+                  }
                 },
                 child: Container(
                   padding: const EdgeInsets.all(20),
@@ -262,14 +280,32 @@ class HomeScreen extends StatelessWidget {
                           elevation: 4,
                           shadowColor: AppColors.primary.withAlpha(100),
                         ),
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                            builder: (_) =>
-                                LessonIntroSheet(lesson: activeLesson),
-                          );
+                        onPressed: () async {
+                          final action =
+                              await showModalBottomSheet<LessonIntroAction>(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (_) =>
+                                    LessonIntroSheet(lesson: activeLesson),
+                              );
+
+                          if (!context.mounted) return;
+
+                          if (action == LessonIntroAction.startLesson) {
+                            await Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    LearningScreen(lesson: activeLesson),
+                              ),
+                            );
+                          } else if (action ==
+                              LessonIntroAction.unlockForParent) {
+                            await showDialog(
+                              context: context,
+                              builder: (_) => const ParentGateDialog(),
+                            );
+                          }
                         },
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
