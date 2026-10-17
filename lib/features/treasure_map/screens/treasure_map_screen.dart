@@ -93,7 +93,21 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
         bottom: false,
         child: Column(
           children: [
-            // 1. TOP HEADER (Chuẩn thanh chỉ số như ảnh 2)
+            // Nút quay về màn hình trước
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                tooltip: 'Quay lại',
+                icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                onPressed: () {
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+            ),
+
+            // 1. TOP HEADER
             _buildTopStatsBar(context, state, kid),
 
             // 2. MAIN SCROLLABLE MAP & BOTTOM SHEET
