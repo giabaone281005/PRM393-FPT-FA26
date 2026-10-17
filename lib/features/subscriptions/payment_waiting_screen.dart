@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -87,70 +88,98 @@ class _PaymentWaitingScreenState extends State<PaymentWaitingScreen>
     await _open(widget.session.payUrl); // chưa cài MoMo: mở trang web MoMo
   }
 
+  Future<void> _copyLink() async {
+    await Clipboard.setData(ClipboardData(text: widget.session.payUrl.toString()));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Đã sao chép liên kết thanh toán.')),
+    );
+  }
+
+  Widget _qrBlock() {
+    final s = widget.session;
+    // MoMo: dùng mã QR do MoMo trả về, không có thì mã hóa link thanh toán.
+    // VNPay: mã hóa link thanh toán (quét bằng camera/app ngân hàng để mở trang VNPay).
+    final data = _isMomo ? (s.qrData ?? s.payUrl.toString()) : s.payUrl.toString();
+    final size = _isMomo ? 240.0 : 300.0;
+    return Column(
+      children: [
+        Center(
+          child: Container(
+            color: Colors.white,
+            padding: const EdgeInsets.all(12),
+            child: QrImageView(
+              data: data,
+              size: size,
+              // Link VNPay rất dài: dùng mức sửa lỗi thấp để QR thưa, dễ quét hơn
+              errorCorrectionLevel: QrErrorCorrectLevel.L,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          _isMomo
+              ? 'Quét mã bằng ứng dụng MoMo để thanh toán.'
+              : 'Quét mã bằng camera hoặc app ngân hàng để mở trang thanh toán VNPay trên điện thoại. Hoặc bấm nút bên dưới.',
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = widget.session;
-    final qr = s.qrData ?? (_isMomo ? s.payUrl.toString() : null);
     return Scaffold(
       appBar: AppBar(title: Text(_isMomo ? 'Thanh toán MoMo' : 'Thanh toán VNPay')),
-      body: Padding(
+      body: ListView(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (_isMomo && qr != null && !_ended) ...[
-              Center(
-                child: Container(
-                  color: Colors.white,
-                  padding: const EdgeInsets.all(12),
-                  child: QrImageView(data: qr, size: 240),
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Quét bằng MoMo trên thiết bị khác, hoặc bấm nút bên dưới.',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-            ],
-            if (!_ended)
-              FilledButton.icon(
-                onPressed: _isMomo ? _openMomoApp : () => _open(s.payUrl),
-                icon: const Icon(Icons.open_in_new),
-                label: Text(
-                  _isMomo ? 'Mở ứng dụng MoMo' : 'Mở trang thanh toán VNPay',
-                ),
-              ),
-            const SizedBox(height: 24),
-            Center(
-              child: _ended
-                  ? Text(
-                _status == 'failed'
-                    ? 'Thanh toán không thành công.'
-                    : 'Đơn đã hết thời gian chờ. Nếu đã bị trừ tiền, hãy kiểm tra lịch sử đơn, đừng thanh toán lại.',
-                textAlign: TextAlign.center,
-              )
-                  : Column(
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 12),
-                  const Text('Đang chờ xác nhận thanh toán…'),
-                  TextButton(
-                    onPressed: _poll,
-                    child: const Text('Kiểm tra lại'),
-                  ),
-                ],
+        children: [
+          if (!_ended) _qrBlock(),
+          if (!_ended)
+            FilledButton.icon(
+              onPressed: _isMomo ? _openMomoApp : () => _open(s.payUrl),
+              icon: const Icon(Icons.open_in_new),
+              label: Text(
+                _isMomo ? 'Mở ứng dụng MoMo' : 'Mở trang thanh toán VNPay',
               ),
             ),
-            if (_ended) ...[
-              const SizedBox(height: 16),
-              OutlinedButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Đóng'),
-              ),
-            ],
+          if (!_ended)
+            TextButton.icon(
+              onPressed: _copyLink,
+              icon: const Icon(Icons.copy, size: 18),
+              label: const Text('Sao chép liên kết thanh toán'),
+            ),
+          const SizedBox(height: 24),
+          Center(
+            child: _ended
+                ? Text(
+                    _status == 'failed'
+                        ? 'Thanh toán không thành công.'
+                        : 'Đơn đã hết thời gian chờ. Nếu đã bị trừ tiền, hãy kiểm tra lịch sử đơn, đừng thanh toán lại.',
+                    textAlign: TextAlign.center,
+                  )
+                : Column(
+                    children: [
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 12),
+                      const Text('Đang chờ xác nhận thanh toán…'),
+                      TextButton(
+                        onPressed: _poll,
+                        child: const Text('Kiểm tra lại'),
+                      ),
+                    ],
+                  ),
+          ),
+          if (_ended) ...[
+            const SizedBox(height: 16),
+            OutlinedButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Đóng'),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
