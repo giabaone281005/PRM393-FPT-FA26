@@ -384,6 +384,14 @@ class HomeScreen extends StatelessWidget {
                           color: AppColors.textSecondary,
                         ),
                       ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '✓ Đã có hoạt động học. Chuỗi chỉ tăng khi hoàn thành bài trước 21:00.',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                        ),
+                      ),
                       const SizedBox(height: 12),
                       FutureBuilder<Set<DateTime>>(
                         future: KidRepository.fetchStudyDays(kid.id),
