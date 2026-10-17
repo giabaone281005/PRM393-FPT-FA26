@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../learning_engine/screens/review_wrong_answers_screen.dart';
 import '../../learning_engine/study_screen.dart';
 
 class PracticeGardenScreen extends StatelessWidget {
@@ -24,6 +25,17 @@ class PracticeGardenScreen extends StatelessWidget {
                 ),
               ),
               child: const Text('Bắt đầu luyện tập'),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.history_edu_rounded),
+              label: const Text('Xem lại câu trả lời sai'),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ReviewWrongAnswersScreen(),
+                ),
+              ),
             ),
           ],
         ),
