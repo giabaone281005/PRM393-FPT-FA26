@@ -332,12 +332,21 @@ class HomeScreen extends StatelessWidget {
                             ],
                           ),
                           Text(
-                            'Chốt lúc 21:00 (BR-02)',
+                            'Trước 21:00',
                             style: AppTypography.labelSmall.copyWith(
                               color: AppColors.primaryHover,
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        kid.streakCount == 0
+                            ? '🦉 Hoàn thành một bài học để bắt đầu chuỗi nhé!'
+                            : '🔥 Học mỗi ngày để giữ vững chuỗi rèn luyện nhé!',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       FutureBuilder<Set<DateTime>>(
