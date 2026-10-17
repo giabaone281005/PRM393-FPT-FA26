@@ -44,8 +44,8 @@ class WalletRepository {
         .from('learning_plans')
         .select('code,name,description,features,trial_days')
         .eq('published', true)
-        .order('sort_order');
-    return rows.map(PlanInfo.fromMap).toList();
+        .order('sort_order', ascending: true);
+      return rows.map(PlanInfo.fromMap).toList();
   }
 
   // Phải liệt kê cột: select() trần sẽ lỗi vì wallet_hash/provider_token bị ẩn
