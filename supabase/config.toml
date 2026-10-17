@@ -22,3 +22,9 @@ verify_jwt = false
 
 [functions.ai-tutor]
 verify_jwt = false
+
+[functions.momo-checkout]
+verify_jwt = false
+
+[functions.momo-ipn]
+verify_jwt = false
