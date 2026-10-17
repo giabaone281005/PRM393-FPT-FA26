@@ -342,11 +342,43 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
     );
   }
 
+  Future<void> _confirmExit() async {
+    if (_busy) return;
+
+    final shouldExit = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('🦉 Bạn muốn thoát bài học?'),
+        content: const Text('Bạn đang học dở. Bạn có muốn tiếp tục học không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Tiếp tục học'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Thoát bài'),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted || shouldExit != true) return;
+
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = _session;
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          tooltip: 'Quay lại',
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: _busy ? null : _confirmExit,
+        ),
         title: Text(s?.title ?? 'Đang mở bài học'),
         actions: [
           if (s != null)
@@ -422,7 +454,8 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
                     MaterialPageRoute(
                       builder: (_) => ReviewWrongAnswersScreen(
                         kidId: kId,
-                        lessonId: widget.lessonId ?? s.data['lesson_id']?.toString(),
+                        lessonId:
+                            widget.lessonId ?? s.data['lesson_id']?.toString(),
                       ),
                     ),
                   );
