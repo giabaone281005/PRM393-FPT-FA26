@@ -105,7 +105,9 @@ class _MathFlappyGameScreenState extends State<MathFlappyGameScreen>
     setState(() {
       _speed += _gravity * dt;
       _birdY += _speed * dt;
-      for (final g in _gates) g.x -= _scrollSpeed * dt;
+      for (final g in _gates) {
+        g.x -= _scrollSpeed * dt;
+      }
       if (_gates.last.x < .30) _gates.add(_gate(1.18));
       if (_gates.first.x < -.28) _gates.removeAt(0);
       _collide();
@@ -123,10 +125,11 @@ class _MathFlappyGameScreenState extends State<MathFlappyGameScreen>
       final answerArea = g.slot * 3 + g.gap * 2;
       if (_birdY >= g.top && _birdY <= g.top + answerArea) {
         g.hit = true;
-        if (g.choices[slot] == g.answer)
+        if (g.choices[slot] == g.answer) {
           _score++;
-        else
+        } else {
           _lose();
+        }
       } else if (_birdY < g.top || _birdY > g.top + answerArea) {
         g.hit = true;
         _lose();
