@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../learning_engine/screens/learning_progress_screen.dart';
 import '../../learning_engine/screens/review_wrong_answers_screen.dart';
 import '../../learning_engine/study_screen.dart';
 
@@ -34,6 +35,17 @@ class PracticeGardenScreen extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (_) => const ReviewWrongAnswersScreen(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.insights_rounded),
+              label: const Text('Tiến độ học tập'),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const LearningProgressScreen(),
                 ),
               ),
             ),
