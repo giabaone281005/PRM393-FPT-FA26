@@ -1,0 +1,369 @@
+import 'dart:convert';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mathlingo/data/models/question.dart';
+import 'package:mathlingo/data/models/wrong_answer_record.dart';
+import 'package:mathlingo/data/repositories/wrong_answer_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
+  group('WrongAnswerRecord', () {
+    test('serializes to map and deserializes back properly', () {
+      final now = DateTime.now();
+      final record = WrongAnswerRecord(
+        questionId: 'q_101',
+        prompt: '12 + 8 = ?',
+        questionType: QuestionType.multiplicationTable,
+        userAnswer: 25,
+        lessonId: 'lesson_1',
+        timestamp: now,
+        isResolved: false,
+        questionData: const {'formula': '12 + 8 = ?'},
+      );
+
+      final map = record.toMap();
+      final restored = WrongAnswerRecord.fromMap(map);
+
+      expect(restored.questionId, 'q_101');
+      expect(restored.prompt, '12 + 8 = ?');
+      expect(restored.questionType, QuestionType.multiplicationTable);
+      expect(restored.userAnswer, 25);
+      expect(restored.lessonId, 'lesson_1');
+      expect(restored.isResolved, isFalse);
+      expect(restored.questionData?['formula'], '12 + 8 = ?');
+    });
+
+    test('handles missing fields and invalid types gracefully', () {
+      final fallback = WrongAnswerRecord.fromMap({});
+
+      expect(fallback.questionId, '');
+      expect(fallback.prompt, '');
+      expect(fallback.questionType, QuestionType.wordProblem);
+      expect(fallback.userAnswer, isNull);
+      expect(fallback.lessonId, isNull);
+      expect(fallback.isResolved, isFalse);
+      expect(fallback.questionData, isNull);
+    });
+
+    test('parses various question type strings safely', () {
+      expect(
+        WrongAnswerRecord.parseQuestionType('drag_counters'),
+        QuestionType.dragCounters,
+      );
+      expect(
+        WrongAnswerRecord.parseQuestionType('clock_rotation'),
+        QuestionType.clockRotation,
+      );
+      expect(
+        WrongAnswerRecord.parseQuestionType('area_grid'),
+        QuestionType.areaGrid,
+      );
+      expect(
+        WrongAnswerRecord.parseQuestionType('multiplicationTable'),
+        QuestionType.multiplicationTable,
+      );
+      expect(
+        WrongAnswerRecord.parseQuestionType('unknown_type'),
+        QuestionType.wordProblem,
+      );
+      expect(
+        WrongAnswerRecord.parseQuestionType(null),
+        QuestionType.wordProblem,
+      );
+    });
+
+    test('copyWith updates properties accurately', () {
+      final record = WrongAnswerRecord(
+        questionId: 'q_1',
+        prompt: 'Prompt 1',
+        questionType: QuestionType.wordProblem,
+        userAnswer: 'A',
+        timestamp: DateTime.now(),
+        isResolved: false,
+      );
+
+      final updated = record.copyWith(isResolved: true, userAnswer: 'B');
+
+      expect(updated.questionId, 'q_1');
+      expect(updated.isResolved, isTrue);
+      expect(updated.userAnswer, 'B');
+    });
+  });
+
+  group('WrongAnswerRepository', () {
+    test(
+      'returns empty list for initial/empty storage or blank kidId',
+      () async {
+        final empty = await WrongAnswerRepository.getWrongAnswers('kid_1');
+        expect(empty, isEmpty);
+
+        final blankKid = await WrongAnswerRepository.getWrongAnswers('   ');
+        expect(blankKid, isEmpty);
+      },
+    );
+
+    test('saves and retrieves wrong answer records', () async {
+      final record = WrongAnswerRecord(
+        questionId: 'q_math_1',
+        prompt: '5 x 4 = ?',
+        questionType: QuestionType.multiplicationTable,
+        userAnswer: '24',
+        lessonId: 'lesson_mult',
+        timestamp: DateTime.now(),
+      );
+
+      await WrongAnswerRepository.saveWrongAnswer('kid_1', record);
+
+      final list = await WrongAnswerRepository.getWrongAnswers('kid_1');
+      expect(list.length, 1);
+      expect(list.first.questionId, 'q_math_1');
+      expect(list.first.userAnswer, '24');
+      expect(list.first.isResolved, isFalse);
+    });
+
+    test(
+      're-answering wrong updates attempt and resets isResolved to false',
+      () async {
+        final initial = WrongAnswerRecord(
+          questionId: 'q_math_1',
+          prompt: '5 x 4 = ?',
+          questionType: QuestionType.multiplicationTable,
+          userAnswer: '24',
+          lessonId: 'lesson_mult',
+          timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
+          isResolved: true,
+        );
+
+        await WrongAnswerRepository.saveWrongAnswer('kid_1', initial);
+
+        // Repeat mistake with another answer
+        final secondAttempt = WrongAnswerRecord(
+          questionId: 'q_math_1',
+          prompt: '5 x 4 = ?',
+          questionType: QuestionType.multiplicationTable,
+          userAnswer: '25',
+          lessonId: 'lesson_mult',
+          timestamp: DateTime.now(),
+          isResolved: false,
+        );
+
+        await WrongAnswerRepository.saveWrongAnswer('kid_1', secondAttempt);
+
+        final list = await WrongAnswerRepository.getWrongAnswers('kid_1');
+        expect(list.length, 1);
+        expect(list.first.userAnswer, '25');
+        expect(list.first.isResolved, isFalse);
+      },
+    );
+
+    test('strictly isolates records by kidId', () async {
+      final recordKid1 = WrongAnswerRecord(
+        questionId: 'q_kid1',
+        prompt: '1 + 1 = ?',
+        questionType: QuestionType.wordProblem,
+        userAnswer: 3,
+        timestamp: DateTime.now(),
+      );
+
+      final recordKid2 = WrongAnswerRecord(
+        questionId: 'q_kid2',
+        prompt: '2 + 2 = ?',
+        questionType: QuestionType.wordProblem,
+        userAnswer: 5,
+        timestamp: DateTime.now(),
+      );
+
+      await WrongAnswerRepository.saveWrongAnswer('kid_alpha', recordKid1);
+      await WrongAnswerRepository.saveWrongAnswer('kid_beta', recordKid2);
+
+      final alphaList = await WrongAnswerRepository.getWrongAnswers(
+        'kid_alpha',
+      );
+      final betaList = await WrongAnswerRepository.getWrongAnswers('kid_beta');
+
+      expect(alphaList.map((r) => r.questionId), ['q_kid1']);
+      expect(betaList.map((r) => r.questionId), ['q_kid2']);
+    });
+
+    test('filters by lessonId correctly', () async {
+      final r1 = WrongAnswerRecord(
+        questionId: 'q_1',
+        prompt: 'P1',
+        questionType: QuestionType.wordProblem,
+        userAnswer: 1,
+        lessonId: 'lesson_A',
+        timestamp: DateTime.now(),
+      );
+      final r2 = WrongAnswerRecord(
+        questionId: 'q_2',
+        prompt: 'P2',
+        questionType: QuestionType.wordProblem,
+        userAnswer: 2,
+        lessonId: 'lesson_B',
+        timestamp: DateTime.now(),
+      );
+
+      await WrongAnswerRepository.saveWrongAnswer('kid_1', r1);
+      await WrongAnswerRepository.saveWrongAnswer('kid_1', r2);
+
+      final lessonAList = await WrongAnswerRepository.getWrongAnswers(
+        'kid_1',
+        lessonId: 'lesson_A',
+      );
+      final lessonBList = await WrongAnswerRepository.getWrongAnswers(
+        'kid_1',
+        lessonId: 'lesson_B',
+      );
+      final lessonCList = await WrongAnswerRepository.getWrongAnswers(
+        'kid_1',
+        lessonId: 'lesson_C',
+      );
+
+      expect(lessonAList.length, 1);
+      expect(lessonAList.first.questionId, 'q_1');
+      expect(lessonBList.length, 1);
+      expect(lessonBList.first.questionId, 'q_2');
+      expect(lessonCList, isEmpty);
+    });
+
+    test('markResolved marks question as resolved', () async {
+      final record = WrongAnswerRecord(
+        questionId: 'q_target',
+        prompt: 'Prompt',
+        questionType: QuestionType.wordProblem,
+        userAnswer: 'wrong',
+        timestamp: DateTime.now(),
+      );
+
+      await WrongAnswerRepository.saveWrongAnswer('kid_1', record);
+
+      final marked = await WrongAnswerRepository.markResolved(
+        'kid_1',
+        'q_target',
+      );
+      expect(marked, isTrue);
+
+      final unresolved = await WrongAnswerRepository.getWrongAnswers(
+        'kid_1',
+        includeResolved: false,
+      );
+      final resolved = await WrongAnswerRepository.getWrongAnswers(
+        'kid_1',
+        includeResolved: true,
+      );
+
+      expect(unresolved, isEmpty);
+      expect(resolved.length, 1);
+      expect(resolved.first.isResolved, isTrue);
+
+      final notFound = await WrongAnswerRepository.markResolved(
+        'kid_1',
+        'non_existent',
+      );
+      expect(notFound, isFalse);
+    });
+
+    test('clearResolved removes only resolved items', () async {
+      final r1 = WrongAnswerRecord(
+        questionId: 'q_1',
+        prompt: 'P1',
+        questionType: QuestionType.wordProblem,
+        userAnswer: 1,
+        timestamp: DateTime.now(),
+        isResolved: true,
+      );
+      final r2 = WrongAnswerRecord(
+        questionId: 'q_2',
+        prompt: 'P2',
+        questionType: QuestionType.wordProblem,
+        userAnswer: 2,
+        timestamp: DateTime.now(),
+        isResolved: false,
+      );
+
+      await WrongAnswerRepository.saveWrongAnswer('kid_1', r1);
+      await WrongAnswerRepository.saveWrongAnswer('kid_1', r2);
+      // Ensure r1 is marked resolved
+      await WrongAnswerRepository.markResolved('kid_1', 'q_1');
+
+      await WrongAnswerRepository.clearResolved('kid_1');
+
+      final remaining = await WrongAnswerRepository.getWrongAnswers('kid_1');
+      expect(remaining.length, 1);
+      expect(remaining.first.questionId, 'q_2');
+    });
+
+    test('clearWrongAnswers removes records by lesson or completely', () async {
+      final r1 = WrongAnswerRecord(
+        questionId: 'q_1',
+        prompt: 'P1',
+        questionType: QuestionType.wordProblem,
+        userAnswer: 1,
+        lessonId: 'L1',
+        timestamp: DateTime.now(),
+      );
+      final r2 = WrongAnswerRecord(
+        questionId: 'q_2',
+        prompt: 'P2',
+        questionType: QuestionType.wordProblem,
+        userAnswer: 2,
+        lessonId: 'L2',
+        timestamp: DateTime.now(),
+      );
+
+      await WrongAnswerRepository.saveWrongAnswer('kid_1', r1);
+      await WrongAnswerRepository.saveWrongAnswer('kid_1', r2);
+
+      // Clear only L1
+      await WrongAnswerRepository.clearWrongAnswers('kid_1', lessonId: 'L1');
+      var list = await WrongAnswerRepository.getWrongAnswers('kid_1');
+      expect(list.length, 1);
+      expect(list.first.questionId, 'q_2');
+
+      // Clear all
+      await WrongAnswerRepository.clearWrongAnswers('kid_1');
+      list = await WrongAnswerRepository.getWrongAnswers('kid_1');
+      expect(list, isEmpty);
+    });
+
+    test('resilient to corrupted JSON in storage', () async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        WrongAnswerRepository.storageKey('kid_corrupt'),
+        '{{{invalid json...',
+      );
+
+      final list = await WrongAnswerRepository.getWrongAnswers('kid_corrupt');
+      expect(list, isEmpty);
+    });
+
+    test('resilient to array containing non-map items', () async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        WrongAnswerRepository.storageKey('kid_mixed'),
+        jsonEncode([
+          'string_item',
+          123,
+          {
+            'questionId': 'q_valid',
+            'prompt': 'Valid prompt',
+            'questionType': 'areaGrid',
+            'userAnswer': 10,
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        ]),
+      );
+
+      final list = await WrongAnswerRepository.getWrongAnswers('kid_mixed');
+      expect(list.length, 1);
+      expect(list.first.questionId, 'q_valid');
+      expect(list.first.questionType, QuestionType.areaGrid);
+    });
+  });
+}
