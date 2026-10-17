@@ -6,8 +6,10 @@ import 'package:provider/provider.dart';
 
 import '../../../data/models/lesson.dart';
 import '../../../data/providers/app_state_provider.dart';
-import '../popups/lesson_intro_sheet.dart';
 import '../../ai_scanner/ai_scanner_screen.dart';
+import '../../learning_engine/screens/learning_screen.dart';
+import '../../parent_portal/popups/parent_gate_dialog.dart';
+import '../popups/lesson_intro_sheet.dart';
 
 class TreasureMapScreen extends StatefulWidget {
   const TreasureMapScreen({super.key});
@@ -934,13 +936,28 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
     );
   }
 
-  void _openLesson(BuildContext context, Lesson lesson) {
-    showModalBottomSheet(
+  Future<void> _openLesson(BuildContext context, Lesson lesson) async {
+    final action = await showModalBottomSheet<LessonIntroAction>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => LessonIntroSheet(lesson: lesson),
     );
+    if (!context.mounted) return;
+
+    switch (action) {
+      case LessonIntroAction.startLesson:
+        await Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => LearningScreen(lesson: lesson)),
+        );
+      case LessonIntroAction.unlockForParent:
+        await showDialog(
+          context: context,
+          builder: (_) => const ParentGateDialog(),
+        );
+      case null:
+        break;
+    }
   }
 }
 
