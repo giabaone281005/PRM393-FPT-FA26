@@ -13,6 +13,10 @@ flutter pub get
 flutter run --dart-define-from-file=config/app.json
 ```
 
+`config/app.json` không nằm trong Git. Sau khi clone/pull, từng thành viên cần điền URL và public key thật của cùng dự án; sao chép file mẫu nhưng giữ `YOUR_...` chưa đủ để kết nối. Không đưa service/secret key vào ứng dụng.
+
+Nếu chạy bằng nút Run của IDE, cấu hình thêm đối số `--dart-define-from-file=config/app.json`, hoặc dùng lệnh trên trong thư mục dự án. Chỉ tạo file JSON rồi chạy `flutter run` sẽ không truyền cấu hình vào ứng dụng. Sau khi đổi cấu hình, dừng ứng dụng và chạy lại bằng lệnh đầy đủ.
+
 ## Kiểm tra mã
 
 ```powershell

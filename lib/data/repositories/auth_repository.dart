@@ -9,12 +9,23 @@ class AuthRepository {
   static bool verificationScreenOpen = false;
   static SupabaseClient get _client =>
       SupabaseService.client ??
-      (throw StateError('Chưa kết nối máy chủ. Vui lòng thử lại.'));
+      (throw StateError(
+        SupabaseService.initializationError ??
+            'Chưa kết nối máy chủ. Vui lòng thử lại.',
+      ));
 
   static Future<({bool success, String? error})> signUp({
     required String email,
     required String password,
   }) async {
+    if (!SupabaseService.isInitialized) {
+      return (
+        success: false,
+        error:
+            SupabaseService.initializationError ??
+            'Chưa kết nối máy chủ. Vui lòng thử lại.',
+      );
+    }
     try {
       final response = await _client.auth.signUp(
         email: email,
@@ -38,6 +49,14 @@ class AuthRepository {
     required String email,
     required String password,
   }) async {
+    if (!SupabaseService.isInitialized) {
+      return (
+        success: false,
+        error:
+            SupabaseService.initializationError ??
+            'Chưa kết nối máy chủ. Vui lòng thử lại.',
+      );
+    }
     try {
       final response = await _client.auth.signInWithPassword(
         email: email,
@@ -92,6 +111,9 @@ class AuthRepository {
 
   static String emailError(Object error) {
     if (error is FormatException) return error.message;
+    if (error is StateError && SupabaseService.initializationError != null) {
+      return SupabaseService.initializationError!;
+    }
     if (error is AuthException) {
       return switch (error.code) {
         'over_email_send_rate_limit' => 'Dịch vụ đang đạt giới hạn gửi email. Hãy thử lại sau; bạn vẫn có thể dùng mã hoặc liên kết đã nhận.',
