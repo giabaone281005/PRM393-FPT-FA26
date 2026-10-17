@@ -35,11 +35,27 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
   String? _error;
   LearningStatistics _statistics = const LearningStatistics.empty();
   int _streakCount = 0;
+  int? _lastStatsRevision;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    try {
+      final appState = Provider.of<AppStateProvider>(context);
+      if (_lastStatsRevision != null &&
+          _lastStatsRevision != appState.statsRevision) {
+        _lastStatsRevision = appState.statsRevision;
+        _loadData();
+      } else {
+        _lastStatsRevision = appState.statsRevision;
+      }
+    } catch (_) {}
   }
 
   String _resolveKidId() {
@@ -85,7 +101,10 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
 
       int streak = widget.streakCount ?? 0;
       if (widget.streakCount == null) {
-        if (appState != null &&
+        final streakRecord = await LearningStatisticsRepository.getStreak(kidId: kidId);
+        if (streakRecord.currentStreak > 0) {
+          streak = streakRecord.currentStreak;
+        } else if (appState != null &&
             appState.hasKids &&
             (kidId.isEmpty || appState.currentKid.id == kidId)) {
           streak = appState.currentKid.streakCount;
