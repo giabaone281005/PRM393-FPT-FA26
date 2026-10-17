@@ -107,8 +107,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
           // AI Scanner FAB (Floating – fixed position above bottom nav)
           Positioned(
-            bottom: 84,
-            right: 16,
+            bottom: 100,
+            right: 20,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
