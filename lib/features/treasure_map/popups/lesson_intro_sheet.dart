@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../../../data/models/lesson.dart';
 import '../../../data/providers/app_state_provider.dart';
-import '../../learning_engine/screens/learning_screen.dart';
-import '../../parent_portal/popups/parent_gate_dialog.dart';
+
+enum LessonIntroAction { startLesson, unlockForParent }
 
 class LessonIntroSheet extends StatelessWidget {
   final Lesson lesson;
@@ -33,14 +33,8 @@ class LessonIntroSheet extends StatelessWidget {
                 'Bài này cần phụ huynh mở quyền học. Thành tích đã có của em vẫn được giữ.',
               ),
               FilledButton(
-                onPressed: () {
-                  final nav = Navigator.of(context);
-                  nav.pop();
-                  showDialog(
-                    context: nav.context,
-                    builder: (_) => const ParentGateDialog(),
-                  );
-                },
+                onPressed: () =>
+                    Navigator.pop(context, LessonIntroAction.unlockForParent),
                 child: const Text('Nhờ phụ huynh mở bài học'),
               ),
             ] else if (locked)
@@ -49,15 +43,8 @@ class LessonIntroSheet extends StatelessWidget {
               )
             else
               FilledButton(
-                onPressed: () {
-                  final nav = Navigator.of(context);
-                  nav.pop();
-                  nav.push(
-                    MaterialPageRoute(
-                      builder: (_) => LearningScreen(lesson: lesson),
-                    ),
-                  );
-                },
+                onPressed: () =>
+                    Navigator.pop(context, LessonIntroAction.startLesson),
                 child: Text(
                   lesson.status == LessonStatus.completed
                       ? 'Ôn lại bài (không nhận thưởng lần hai)'
