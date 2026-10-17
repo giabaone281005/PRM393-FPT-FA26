@@ -1,0 +1,157 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../data/providers/app_state_provider.dart';
+import '../../data/repositories/commerce_repository.dart';
+
+/// Pop(true) khi đã thanh toán thành công.
+class PaymentWaitingScreen extends StatefulWidget {
+  final PaymentSession session;
+  const PaymentWaitingScreen({super.key, required this.session});
+  @override
+  State<PaymentWaitingScreen> createState() => _PaymentWaitingScreenState();
+}
+
+class _PaymentWaitingScreenState extends State<PaymentWaitingScreen>
+    with WidgetsBindingObserver {
+  Timer? _timer;
+  bool _checking = false;
+  String _status = 'pending';
+  final _deadline = DateTime.now().add(const Duration(minutes: 15));
+
+  bool get _isMomo => widget.session.provider == 'momo';
+  bool get _ended => _status != 'pending' || DateTime.now().isAfter(_deadline);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _timer = Timer.periodic(const Duration(seconds: 3), (_) => _poll());
+    _poll();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState s) {
+    if (s == AppLifecycleState.resumed) _poll(); // quay lại từ app MoMo/ngân hàng
+  }
+
+  Future<void> _poll() async {
+    if (_checking || !mounted) return;
+    _checking = true;
+    try {
+      final s = await CommerceRepository.fetchOrderStatus(widget.session.orderId);
+      if (!mounted) return;
+      if (s == 'paid') {
+        _timer?.cancel();
+        await context.read<AppStateProvider>().refreshSubscription();
+        if (mounted) Navigator.pop(context, true);
+        return;
+      }
+      if (s != 'pending' || DateTime.now().isAfter(_deadline)) _timer?.cancel();
+      setState(() => _status = s);
+    } catch (_) {
+      // lỗi mạng tạm thời: bỏ qua, lần sau thử lại
+    } finally {
+      _checking = false;
+    }
+  }
+
+  Future<void> _open(Uri uri) async {
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication) && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Không mở được ứng dụng thanh toán.')),
+      );
+    }
+  }
+
+  Future<void> _openMomoApp() async {
+    final dl = widget.session.deeplink;
+    if (dl != null) {
+      try {
+        if (await launchUrl(Uri.parse(dl), mode: LaunchMode.externalApplication)) {
+          return;
+        }
+      } catch (_) {}
+    }
+    await _open(widget.session.payUrl); // chưa cài MoMo: mở trang web MoMo
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = widget.session;
+    final qr = s.qrData ?? (_isMomo ? s.payUrl.toString() : null);
+    return Scaffold(
+      appBar: AppBar(title: Text(_isMomo ? 'Thanh toán MoMo' : 'Thanh toán VNPay')),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (_isMomo && qr != null && !_ended) ...[
+              Center(
+                child: Container(
+                  color: Colors.white,
+                  padding: const EdgeInsets.all(12),
+                  child: QrImageView(data: qr, size: 240),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Quét bằng MoMo trên thiết bị khác, hoặc bấm nút bên dưới.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+            ],
+            if (!_ended)
+              FilledButton.icon(
+                onPressed: _isMomo ? _openMomoApp : () => _open(s.payUrl),
+                icon: const Icon(Icons.open_in_new),
+                label: Text(
+                  _isMomo ? 'Mở ứng dụng MoMo' : 'Mở trang thanh toán VNPay',
+                ),
+              ),
+            const SizedBox(height: 24),
+            Center(
+              child: _ended
+                  ? Text(
+                _status == 'failed'
+                    ? 'Thanh toán không thành công.'
+                    : 'Đơn đã hết thời gian chờ. Nếu đã bị trừ tiền, hãy kiểm tra lịch sử đơn, đừng thanh toán lại.',
+                textAlign: TextAlign.center,
+              )
+                  : Column(
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 12),
+                  const Text('Đang chờ xác nhận thanh toán…'),
+                  TextButton(
+                    onPressed: _poll,
+                    child: const Text('Kiểm tra lại'),
+                  ),
+                ],
+              ),
+            ),
+            if (_ended) ...[
+              const SizedBox(height: 16),
+              OutlinedButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Đóng'),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
