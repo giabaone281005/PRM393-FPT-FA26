@@ -299,6 +299,51 @@ void main() {
       expect(remaining.first.questionId, 'q_2');
     });
 
+    test('clearResolved with lessonId removes only resolved items for that lesson', () async {
+      const kidId = 'kid_clear_lesson';
+      final r1 = WrongAnswerRecord(
+        questionId: 'q_res_L1',
+        prompt: 'P1',
+        questionType: QuestionType.wordProblem,
+        userAnswer: 1,
+        lessonId: 'L1',
+        timestamp: DateTime.now(),
+        isResolved: true,
+      );
+      final r2 = WrongAnswerRecord(
+        questionId: 'q_res_L2',
+        prompt: 'P2',
+        questionType: QuestionType.wordProblem,
+        userAnswer: 2,
+        lessonId: 'L2',
+        timestamp: DateTime.now(),
+        isResolved: true,
+      );
+      final r3 = WrongAnswerRecord(
+        questionId: 'q_unres_L1',
+        prompt: 'P3',
+        questionType: QuestionType.wordProblem,
+        userAnswer: 3,
+        lessonId: 'L1',
+        timestamp: DateTime.now(),
+        isResolved: false,
+      );
+
+      await WrongAnswerRepository.saveWrongAnswer(kidId, r1);
+      await WrongAnswerRepository.saveWrongAnswer(kidId, r2);
+      await WrongAnswerRepository.saveWrongAnswer(kidId, r3);
+      await WrongAnswerRepository.markResolved(kidId, 'q_res_L1');
+      await WrongAnswerRepository.markResolved(kidId, 'q_res_L2');
+
+      // Clear only L1 resolved
+      await WrongAnswerRepository.clearResolved(kidId, lessonId: 'L1');
+
+      final remaining = await WrongAnswerRepository.getWrongAnswers(kidId);
+      expect(remaining.length, 2);
+      expect(remaining.map((r) => r.questionId), containsAll(['q_res_L2', 'q_unres_L1']));
+      expect(remaining.any((r) => r.questionId == 'q_res_L1'), isFalse);
+    });
+
     test('clearWrongAnswers removes records by lesson or completely', () async {
       final r1 = WrongAnswerRecord(
         questionId: 'q_1',

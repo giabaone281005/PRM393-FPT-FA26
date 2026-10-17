@@ -18,6 +18,7 @@ import 'widgets/area_grid_widget.dart';
 import 'widgets/word_problem_widget.dart';
 import 'widgets/voice_answer_widget.dart';
 import '../../core/services/voice/speech_service.dart';
+import 'screens/review_wrong_answers_screen.dart';
 import '../parent_portal/popups/parent_gate_dialog.dart';
 
 class StudyScreen extends StatefulWidget {
@@ -407,6 +408,27 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
               FilledButton(
                 onPressed: () => Navigator.pop(context),
                 child: const Text('Tiếp tục hành trình'),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () {
+                  final kId = s.kidId.isNotEmpty
+                      ? s.kidId
+                      : (context.read<AppStateProvider>().hasKids
+                            ? context.read<AppStateProvider>().currentKid.id
+                            : '');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ReviewWrongAnswersScreen(
+                        kidId: kId,
+                        lessonId: widget.lessonId ?? s.data['lesson_id']?.toString(),
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.history_edu_rounded),
+                label: const Text('Xem lại câu trả lời sai'),
               ),
             ] else if (s != null) ...[
               LinearProgressIndicator(

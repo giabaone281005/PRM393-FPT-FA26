@@ -212,6 +212,261 @@ void main() {
     expect(find.text('Câu hỏi cần xóa'), findsNothing);
   });
 
+  testWidgets('canceling delete dialog preserves the record', (tester) async {
+    const kidId = 'kid_cancel_del';
+    final record = WrongAnswerRecord(
+      questionId: 'q_keep',
+      prompt: 'Câu hỏi giữ lại',
+      questionType: QuestionType.wordProblem,
+      userAnswer: '12',
+      timestamp: DateTime.now(),
+      isResolved: false,
+    );
+
+    await WrongAnswerRepository.saveWrongAnswer(kidId, record);
+
+    await tester.pumpWidget(
+      wrapWithMaterial(const ReviewWrongAnswersScreen(kidId: kidId)),
+    );
+    await tester.pumpAndSettle();
+
+    // Tap delete button
+    await tester.tap(find.byIcon(Icons.delete_outline_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Xóa câu sai'), findsOneWidget);
+
+    // Cancel delete
+    await tester.tap(find.text('Hủy'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Câu hỏi giữ lại'), findsOneWidget);
+    final item = await WrongAnswerRepository.getWrongAnswer(kidId, 'q_keep');
+    expect(item, isNotNull);
+  });
+
+  testWidgets('mark all resolved updates all questions to resolved', (tester) async {
+    const kidId = 'kid_mark_all_ui';
+    final r1 = WrongAnswerRecord(
+      questionId: 'q_all_1',
+      prompt: 'Câu 1',
+      questionType: QuestionType.multiplicationTable,
+      userAnswer: '10',
+      timestamp: DateTime.now(),
+      isResolved: false,
+    );
+    final r2 = WrongAnswerRecord(
+      questionId: 'q_all_2',
+      prompt: 'Câu 2',
+      questionType: QuestionType.wordProblem,
+      userAnswer: '20',
+      timestamp: DateTime.now(),
+      isResolved: false,
+    );
+
+    await WrongAnswerRepository.saveWrongAnswer(kidId, r1);
+    await WrongAnswerRepository.saveWrongAnswer(kidId, r2);
+
+    await tester.pumpWidget(
+      wrapWithMaterial(const ReviewWrongAnswersScreen(kidId: kidId)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.done_all_rounded), findsOneWidget);
+
+    // Tap mark all resolved
+    await tester.tap(find.byIcon(Icons.done_all_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Đánh dấu tất cả'), findsOneWidget);
+
+    // Confirm
+    await tester.tap(find.text('Đồng ý'));
+    await tester.pumpAndSettle();
+
+    // Both should now be marked resolved
+    expect(find.text('Đã ôn tập (2)'), findsOneWidget);
+    expect(find.text('Chưa ôn tập (0)'), findsOneWidget);
+
+    final item1 = await WrongAnswerRepository.getWrongAnswer(kidId, 'q_all_1');
+    final item2 = await WrongAnswerRepository.getWrongAnswer(kidId, 'q_all_2');
+    expect(item1?.isResolved, isTrue);
+    expect(item2?.isResolved, isTrue);
+  });
+
+  testWidgets('canceling mark all resolved dialog does nothing', (tester) async {
+    const kidId = 'kid_cancel_mark_all';
+    final r1 = WrongAnswerRecord(
+      questionId: 'q_not_all',
+      prompt: 'Câu hỏi chưa xong',
+      questionType: QuestionType.multiplicationTable,
+      userAnswer: '10',
+      timestamp: DateTime.now(),
+      isResolved: false,
+    );
+
+    await WrongAnswerRepository.saveWrongAnswer(kidId, r1);
+
+    await tester.pumpWidget(
+      wrapWithMaterial(const ReviewWrongAnswersScreen(kidId: kidId)),
+    );
+    await tester.pumpAndSettle();
+
+    // Tap mark all resolved
+    await tester.tap(find.byIcon(Icons.done_all_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Đánh dấu tất cả'), findsOneWidget);
+
+    // Cancel
+    await tester.tap(find.text('Hủy'));
+    await tester.pumpAndSettle();
+
+    final item = await WrongAnswerRepository.getWrongAnswer(kidId, 'q_not_all');
+    expect(item?.isResolved, isFalse);
+  });
+
+  testWidgets('clears resolved records after confirming dialog', (tester) async {
+    const kidId = 'kid_clear_res';
+    final r1 = WrongAnswerRecord(
+      questionId: 'q_res_del',
+      prompt: 'Câu đã ôn',
+      questionType: QuestionType.wordProblem,
+      userAnswer: '30',
+      timestamp: DateTime.now(),
+      isResolved: true,
+    );
+    final r2 = WrongAnswerRecord(
+      questionId: 'q_unres_keep',
+      prompt: 'Câu cần giữ',
+      questionType: QuestionType.wordProblem,
+      userAnswer: '40',
+      timestamp: DateTime.now(),
+      isResolved: false,
+    );
+
+    await WrongAnswerRepository.saveWrongAnswer(kidId, r1);
+    await WrongAnswerRepository.saveWrongAnswer(kidId, r2);
+    await WrongAnswerRepository.markResolved(kidId, 'q_res_del');
+
+    await tester.pumpWidget(
+      wrapWithMaterial(const ReviewWrongAnswersScreen(kidId: kidId)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.cleaning_services_rounded), findsOneWidget);
+
+    // Tap clear resolved
+    await tester.tap(find.byIcon(Icons.cleaning_services_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Dọn dẹp danh sách'), findsOneWidget);
+
+    // Confirm
+    await tester.tap(find.text('Đồng ý'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Câu cần giữ'), findsOneWidget);
+    expect(find.text('Câu đã ôn'), findsNothing);
+
+    final item1 = await WrongAnswerRepository.getWrongAnswer(kidId, 'q_res_del');
+    final item2 = await WrongAnswerRepository.getWrongAnswer(kidId, 'q_unres_keep');
+    expect(item1, isNull);
+    expect(item2, isNotNull);
+  });
+
+  testWidgets('canceling clear resolved dialog preserves records', (tester) async {
+    const kidId = 'kid_cancel_clear';
+    final r1 = WrongAnswerRecord(
+      questionId: 'q_keep_res',
+      prompt: 'Câu giữ lại ôn',
+      questionType: QuestionType.wordProblem,
+      userAnswer: '50',
+      timestamp: DateTime.now(),
+      isResolved: true,
+    );
+
+    await WrongAnswerRepository.saveWrongAnswer(kidId, r1);
+    await WrongAnswerRepository.markResolved(kidId, 'q_keep_res');
+
+    await tester.pumpWidget(
+      wrapWithMaterial(const ReviewWrongAnswersScreen(kidId: kidId)),
+    );
+    await tester.pumpAndSettle();
+
+    // Tap clear resolved
+    await tester.tap(find.byIcon(Icons.cleaning_services_rounded));
+    await tester.pumpAndSettle();
+
+    // Cancel
+    await tester.tap(find.text('Hủy'));
+    await tester.pumpAndSettle();
+
+    final item = await WrongAnswerRepository.getWrongAnswer(kidId, 'q_keep_res');
+    expect(item, isNotNull);
+    expect(find.text('Câu giữ lại ôn'), findsOneWidget);
+  });
+
+  testWidgets('toggling resolved item back to unresolved updates status', (tester) async {
+    const kidId = 'kid_toggle_back';
+    final r = WrongAnswerRecord(
+      questionId: 'q_back',
+      prompt: 'Câu hỏi cần ôn lại lần 2',
+      questionType: QuestionType.multiplicationTable,
+      userAnswer: '9',
+      timestamp: DateTime.now(),
+      isResolved: true,
+    );
+
+    await WrongAnswerRepository.saveWrongAnswer(kidId, r);
+    await WrongAnswerRepository.markResolved(kidId, 'q_back');
+
+    await tester.pumpWidget(
+      wrapWithMaterial(const ReviewWrongAnswersScreen(kidId: kidId)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Đã ôn tập'), findsOneWidget);
+    expect(find.text('Đánh dấu cần ôn'), findsOneWidget);
+
+    // Tap button to toggle back to needing review
+    await tester.tap(find.text('Đánh dấu cần ôn'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cần ôn tập'), findsOneWidget);
+    expect(find.text('Đánh dấu đã ôn'), findsOneWidget);
+
+    final item = await WrongAnswerRepository.getWrongAnswer(kidId, 'q_back');
+    expect(item?.isResolved, isFalse);
+  });
+
+  testWidgets('displays friendly message when filtered tab is empty', (tester) async {
+    const kidId = 'kid_empty_filter';
+    final r = WrongAnswerRecord(
+      questionId: 'q_only_res',
+      prompt: 'Câu đã ôn xong duy nhất',
+      questionType: QuestionType.wordProblem,
+      userAnswer: '5',
+      timestamp: DateTime.now(),
+      isResolved: true,
+    );
+
+    await WrongAnswerRepository.saveWrongAnswer(kidId, r);
+    await WrongAnswerRepository.markResolved(kidId, 'q_only_res');
+
+    await tester.pumpWidget(
+      wrapWithMaterial(const ReviewWrongAnswersScreen(kidId: kidId)),
+    );
+    await tester.pumpAndSettle();
+
+    // Tap 'Chưa ôn tập (0)'
+    await tester.tap(find.text('Chưa ôn tập (0)'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Em đã ôn tập xong tất cả các câu sai!'), findsOneWidget);
+    expect(find.byIcon(Icons.task_alt_rounded), findsOneWidget);
+  });
+
   testWidgets('isolates wrong answer records by kidId', (tester) async {
     final rKidA = WrongAnswerRecord(
       questionId: 'q_kid_A',

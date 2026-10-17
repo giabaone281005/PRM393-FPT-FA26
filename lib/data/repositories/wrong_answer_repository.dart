@@ -144,6 +144,7 @@ class WrongAnswerRepository {
 
   static Future<void> clearResolved(
     String kidId, {
+    String? lessonId,
     SharedPreferences? prefs,
   }) async {
     if (kidId.trim().isEmpty) return;
@@ -154,7 +155,11 @@ class WrongAnswerRepository {
         includeResolved: null,
         prefs: p,
       );
-      final remaining = current.where((r) => !r.isResolved).toList();
+      final remaining = current.where((r) {
+        if (!r.isResolved) return true;
+        if (lessonId != null && r.lessonId != lessonId) return true;
+        return false;
+      }).toList();
       if (remaining.isEmpty) {
         await p.remove(storageKey(kidId));
       } else {

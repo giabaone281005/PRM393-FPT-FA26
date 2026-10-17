@@ -88,16 +88,95 @@ class _ReviewWrongAnswersScreenState extends State<ReviewWrongAnswersScreen> {
     final kidId = _resolveKidId();
     if (kidId.isEmpty) return;
 
-    if (record.isResolved) {
-      await WrongAnswerRepository.recordReviewAttempt(
-        kidId,
-        record.questionId,
-        isCorrect: false,
-      );
-    } else {
-      await WrongAnswerRepository.markResolved(kidId, record.questionId);
+    try {
+      if (record.isResolved) {
+        await WrongAnswerRepository.recordReviewAttempt(
+          kidId,
+          record.questionId,
+          isCorrect: false,
+        );
+      } else {
+        await WrongAnswerRepository.recordReviewAttempt(
+          kidId,
+          record.questionId,
+          isCorrect: true,
+        );
+      }
+      await _loadData();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              record.isResolved
+                  ? 'Đã chuyển sang trạng thái cần ôn tập.'
+                  : 'Đã hoàn thành ôn tập câu hỏi này!',
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Không thể cập nhật trạng thái. Vui lòng thử lại.'),
+            backgroundColor: AppColors.accentRed,
+          ),
+        );
+      }
     }
-    await _loadData();
+  }
+
+  Future<void> _markAllResolved() async {
+    final kidId = _resolveKidId();
+    if (kidId.isEmpty) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Đánh dấu tất cả'),
+        content: const Text(
+          'Đánh dấu tất cả các câu hỏi này là đã ôn tập xong?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Hủy'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Đồng ý'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await WrongAnswerRepository.markAllResolved(
+          kidId,
+          lessonId: widget.lessonId,
+        );
+        await _loadData();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Đã đánh dấu tất cả câu hỏi là đã ôn tập.'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Không thể cập nhật. Vui lòng thử lại.'),
+              backgroundColor: AppColors.accentRed,
+            ),
+          );
+        }
+      }
+    }
   }
 
   Future<void> _deleteRecord(String questionId) async {
@@ -126,8 +205,27 @@ class _ReviewWrongAnswersScreenState extends State<ReviewWrongAnswersScreen> {
     );
 
     if (confirmed == true) {
-      await WrongAnswerRepository.deleteWrongAnswer(kidId, questionId);
-      await _loadData();
+      try {
+        await WrongAnswerRepository.deleteWrongAnswer(kidId, questionId);
+        await _loadData();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Đã xóa câu hỏi khỏi danh sách ôn tập.'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Không thể xóa câu hỏi. Vui lòng thử lại.'),
+              backgroundColor: AppColors.accentRed,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -156,8 +254,30 @@ class _ReviewWrongAnswersScreenState extends State<ReviewWrongAnswersScreen> {
     );
 
     if (confirmed == true) {
-      await WrongAnswerRepository.clearResolved(kidId);
-      await _loadData();
+      try {
+        await WrongAnswerRepository.clearResolved(
+          kidId,
+          lessonId: widget.lessonId,
+        );
+        await _loadData();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Đã dọn dẹp các câu đã hoàn thành ôn tập.'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Không thể dọn dẹp danh sách. Vui lòng thử lại.'),
+              backgroundColor: AppColors.accentRed,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -216,6 +336,12 @@ class _ReviewWrongAnswersScreenState extends State<ReviewWrongAnswersScreen> {
       appBar: AppBar(
         title: const Text('Ôn tập câu trả lời sai'),
         actions: [
+          if (unresolvedCount > 0)
+            IconButton(
+              icon: const Icon(Icons.done_all_rounded),
+              tooltip: 'Đánh dấu tất cả đã ôn',
+              onPressed: _markAllResolved,
+            ),
           if (resolvedCount > 0)
             IconButton(
               icon: const Icon(Icons.cleaning_services_rounded),
@@ -350,12 +476,34 @@ class _ReviewWrongAnswersScreenState extends State<ReviewWrongAnswersScreen> {
           // List of wrong answers
           Expanded(
             child: filtered.isEmpty
-                ? const Center(
+                ? Center(
                     child: Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Text(
-                        'Không có câu hỏi nào theo bộ lọc này.',
-                        style: TextStyle(color: AppColors.textSecondary),
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _filter == 'unresolved'
+                                ? Icons.task_alt_rounded
+                                : Icons.history_toggle_off_rounded,
+                            size: 48,
+                            color: _filter == 'unresolved'
+                                ? AppColors.accentGreen
+                                : AppColors.textMuted,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            _filter == 'unresolved'
+                                ? 'Em đã ôn tập xong tất cả các câu sai!'
+                                : 'Chưa có câu nào được đánh dấu đã ôn tập.',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   )
