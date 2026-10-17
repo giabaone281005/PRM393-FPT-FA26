@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../learning_engine/study_screen.dart';
+import 'math_flappy_game_screen.dart';
 
 class PracticeGardenScreen extends StatelessWidget {
   const PracticeGardenScreen({super.key});
@@ -16,14 +17,23 @@ class PracticeGardenScreen extends StatelessWidget {
             const Icon(Icons.park, size: 80, color: Colors.green),
             const Text('Làm đúng 5 câu để hồi đầy đủ tim. Luôn miễn phí.'),
             const SizedBox(height: 20),
-            FilledButton(
+            FilledButton.icon(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MathFlappyGameScreen()),
+              ),
+              icon: const Icon(Icons.flight_takeoff_rounded),
+              label: const Text('Chơi Math Flappy'),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton(
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => const StudyScreen(kind: 'practice'),
                 ),
               ),
-              child: const Text('Bắt đầu luyện tập'),
+              child: const Text('Luyện tập câu hỏi'),
             ),
           ],
         ),
