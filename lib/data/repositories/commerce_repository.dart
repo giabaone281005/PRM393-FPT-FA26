@@ -5,6 +5,21 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase/supabase_service.dart';
 import '../models/commerce_models.dart';
 
+class PaymentSession {
+  final String orderId;
+  final String provider; // 'momo' hoặc 'vnpay'
+  final Uri payUrl;
+  final String? deeplink; // chỉ MoMo
+  final String? qrData; // chỉ MoMo
+  const PaymentSession({
+    required this.orderId,
+    required this.provider,
+    required this.payUrl,
+    this.deeplink,
+    this.qrData,
+  });
+}
+
 class CommerceRepository {
   static SupabaseClient get _client {
     final client = SupabaseService.client;
@@ -75,6 +90,59 @@ class CommerceRepository {
     return uri;
   }
 
+  static Future<PaymentSession> startPayment({
+    required String provider, // 'momo' hoặc 'vnpay'
+    required String parentToken,
+    String? priceId,
+    String? requestId,
+    String? orderId,
+  }) async {
+    final response = await _client.functions.invoke(
+      provider == 'momo' ? 'momo-checkout' : 'vnpay-checkout',
+      body: {
+        'parentToken': parentToken,
+        'orderId': ?orderId,
+        'priceId': ?priceId,
+        'requestId': ?requestId,
+      },
+    );
+    final data = Map<String, dynamic>.from(response.data as Map);
+    final id = (data['order'] as Map?)?['id']?.toString();
+    final url =
+    (provider == 'momo' ? data['payUrl'] : data['checkoutUrl']) as String?;
+    if (response.status != 200 || id == null || url == null) {
+      throw StateError(
+        data['error']?.toString() ?? 'Không thể tạo thanh toán.',
+      );
+    }
+    final uri = Uri.parse(url);
+    const allowedHosts = [
+      'sandbox.vnpayment.vn',
+      'pay.vnpay.vn',
+      'test-payment.momo.vn',
+      'payment.momo.vn',
+    ];
+    if (uri.scheme != 'https' || !allowedHosts.contains(uri.host)) {
+      throw StateError('Địa chỉ thanh toán không hợp lệ.');
+    }
+    return PaymentSession(
+      orderId: id,
+      provider: provider,
+      payUrl: uri,
+      deeplink: data['deeplink'] as String?,
+      qrData: data['qrCodeUrl'] as String?,
+    );
+  }
+
+  static Future<String> fetchOrderStatus(String orderId) async {
+    final row = await _client
+        .from('learning_orders')
+        .select('status')
+        .eq('id', orderId)
+        .single();
+    return row['status'] as String;
+  }
+
   static Future<void> reconcile(String orderId) async {
     final res = await _client.functions.invoke(
       'vnpay-query',
@@ -84,12 +152,12 @@ class CommerceRepository {
   }
 
   static Future<void> savePrice(
-    PlanPrice price, {
-    required String label,
-    required int amount,
-    required bool published,
-    required bool newVersion,
-  }) async {
+      PlanPrice price, {
+        required String label,
+        required int amount,
+        required bool published,
+        required bool newVersion,
+      }) async {
     final values = {
       'plan_id': price.planId,
       'label': label,
