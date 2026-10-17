@@ -1,5 +1,8 @@
+import '../../../data/repositories/kid_repository.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../data/models/lesson.dart';
@@ -20,10 +23,29 @@ class HomeScreen extends StatelessWidget {
     final state = context.watch<AppStateProvider>();
     final kid = state.currentKid;
     final lessons = state.currentLessons;
+    if (lessons.isEmpty) {
+      return Scaffold(
+        appBar: const AppHeader(),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(state.syncError ?? 'Chưa có bài học khả dụng.'),
+              TextButton(
+                onPressed: state.refreshFromCloud,
+                child: const Text('Tải lại bài học'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     // Tìm bài học đang học hoặc bài có sẵn kế tiếp
     final activeLesson = lessons.firstWhere(
-      (l) => l.status == LessonStatus.available || l.status == LessonStatus.inProgress,
+      (l) =>
+          l.status == LessonStatus.available ||
+          l.status == LessonStatus.inProgress,
       orElse: () => lessons.first,
     );
 
@@ -32,10 +54,7 @@ class HomeScreen extends StatelessWidget {
       appBar: const AppHeader(),
       body: SafeArea(
         child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
-          ),
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 130),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 150),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -43,7 +62,10 @@ class HomeScreen extends StatelessWidget {
               GestureDetector(
                 onTap: () => context.read<AppStateProvider>().setNavIndex(1),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
@@ -64,7 +86,9 @@ class HomeScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: AppColors.primaryLight,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.primary.withAlpha(60)),
+                          border: Border.all(
+                            color: AppColors.primary.withAlpha(60),
+                          ),
                         ),
                         child: const Icon(
                           Icons.auto_stories_rounded,
@@ -79,22 +103,31 @@ class HomeScreen extends StatelessWidget {
                           children: [
                             Text(
                               'Gói Toán Toàn Diện Lớp ${kid.grade}',
-                              style: AppTypography.titleMedium.copyWith(fontSize: 14),
+                              style: AppTypography.titleMedium.copyWith(
+                                fontSize: 14,
+                              ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               'Học kỳ 2 • Lộ trình 3–5 phút/ngày (Xem lộ trình)',
-                              style: AppTypography.bodySmall.copyWith(fontSize: 11),
+                              style: AppTypography.bodySmall.copyWith(
+                                fontSize: 11,
+                              ),
                             ),
                           ],
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.accentGreenLight,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppColors.accentGreen.withAlpha(90)),
+                          border: Border.all(
+                            color: AppColors.accentGreen.withAlpha(90),
+                          ),
                         ),
                         child: const Text(
                           'ĐANG HỌC',
@@ -148,7 +181,10 @@ class HomeScreen extends StatelessWidget {
                                 Row(
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 3,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: AppColors.primaryLight,
                                         borderRadius: BorderRadius.circular(6),
@@ -165,7 +201,11 @@ class HomeScreen extends StatelessWidget {
                                     const SizedBox(width: 8),
                                     Row(
                                       children: [
-                                        const Icon(Icons.bolt_rounded, color: AppColors.accentGold, size: 16),
+                                        const Icon(
+                                          Icons.bolt_rounded,
+                                          color: AppColors.accentGold,
+                                          size: 16,
+                                        ),
                                         Text(
                                           '+${activeLesson.xpReward} XP',
                                           style: const TextStyle(
@@ -181,7 +221,9 @@ class HomeScreen extends StatelessWidget {
                                 const SizedBox(height: 8),
                                 Text(
                                   activeLesson.title,
-                                  style: AppTypography.titleLarge.copyWith(fontSize: 18),
+                                  style: AppTypography.titleLarge.copyWith(
+                                    fontSize: 18,
+                                  ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
@@ -214,7 +256,9 @@ class HomeScreen extends StatelessWidget {
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           minimumSize: const Size.fromHeight(54),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                           elevation: 4,
                           shadowColor: AppColors.primary.withAlpha(100),
                         ),
@@ -223,7 +267,8 @@ class HomeScreen extends StatelessWidget {
                             context: context,
                             isScrollControlled: true,
                             backgroundColor: Colors.transparent,
-                            builder: (_) => LessonIntroSheet(lesson: activeLesson),
+                            builder: (_) =>
+                                LessonIntroSheet(lesson: activeLesson),
                           );
                         },
                         child: const Row(
@@ -231,7 +276,11 @@ class HomeScreen extends StatelessWidget {
                           children: [
                             Text(
                               'TIẾP TỤC HỌC NGAY',
-                              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, letterSpacing: 0.5),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                             SizedBox(width: 8),
                             Icon(Icons.play_arrow_rounded, size: 22),
@@ -268,50 +317,104 @@ class HomeScreen extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.local_fire_department_rounded, color: AppColors.streakFire, size: 20),
+                              const Icon(
+                                Icons.local_fire_department_rounded,
+                                color: AppColors.streakFire,
+                                size: 20,
+                              ),
                               const SizedBox(width: 6),
                               Text(
                                 'Chuỗi Rèn Luyện (${kid.streakCount} Ngày)',
-                                style: AppTypography.titleMedium.copyWith(fontSize: 14),
+                                style: AppTypography.titleMedium.copyWith(
+                                  fontSize: 14,
+                                ),
                               ),
                             ],
                           ),
                           Text(
                             'Chốt lúc 21:00 (BR-02)',
-                            style: AppTypography.labelSmall.copyWith(color: AppColors.primaryHover),
+                            style: AppTypography.labelSmall.copyWith(
+                              color: AppColors.primaryHover,
+                            ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].asMap().entries.map((entry) {
-                          final isDone = entry.key < (kid.streakCount % 7 == 0 ? 7 : kid.streakCount % 7);
-                          return Column(
-                            children: [
-                              Container(
-                                width: 34,
-                                height: 34,
-                                decoration: BoxDecoration(
-                                  color: isDone ? AppColors.accentGoldLight : AppColors.surfaceSubtle,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: isDone ? AppColors.accentGold : AppColors.borderSubtle,
-                                  ),
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    Icons.check_rounded,
-                                    size: 18,
-                                    color: isDone ? const Color(0xFFB45309) : Colors.transparent,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(entry.value, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-                            ],
+                      FutureBuilder<Set<DateTime>>(
+                        future: KidRepository.fetchStudyDays(kid.id),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return const Text(
+                              'Chưa tải được lịch sử học',
+                              style: TextStyle(fontSize: 12, color: Colors.red),
+                            );
+                          }
+
+                          if (!snapshot.hasData) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+
+                          final studyDays = snapshot.data!;
+                          final now = DateTime.now();
+                          final monday = DateTime(
+                            now.year,
+                            now.month,
+                            now.day - now.weekday + 1,
                           );
-                        }).toList(),
+
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
+                                .asMap()
+                                .entries
+                                .map((entry) {
+                                  final date = monday.add(
+                                    Duration(days: entry.key),
+                                  );
+                                  final isDone = studyDays.contains(date);
+
+                                  return Column(
+                                    children: [
+                                      Container(
+                                        width: 34,
+                                        height: 34,
+                                        decoration: BoxDecoration(
+                                          color: isDone
+                                              ? AppColors.accentGoldLight
+                                              : AppColors.surfaceSubtle,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: isDone
+                                                ? AppColors.accentGold
+                                                : AppColors.borderSubtle,
+                                          ),
+                                        ),
+                                        child: Center(
+                                          child: Icon(
+                                            Icons.check_rounded,
+                                            size: 18,
+                                            color: isDone
+                                                ? const Color(0xFFB45309)
+                                                : Colors.transparent,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        entry.value,
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                })
+                                .toList(),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -335,7 +438,9 @@ class HomeScreen extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const TreasureMapScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const TreasureMapScreen(),
+                          ),
                         );
                       },
                     ),
@@ -351,7 +456,9 @@ class HomeScreen extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const PracticeGardenScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const PracticeGardenScreen(),
+                          ),
                         );
                       },
                     ),
@@ -372,7 +479,9 @@ class HomeScreen extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const ArenaScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const ArenaScreen(),
+                          ),
                         );
                       },
                     ),
@@ -388,7 +497,9 @@ class HomeScreen extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const MascotWardrobeScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const MascotWardrobeScreen(),
+                          ),
                         );
                       },
                     ),
@@ -436,12 +547,20 @@ class HomeScreen extends StatelessWidget {
                 color: color,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Center(child: Text(icon, style: const TextStyle(fontSize: 22))),
+              child: Center(
+                child: Text(icon, style: const TextStyle(fontSize: 22)),
+              ),
             ),
             const SizedBox(height: 12),
-            Text(title, style: AppTypography.titleMedium.copyWith(fontSize: 14)),
+            Text(
+              title,
+              style: AppTypography.titleMedium.copyWith(fontSize: 14),
+            ),
             const SizedBox(height: 2),
-            Text(subtitle, style: AppTypography.bodySmall.copyWith(fontSize: 11)),
+            Text(
+              subtitle,
+              style: AppTypography.bodySmall.copyWith(fontSize: 11),
+            ),
           ],
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../data/providers/app_state_provider.dart';
@@ -60,10 +61,17 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
                           ),
                         ],
                       ),
-                      child: const Icon(
-                        Icons.calculate_rounded,
-                        color: Colors.white,
-                        size: 22,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          'assets/images/owl_mascot.jpg',
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => const Icon(
+                            Icons.calculate_rounded,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -82,7 +90,10 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
                             ),
                             const SizedBox(width: 6),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.primaryLight,
                                 borderRadius: BorderRadius.circular(20),
@@ -118,11 +129,16 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
                   GestureDetector(
                     onTap: () => _showStreakInfo(context, state),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.accentGoldLight,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppColors.accentGold.withAlpha(90)),
+                        border: Border.all(
+                          color: AppColors.accentGold.withAlpha(90),
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -150,11 +166,16 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
                   GestureDetector(
                     onTap: onHeartTap ?? () => _showHeartStatus(context, state),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.accentRedLight,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppColors.accentRed.withAlpha(90)),
+                        border: Border.all(
+                          color: AppColors.accentRed.withAlpha(90),
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -232,9 +253,6 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   }
 
   void _openParentGate(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => const ParentGateDialog(),
-    );
+    showDialog(context: context, builder: (_) => const ParentGateDialog());
   }
 }

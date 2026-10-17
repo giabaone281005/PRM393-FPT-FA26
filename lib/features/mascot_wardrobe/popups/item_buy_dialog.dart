@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../data/providers/app_state_provider.dart';
@@ -42,7 +43,9 @@ class _ItemBuyDialogState extends State<ItemBuyDialog> {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('🎉 Bé đã trang bị thành công "${widget.itemName}" cho Cú!'),
+          content: Text(
+            '🎉 Bé đã trang bị thành công "${widget.itemName}" cho Cú!',
+          ),
           backgroundColor: AppColors.accentGreen,
         ),
       );
@@ -50,7 +53,9 @@ class _ItemBuyDialogState extends State<ItemBuyDialog> {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Bé chưa đủ Sao! Cần thêm ${widget.costStars - widget.state.currentKid.energyStars} Sao nữa.'),
+          content: Text(
+            'Bé chưa đủ Sao! Cần thêm ${widget.costStars - widget.state.currentKid.energyStars} Sao nữa.',
+          ),
           backgroundColor: AppColors.accentRed,
         ),
       );
@@ -68,7 +73,10 @@ class _ItemBuyDialogState extends State<ItemBuyDialog> {
         children: [
           const Text('🦉', style: TextStyle(fontSize: 28)),
           const SizedBox(width: 10),
-          Text(widget.itemName, style: AppTypography.titleLarge.copyWith(fontSize: 18)),
+          Text(
+            widget.itemName,
+            style: AppTypography.titleLarge.copyWith(fontSize: 18),
+          ),
         ],
       ),
       content: Column(
@@ -79,8 +87,8 @@ class _ItemBuyDialogState extends State<ItemBuyDialog> {
             widget.isEquipped
                 ? 'Món đồ này hiện đang được trang bị cho chú Cú của bé!'
                 : (widget.costStars == 0
-                    ? 'Món đồ miễn phí cơ bản. Bé có muốn trang bị ngay không?'
-                    : 'Đổi ${widget.costStars} Sao Năng Lượng để mở khóa và trang bị món đồ thời trang này?'),
+                      ? 'Món đồ miễn phí cơ bản. Bé có muốn trang bị ngay không?'
+                      : 'Đổi ${widget.costStars} Sao Năng Lượng để mở khóa và trang bị món đồ thời trang này?'),
             style: AppTypography.bodySmall,
           ),
           const SizedBox(height: 16),
@@ -93,14 +101,27 @@ class _ItemBuyDialogState extends State<ItemBuyDialog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Sao hiện có:', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                const Text(
+                  'Sao hiện có:',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
                 Row(
                   children: [
-                    const Icon(Icons.star_rounded, color: AppColors.star, size: 18),
+                    const Icon(
+                      Icons.star_rounded,
+                      color: AppColors.star,
+                      size: 18,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       '$currentStars Sao',
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFB45309)),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFB45309),
+                      ),
                     ),
                   ],
                 ),
@@ -117,18 +138,29 @@ class _ItemBuyDialogState extends State<ItemBuyDialog> {
         if (!widget.isEquipped)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: canAfford ? AppColors.accentGold : AppColors.surfaceSubtle,
+              backgroundColor: canAfford
+                  ? AppColors.accentGold
+                  : AppColors.surfaceSubtle,
               foregroundColor: canAfford ? Colors.white : AppColors.textMuted,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
             ),
             onPressed: canAfford && !_isLoading ? _equipOrBuy : null,
             child: _isLoading
                 ? const SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
                   )
-                : Text(widget.costStars == 0 ? 'TRANG BỊ' : 'MỞ KHÓA (${widget.costStars} ⭐)'),
+                : Text(
+                    widget.costStars == 0
+                        ? 'TRANG BỊ'
+                        : 'MỞ KHÓA (${widget.costStars} ⭐)',
+                  ),
           ),
       ],
     );

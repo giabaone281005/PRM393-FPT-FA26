@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+
 import '../../core/theme/app_typography.dart';
 import '../auth/auth_screen.dart';
 
@@ -75,38 +76,51 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            page.emoji,
-                            style: const TextStyle(fontSize: 96),
-                          ).animate(key: ValueKey('emoji_$i')).scale(duration: 600.ms, curve: Curves.elasticOut),
+                          Text(page.emoji, style: const TextStyle(fontSize: 96))
+                              .animate(key: ValueKey('emoji_$i'))
+                              .scale(
+                                duration: 600.ms,
+                                curve: Curves.elasticOut,
+                              ),
                           const SizedBox(height: 32),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 36),
-                            child: Text(
-                              page.title,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontFamily: 'Nunito',
-                                fontFamilyFallback: ['Roboto', 'Arial', 'sans-serif'],
-                                fontSize: 32,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                                height: 1.2,
-                              ),
-                            ).animate(key: ValueKey('title_$i')).fadeIn(delay: 200.ms).slideY(begin: 0.3),
+                            child:
+                                Text(
+                                      page.title,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontFamily: 'Nunito',
+                                        fontFamilyFallback: [
+                                          'Roboto',
+                                          'Arial',
+                                          'sans-serif',
+                                        ],
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.white,
+                                        height: 1.2,
+                                      ),
+                                    )
+                                    .animate(key: ValueKey('title_$i'))
+                                    .fadeIn(delay: 200.ms)
+                                    .slideY(begin: 0.3),
                           ),
                           const SizedBox(height: 20),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 40),
-                            child: Text(
-                              page.body,
-                              textAlign: TextAlign.center,
-                              style: AppTypography.bodyMedium.copyWith(
-                                color: Colors.white.withAlpha(210),
-                                fontSize: 15,
-                                height: 1.6,
-                              ),
-                            ).animate(key: ValueKey('body_$i')).fadeIn(delay: 350.ms),
+                            child:
+                                Text(
+                                      page.body,
+                                      textAlign: TextAlign.center,
+                                      style: AppTypography.bodyMedium.copyWith(
+                                        color: Colors.white.withAlpha(210),
+                                        fontSize: 15,
+                                        height: 1.6,
+                                      ),
+                                    )
+                                    .animate(key: ValueKey('body_$i'))
+                                    .fadeIn(delay: 350.ms),
                           ),
                         ],
                       ),
@@ -168,8 +182,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          _currentPage < _pages.length - 1 ? 'TIẾP THEO' : 'BẮT ĐẦU NGAY',
-                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                          _currentPage < _pages.length - 1
+                              ? 'TIẾP THEO'
+                              : 'BẮT ĐẦU NGAY',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         Icon(

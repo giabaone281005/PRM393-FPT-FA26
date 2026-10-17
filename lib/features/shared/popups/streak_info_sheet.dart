@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../data/models/kid_profile.dart';
@@ -30,14 +31,24 @@ class StreakInfoSheet extends StatelessWidget {
                       color: AppColors.accentGoldLight,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.local_fire_department_rounded, color: AppColors.streakFire, size: 22),
+                    child: const Icon(
+                      Icons.local_fire_department_rounded,
+                      color: AppColors.streakFire,
+                      size: 22,
+                    ),
                   ),
                   const SizedBox(width: 10),
-                  Text('Chuỗi Rèn Luyện (Math Streak)', style: AppTypography.titleLarge.copyWith(fontSize: 18)),
+                  Text(
+                    'Chuỗi Rèn Luyện (Math Streak)',
+                    style: AppTypography.titleLarge.copyWith(fontSize: 18),
+                  ),
                 ],
               ),
               IconButton(
-                icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
+                icon: const Icon(
+                  Icons.close_rounded,
+                  color: AppColors.textSecondary,
+                ),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -55,7 +66,11 @@ class StreakInfoSheet extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.local_fire_department_rounded, color: AppColors.streakFire, size: 36),
+                const Icon(
+                  Icons.local_fire_department_rounded,
+                  color: AppColors.streakFire,
+                  size: 36,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   '${kid.streakCount} Ngày Liên Tiếp!',
@@ -83,9 +98,16 @@ class StreakInfoSheet extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.schedule_rounded, color: AppColors.primaryHover, size: 18),
+                    const Icon(
+                      Icons.schedule_rounded,
+                      color: AppColors.primaryHover,
+                      size: 18,
+                    ),
                     const SizedBox(width: 6),
-                    Text('Mốc Chốt Streak: 21:00 Mỗi Ngày (BR-02)', style: AppTypography.titleMedium.copyWith(fontSize: 13)),
+                    Text(
+                      'Mốc Chốt Streak: 21:00 Mỗi Ngày (BR-02)',
+                      style: AppTypography.titleMedium.copyWith(fontSize: 13),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -96,11 +118,19 @@ class StreakInfoSheet extends StatelessWidget {
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    const Icon(Icons.shield_rounded, color: AppColors.accentGreen, size: 18),
+                    const Icon(
+                      Icons.shield_rounded,
+                      color: AppColors.accentGreen,
+                      size: 18,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       'Khiên bảo vệ chuỗi: 1 Khiên khả dụng',
-                      style: AppTypography.bodySmall.copyWith(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFF15803D)),
+                      style: AppTypography.bodySmall.copyWith(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF15803D),
+                      ),
                     ),
                   ],
                 ),
@@ -114,10 +144,15 @@ class StreakInfoSheet extends StatelessWidget {
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               minimumSize: const Size.fromHeight(48),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
             ),
             onPressed: () => Navigator.pop(context),
-            child: const Text('TIẾP TỤC HỌC TẬP', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text(
+              'TIẾP TỤC HỌC TẬP',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
           const SizedBox(height: 8),
         ],

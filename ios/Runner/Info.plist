@@ -14,7 +14,10 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
-	<key>CFBundleName</key>
+	<key>NSCameraUsageDescription</key><string>Chụp đề toán để nhận gợi ý học tập.</string>
+    <key>NSPhotoLibraryUsageDescription</key><string>Chọn ảnh đề toán để nhận gợi ý học tập.</string>
+    <key>CFBundleURLTypes</key><array><dict><key>CFBundleURLSchemes</key><array><string>mathlingo</string></array></dict></array>
+    <key>CFBundleName</key>
 	<string>mathlingo</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 
@@ -20,7 +21,10 @@ class HeartRecoveredDialog extends StatelessWidget {
             child: const Icon(Icons.favorite_rounded, color: AppColors.heart),
           ),
           const SizedBox(width: 10),
-          Text('Đã Đầy 5 Tim!', style: AppTypography.titleLarge.copyWith(fontSize: 18)),
+          Text(
+            'Đã Đầy 5 Tim!',
+            style: AppTypography.titleLarge.copyWith(fontSize: 18),
+          ),
         ],
       ),
       content: Column(
@@ -39,7 +43,11 @@ class HeartRecoveredDialog extends StatelessWidget {
                 5,
                 (_) => const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 4),
-                  child: Icon(Icons.favorite_rounded, color: AppColors.heart, size: 28),
+                  child: Icon(
+                    Icons.favorite_rounded,
+                    color: AppColors.heart,
+                    size: 28,
+                  ),
                 ),
               ),
             ),
@@ -52,13 +60,18 @@ class HeartRecoveredDialog extends StatelessWidget {
             backgroundColor: AppColors.accentGreen,
             foregroundColor: Colors.white,
             minimumSize: const Size(180, 48),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
           ),
           onPressed: () {
             Navigator.pop(context); // close dialog
             Navigator.pop(context); // back to lesson/home
           },
-          child: const Text('TIẾP TỤC HỌC BÀI', style: TextStyle(fontWeight: FontWeight.bold)),
+          child: const Text(
+            'TIẾP TỤC HỌC BÀI',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );

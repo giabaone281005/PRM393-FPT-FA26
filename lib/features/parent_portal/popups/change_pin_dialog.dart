@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../data/providers/app_state_provider.dart';
@@ -32,10 +33,6 @@ class _ChangePinDialogState extends State<ChangePinDialog> {
     final newPin = _newPinCtrl.text.trim();
     final confirm = _confirmPinCtrl.text.trim();
 
-    if (oldPin != widget.state.parentPin) {
-      setState(() => _error = 'Mã PIN hiện tại không chính xác');
-      return;
-    }
     if (newPin.length != 4 || int.tryParse(newPin) == null) {
       setState(() => _error = 'Mã PIN mới phải gồm đúng 4 chữ số');
       return;
@@ -50,7 +47,10 @@ class _ChangePinDialogState extends State<ChangePinDialog> {
       _error = null;
     });
 
-    final success = await widget.state.updateParentPinCode(newPin);
+    final success = await widget.state.updateParentPinCode(
+      newPin,
+      oldPin: oldPin,
+    );
 
     if (!mounted) return;
     setState(() => _isLoading = false);
@@ -59,7 +59,9 @@ class _ChangePinDialogState extends State<ChangePinDialog> {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('🔒 Đã đổi mã PIN phụ huynh thành công và đồng bộ đám mây!'),
+          content: Text(
+            '🔒 Đã đổi mã PIN phụ huynh thành công và đồng bộ đám mây!',
+          ),
           backgroundColor: AppColors.accentGreen,
         ),
       );
@@ -83,7 +85,10 @@ class _ChangePinDialogState extends State<ChangePinDialog> {
             child: const Icon(Icons.pin_rounded, color: AppColors.primary),
           ),
           const SizedBox(width: 10),
-          Text('Đổi Mã PIN Phụ Huynh', style: AppTypography.titleLarge.copyWith(fontSize: 18)),
+          Text(
+            'Đổi Mã PIN Phụ Huynh',
+            style: AppTypography.titleLarge.copyWith(fontSize: 18),
+          ),
         ],
       ),
       content: SingleChildScrollView(
@@ -98,7 +103,9 @@ class _ChangePinDialogState extends State<ChangePinDialog> {
               decoration: InputDecoration(
                 labelText: 'Mã PIN hiện tại (Mặc định: 1234)',
                 prefixIcon: const Icon(Icons.lock_clock_rounded),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
             ),
             const SizedBox(height: 12),
@@ -110,7 +117,9 @@ class _ChangePinDialogState extends State<ChangePinDialog> {
               decoration: InputDecoration(
                 labelText: 'Mã PIN mới (4 số)',
                 prefixIcon: const Icon(Icons.password_rounded),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
             ),
             const SizedBox(height: 12),
@@ -122,7 +131,9 @@ class _ChangePinDialogState extends State<ChangePinDialog> {
               decoration: InputDecoration(
                 labelText: 'Nhập lại mã PIN mới',
                 prefixIcon: const Icon(Icons.check_rounded),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
                 errorText: _error,
               ),
             ),
@@ -138,14 +149,19 @@ class _ChangePinDialogState extends State<ChangePinDialog> {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
           ),
           onPressed: _isLoading ? null : _submit,
           child: _isLoading
               ? const SizedBox(
                   width: 18,
                   height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
                 )
               : const Text('Lưu Mã PIN'),
         ),

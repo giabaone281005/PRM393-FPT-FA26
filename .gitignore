@@ -21,6 +21,7 @@ migrate_working_dir/
 # Environment variables
 .env
 .env.*
+supabase/.temp/
 
 # IDE & Agents
 .vscode/
@@ -50,3 +51,12 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+/android/key.properties
+/android/build/
+*.jks
+*.keystore
+/config/*.json
+!/config/*.example.json
+/supabase/.env*
+!/supabase/.env.example

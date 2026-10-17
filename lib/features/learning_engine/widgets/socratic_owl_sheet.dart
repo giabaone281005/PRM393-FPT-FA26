@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../data/models/question.dart';
@@ -22,7 +23,8 @@ class _SocraticOwlSheetState extends State<SocraticOwlSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final currentHint = widget.hints.isNotEmpty && _currentStep < widget.hints.length
+    final currentHint =
+        widget.hints.isNotEmpty && _currentStep < widget.hints.length
         ? widget.hints[_currentStep]
         : null;
 
@@ -55,8 +57,15 @@ class _SocraticOwlSheetState extends State<SocraticOwlSheet> {
                     ),
                   ],
                 ),
-                child: const Center(
-                  child: Text('🦉', style: TextStyle(fontSize: 32)),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(
+                    'assets/images/owl_mascot.jpg',
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Center(
+                      child: Text('🦉', style: TextStyle(fontSize: 32)),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 14),
@@ -68,11 +77,16 @@ class _SocraticOwlSheetState extends State<SocraticOwlSheet> {
                       children: [
                         Text(
                           'Cú Toán Học Trợ Giúp',
-                          style: AppTypography.titleMedium.copyWith(fontSize: 17),
+                          style: AppTypography.titleMedium.copyWith(
+                            fontSize: 17,
+                          ),
                         ),
                         const SizedBox(width: 6),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.accentPurpleLight,
                             borderRadius: BorderRadius.circular(10),
@@ -153,12 +167,15 @@ class _SocraticOwlSheetState extends State<SocraticOwlSheet> {
           // Nút hành động
           Row(
             children: [
-              if (widget.hints.length > 1 && _currentStep < widget.hints.length - 1)
+              if (widget.hints.length > 1 &&
+                  _currentStep < widget.hints.length - 1)
                 Expanded(
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size.fromHeight(50),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       side: const BorderSide(color: AppColors.accentPurple),
                     ),
                     onPressed: () {
@@ -168,11 +185,15 @@ class _SocraticOwlSheetState extends State<SocraticOwlSheet> {
                     },
                     child: const Text(
                       'Gợi ý bước kế tiếp',
-                      style: TextStyle(color: AppColors.accentPurple, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: AppColors.accentPurple,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              if (widget.hints.length > 1 && _currentStep < widget.hints.length - 1)
+              if (widget.hints.length > 1 &&
+                  _currentStep < widget.hints.length - 1)
                 const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
@@ -180,13 +201,18 @@ class _SocraticOwlSheetState extends State<SocraticOwlSheet> {
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     minimumSize: const Size.fromHeight(50),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   onPressed: () {
                     Navigator.pop(context);
                     widget.onTryAgain();
                   },
-                  child: const Text('TỚ ĐÃ HIỂU, LÀM LẠI!', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'TỚ ĐÃ HIỂU, LÀM LẠI!',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ],

@@ -1,9 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseService {
-  static const String supabaseUrl = 'https://seoswmcldwwytdrfrrrb.supabase.co';
-  static const String anonKey =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlb3N3bWNsZHd3eXRkcmZycnJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE4NjkxMjEsImV4cCI6MjEwNzQ0NTEyMX0.DblsRXX1FznXbEd2hIosnWbbW_bjwSjRGo6CpOdjfKE';
+  static const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+  static const String anonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
 
   static bool _isInitialized = false;
 
@@ -13,14 +12,14 @@ class SupabaseService {
 
   static Future<void> initialize() async {
     try {
-      await Supabase.initialize(
-        url: supabaseUrl,
-        publishableKey: anonKey,
-      );
+      if (supabaseUrl.isEmpty || anonKey.isEmpty) {
+        throw StateError('Missing app configuration');
+      }
+      await Supabase.initialize(url: supabaseUrl, publishableKey: anonKey);
       _client = Supabase.instance.client;
       _isInitialized = true;
     } catch (e) {
-      // Offline/Demo mode
+      // Configuration failure keeps authentication unavailable.
       _isInitialized = false;
     }
   }

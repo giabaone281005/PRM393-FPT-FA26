@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../data/providers/app_state_provider.dart';
@@ -19,9 +20,21 @@ class ArenaChallengeDialog extends StatefulWidget {
 
 class _ArenaChallengeDialogState extends State<ArenaChallengeDialog> {
   final List<Map<String, dynamic>> _questions = [
-    {'q': '7 × 8 = ?', 'options': [54, 56, 58], 'ans': 56},
-    {'q': '64 ÷ 8 = ?', 'options': [7, 8, 9], 'ans': 8},
-    {'q': '150 + 250 = ?', 'options': [380, 400, 420], 'ans': 400},
+    {
+      'q': '7 × 8 = ?',
+      'options': [54, 56, 58],
+      'ans': 56,
+    },
+    {
+      'q': '64 ÷ 8 = ?',
+      'options': [7, 8, 9],
+      'ans': 8,
+    },
+    {
+      'q': '150 + 250 = ?',
+      'options': [380, 400, 420],
+      'ans': 400,
+    },
   ];
 
   int _currentIndex = 0;
@@ -63,15 +76,24 @@ class _ArenaChallengeDialogState extends State<ArenaChallengeDialog> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Row(
           children: [
-            const Icon(Icons.emoji_events_rounded, color: AppColors.accentGold, size: 28),
+            const Icon(
+              Icons.emoji_events_rounded,
+              color: AppColors.accentGold,
+              size: 28,
+            ),
             const SizedBox(width: 10),
-            Text('Kết Quả Thi Đấu!', style: AppTypography.titleLarge.copyWith(fontSize: 18)),
+            Text(
+              'Kết Quả Thi Đấu!',
+              style: AppTypography.titleLarge.copyWith(fontSize: 18),
+            ),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Bé đã trả lời đúng $_correctCount / ${_questions.length} câu hỏi!'),
+            Text(
+              'Bé đã trả lời đúng $_correctCount / ${_questions.length} câu hỏi!',
+            ),
             const SizedBox(height: 16),
             if (_isSubmitting)
               const Padding(
@@ -91,7 +113,11 @@ class _ArenaChallengeDialogState extends State<ArenaChallengeDialog> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.bolt_rounded, color: Color(0xFFB45309), size: 28),
+                        const Icon(
+                          Icons.bolt_rounded,
+                          color: Color(0xFFB45309),
+                          size: 28,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           '+$xpEarned XP ĐẤU TRƯỜNG',
@@ -119,10 +145,15 @@ class _ArenaChallengeDialogState extends State<ArenaChallengeDialog> {
               backgroundColor: const Color(0xFF8B5CF6),
               foregroundColor: Colors.white,
               minimumSize: const Size(200, 48),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
             ),
             onPressed: _isSubmitting ? null : () => Navigator.pop(context),
-            child: const Text('XEM BẢNG XẾP HẠNG MỚI', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text(
+              'XEM BẢNG XẾP HẠNG MỚI',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       );
@@ -144,7 +175,11 @@ class _ArenaChallengeDialogState extends State<ArenaChallengeDialog> {
           ),
           Text(
             'Câu ${_currentIndex + 1}/${_questions.length}',
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF8B5CF6)),
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF8B5CF6),
+            ),
           ),
         ],
       ),
@@ -160,7 +195,11 @@ class _ArenaChallengeDialogState extends State<ArenaChallengeDialog> {
             child: Center(
               child: Text(
                 q['q'] as String,
-                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF6D28D9)),
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF6D28D9),
+                ),
               ),
             ),
           ),
@@ -173,11 +212,22 @@ class _ArenaChallengeDialogState extends State<ArenaChallengeDialog> {
                   backgroundColor: Colors.white,
                   foregroundColor: const Color(0xFF6D28D9),
                   side: const BorderSide(color: Color(0xFFDDD6FE)),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 14,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
                 onPressed: () => _chooseAnswer(opt),
-                child: Text('$opt', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                child: Text(
+                  '$opt',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               );
             }).toList(),
           ),
