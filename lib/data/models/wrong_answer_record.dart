@@ -11,6 +11,8 @@ class WrongAnswerRecord {
   final DateTime timestamp;
   final bool isResolved;
   final Map<String, dynamic>? questionData;
+  final int reviewCount;
+  final DateTime? lastReviewedAt;
 
   const WrongAnswerRecord({
     required this.questionId,
@@ -21,6 +23,8 @@ class WrongAnswerRecord {
     required this.timestamp,
     this.isResolved = false,
     this.questionData,
+    this.reviewCount = 0,
+    this.lastReviewedAt,
   });
 
   static QuestionType parseQuestionType(dynamic type) {
@@ -47,6 +51,8 @@ class WrongAnswerRecord {
     DateTime? timestamp,
     bool? isResolved,
     Map<String, dynamic>? questionData,
+    int? reviewCount,
+    DateTime? lastReviewedAt,
   }) {
     return WrongAnswerRecord(
       questionId: questionId ?? this.questionId,
@@ -57,6 +63,8 @@ class WrongAnswerRecord {
       timestamp: timestamp ?? this.timestamp,
       isResolved: isResolved ?? this.isResolved,
       questionData: questionData ?? this.questionData,
+      reviewCount: reviewCount ?? this.reviewCount,
+      lastReviewedAt: lastReviewedAt ?? this.lastReviewedAt,
     );
   }
 
@@ -70,6 +78,9 @@ class WrongAnswerRecord {
       'timestamp': timestamp.toIso8601String(),
       'isResolved': isResolved,
       if (questionData != null) 'questionData': questionData,
+      'reviewCount': reviewCount,
+      if (lastReviewedAt != null)
+        'lastReviewedAt': lastReviewedAt!.toIso8601String(),
     };
   }
 
@@ -87,6 +98,10 @@ class WrongAnswerRecord {
       questionData: map['questionData'] is Map
           ? Map<String, dynamic>.from(map['questionData'] as Map)
           : null,
+      reviewCount: (map['reviewCount'] as num?)?.toInt() ?? 0,
+      lastReviewedAt: DateTime.tryParse(
+        map['lastReviewedAt']?.toString() ?? '',
+      ),
     );
   }
 
@@ -108,10 +123,17 @@ class WrongAnswerRecord {
         other.prompt == prompt &&
         other.questionType == questionType &&
         other.lessonId == lessonId &&
-        other.isResolved == isResolved;
+        other.isResolved == isResolved &&
+        other.reviewCount == reviewCount;
   }
 
   @override
-  int get hashCode =>
-      Object.hash(questionId, prompt, questionType, lessonId, isResolved);
+  int get hashCode => Object.hash(
+    questionId,
+    prompt,
+    questionType,
+    lessonId,
+    isResolved,
+    reviewCount,
+  );
 }

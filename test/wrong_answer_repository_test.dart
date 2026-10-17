@@ -548,4 +548,338 @@ void main() {
       },
     );
   });
+
+  group('WrongAnswerRepository Review Management (Step 3)', () {
+    test('WrongAnswerRecord supports reviewCount and lastReviewedAt with backward compatibility', () {
+      final now = DateTime.now();
+      final fresh = WrongAnswerRecord(
+        questionId: 'q_fresh',
+        prompt: 'Prompt',
+        questionType: QuestionType.wordProblem,
+        userAnswer: '1',
+        timestamp: now,
+      );
+      expect(fresh.reviewCount, 0);
+      expect(fresh.lastReviewedAt, isNull);
+
+      final withReview = fresh.copyWith(reviewCount: 3, lastReviewedAt: now);
+      expect(withReview.reviewCount, 3);
+      expect(withReview.lastReviewedAt, now);
+
+      final map = withReview.toMap();
+      final restored = WrongAnswerRecord.fromMap(map);
+      expect(restored.reviewCount, 3);
+      expect(restored.lastReviewedAt?.toIso8601String(), now.toIso8601String());
+
+      // Old map without review fields
+      final legacy = WrongAnswerRecord.fromMap({
+        'questionId': 'q_legacy',
+        'prompt': 'Legacy',
+        'questionType': 'area_grid',
+        'userAnswer': 4,
+        'timestamp': now.toIso8601String(),
+      });
+      expect(legacy.reviewCount, 0);
+      expect(legacy.lastReviewedAt, isNull);
+    });
+
+    test('getWrongAnswer retrieves target question or returns null', () async {
+      const kidId = 'kid_get_single';
+      final record = WrongAnswerRecord(
+        questionId: 'q_find_me',
+        prompt: 'Find me',
+        questionType: QuestionType.wordProblem,
+        userAnswer: 'A',
+        timestamp: DateTime.now(),
+      );
+      await WrongAnswerRepository.saveWrongAnswer(kidId, record);
+
+      final found = await WrongAnswerRepository.getWrongAnswer(
+        kidId,
+        'q_find_me',
+      );
+      expect(found, isNotNull);
+      expect(found!.questionId, 'q_find_me');
+      expect(found.prompt, 'Find me');
+
+      final notFound = await WrongAnswerRepository.getWrongAnswer(
+        kidId,
+        'q_absent',
+      );
+      expect(notFound, isNull);
+
+      final emptyKid = await WrongAnswerRepository.getWrongAnswer(
+        '   ',
+        'q_find_me',
+      );
+      expect(emptyKid, isNull);
+
+      final emptyQ = await WrongAnswerRepository.getWrongAnswer(kidId, '   ');
+      expect(emptyQ, isNull);
+    });
+
+    test(
+      'deleteWrongAnswer removes single record and cleans key if empty',
+      () async {
+        const kidId = 'kid_del';
+        final r1 = WrongAnswerRecord(
+          questionId: 'q_del_1',
+          prompt: 'Prompt 1',
+          questionType: QuestionType.wordProblem,
+          userAnswer: '1',
+          timestamp: DateTime.now(),
+        );
+        final r2 = WrongAnswerRecord(
+          questionId: 'q_del_2',
+          prompt: 'Prompt 2',
+          questionType: QuestionType.wordProblem,
+          userAnswer: '2',
+          timestamp: DateTime.now(),
+        );
+        await WrongAnswerRepository.saveWrongAnswer(kidId, r1);
+        await WrongAnswerRepository.saveWrongAnswer(kidId, r2);
+
+        // Delete non-existent
+        final missing = await WrongAnswerRepository.deleteWrongAnswer(
+          kidId,
+          'q_unknown',
+        );
+        expect(missing, isFalse);
+
+        // Delete invalid parameters
+        expect(
+          await WrongAnswerRepository.deleteWrongAnswer('', 'q_del_1'),
+          isFalse,
+        );
+        expect(
+          await WrongAnswerRepository.deleteWrongAnswer(kidId, ' '),
+          isFalse,
+        );
+
+        // Delete r1
+        final deleted1 = await WrongAnswerRepository.deleteWrongAnswer(
+          kidId,
+          'q_del_1',
+        );
+        expect(deleted1, isTrue);
+        var list = await WrongAnswerRepository.getWrongAnswers(kidId);
+        expect(list.length, 1);
+        expect(list.first.questionId, 'q_del_2');
+
+        // Delete r2 (last item removes storage key)
+        final deleted2 = await WrongAnswerRepository.deleteWrongAnswer(
+          kidId,
+          'q_del_2',
+        );
+        expect(deleted2, isTrue);
+        list = await WrongAnswerRepository.getWrongAnswers(kidId);
+        expect(list, isEmpty);
+
+        final prefs = await SharedPreferences.getInstance();
+        expect(
+          prefs.containsKey(WrongAnswerRepository.storageKey(kidId)),
+          isFalse,
+        );
+      },
+    );
+
+    test('markAllResolved marks unresolved items for kid or lesson', () async {
+      const kidId = 'kid_mark_all';
+      final r1 = WrongAnswerRecord(
+        questionId: 'q_1',
+        prompt: 'P1',
+        questionType: QuestionType.wordProblem,
+        userAnswer: '1',
+        lessonId: 'L1',
+        timestamp: DateTime.now(),
+        isResolved: false,
+      );
+      final r2 = WrongAnswerRecord(
+        questionId: 'q_2',
+        prompt: 'P2',
+        questionType: QuestionType.wordProblem,
+        userAnswer: '2',
+        lessonId: 'L1',
+        timestamp: DateTime.now(),
+        isResolved: false,
+      );
+      final r3 = WrongAnswerRecord(
+        questionId: 'q_3',
+        prompt: 'P3',
+        questionType: QuestionType.wordProblem,
+        userAnswer: '3',
+        lessonId: 'L2',
+        timestamp: DateTime.now(),
+        isResolved: false,
+      );
+
+      await WrongAnswerRepository.saveWrongAnswer(kidId, r1);
+      await WrongAnswerRepository.saveWrongAnswer(kidId, r2);
+      await WrongAnswerRepository.saveWrongAnswer(kidId, r3);
+
+      // Mark only L1
+      final updatedL1 = await WrongAnswerRepository.markAllResolved(
+        kidId,
+        lessonId: 'L1',
+      );
+      expect(updatedL1, 2);
+
+      final l1Unresolved = await WrongAnswerRepository.getWrongAnswers(
+        kidId,
+        lessonId: 'L1',
+        includeResolved: false,
+      );
+      expect(l1Unresolved, isEmpty);
+
+      final l2Unresolved = await WrongAnswerRepository.getWrongAnswers(
+        kidId,
+        lessonId: 'L2',
+        includeResolved: false,
+      );
+      expect(l2Unresolved.length, 1);
+
+      // Re-running on L1 updates 0
+      expect(
+        await WrongAnswerRepository.markAllResolved(kidId, lessonId: 'L1'),
+        0,
+      );
+
+      // Mark all remaining
+      final updatedAll = await WrongAnswerRepository.markAllResolved(kidId);
+      expect(updatedAll, 1);
+
+      final allUnresolved = await WrongAnswerRepository.getWrongAnswers(
+        kidId,
+        includeResolved: false,
+      );
+      expect(allUnresolved, isEmpty);
+
+      // Invalid kidId
+      expect(await WrongAnswerRepository.markAllResolved('   '), 0);
+    });
+
+    test('recordReviewAttempt updates attempt count, lastReviewedAt and resolution state', () async {
+      const kidId = 'kid_review';
+      final record = WrongAnswerRecord(
+        questionId: 'q_rev',
+        prompt: 'Prompt',
+        questionType: QuestionType.multiplicationTable,
+        userAnswer: '20',
+        timestamp: DateTime.now(),
+        isResolved: false,
+      );
+      await WrongAnswerRepository.saveWrongAnswer(kidId, record);
+
+      // First review attempt: incorrect
+      final firstAttempt = await WrongAnswerRepository.recordReviewAttempt(
+        kidId,
+        'q_rev',
+        isCorrect: false,
+      );
+      expect(firstAttempt, isTrue);
+
+      var item = await WrongAnswerRepository.getWrongAnswer(kidId, 'q_rev');
+      expect(item, isNotNull);
+      expect(item!.reviewCount, 1);
+      expect(item.isResolved, isFalse);
+      expect(item.lastReviewedAt, isNotNull);
+
+      // Second review attempt: correct
+      final secondAttempt = await WrongAnswerRepository.recordReviewAttempt(
+        kidId,
+        'q_rev',
+        isCorrect: true,
+      );
+      expect(secondAttempt, isTrue);
+
+      item = await WrongAnswerRepository.getWrongAnswer(kidId, 'q_rev');
+      expect(item!.reviewCount, 2);
+      expect(item.isResolved, isTrue);
+
+      // Missing item or empty kidId
+      expect(
+        await WrongAnswerRepository.recordReviewAttempt(
+          kidId,
+          'missing',
+          isCorrect: true,
+        ),
+        isFalse,
+      );
+      expect(
+        await WrongAnswerRepository.recordReviewAttempt(
+          '',
+          'q_rev',
+          isCorrect: true,
+        ),
+        isFalse,
+      );
+    });
+
+    test('getLessonIdsWithWrongAnswers returns unique lesson IDs with unresolved filter', () async {
+      const kidId = 'kid_lessons';
+      final r1 = WrongAnswerRecord(
+        questionId: 'q_1',
+        prompt: 'P1',
+        questionType: QuestionType.wordProblem,
+        userAnswer: '1',
+        lessonId: 'lesson_math_1',
+        timestamp: DateTime.now(),
+        isResolved: false,
+      );
+      final r2 = WrongAnswerRecord(
+        questionId: 'q_2',
+        prompt: 'P2',
+        questionType: QuestionType.wordProblem,
+        userAnswer: '2',
+        lessonId: 'lesson_math_1',
+        timestamp: DateTime.now(),
+        isResolved: false,
+      );
+      final r3 = WrongAnswerRecord(
+        questionId: 'q_3',
+        prompt: 'P3',
+        questionType: QuestionType.wordProblem,
+        userAnswer: '3',
+        lessonId: 'lesson_geometry_2',
+        timestamp: DateTime.now(),
+        isResolved: true,
+      );
+      final r4 = WrongAnswerRecord(
+        questionId: 'q_4',
+        prompt: 'P4',
+        questionType: QuestionType.wordProblem,
+        userAnswer: '4',
+        lessonId: null, // Arena or drill without lessonId
+        timestamp: DateTime.now(),
+        isResolved: false,
+      );
+
+      await WrongAnswerRepository.saveWrongAnswer(kidId, r1);
+      await WrongAnswerRepository.saveWrongAnswer(kidId, r2);
+      await WrongAnswerRepository.saveWrongAnswer(kidId, r3);
+      await WrongAnswerRepository.saveWrongAnswer(kidId, r4);
+
+      // Only unresolved lessons
+      final unresolvedLessons =
+          await WrongAnswerRepository.getLessonIdsWithWrongAnswers(
+            kidId,
+            onlyUnresolved: true,
+          );
+      expect(unresolvedLessons, ['lesson_math_1']);
+
+      // All lessons
+      final allLessons =
+          await WrongAnswerRepository.getLessonIdsWithWrongAnswers(
+            kidId,
+            onlyUnresolved: false,
+          );
+      expect(allLessons.toSet(), {'lesson_math_1', 'lesson_geometry_2'});
+
+      // Empty kidId
+      expect(
+        await WrongAnswerRepository.getLessonIdsWithWrongAnswers(''),
+        isEmpty,
+      );
+    });
+  });
 }

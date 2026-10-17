@@ -179,4 +179,136 @@ class WrongAnswerRepository {
     );
     return list.length;
   }
+
+  static Future<WrongAnswerRecord?> getWrongAnswer(
+    String kidId,
+    String questionId, {
+    SharedPreferences? prefs,
+  }) async {
+    if (kidId.trim().isEmpty || questionId.trim().isEmpty) return null;
+    final list = await getWrongAnswers(
+      kidId,
+      includeResolved: null,
+      prefs: prefs,
+    );
+    final index = list.indexWhere((r) => r.questionId == questionId);
+    return index >= 0 ? list[index] : null;
+  }
+
+  static Future<bool> deleteWrongAnswer(
+    String kidId,
+    String questionId, {
+    SharedPreferences? prefs,
+  }) async {
+    if (kidId.trim().isEmpty || questionId.trim().isEmpty) return false;
+    try {
+      final p = prefs ?? await SharedPreferences.getInstance();
+      final current = await getWrongAnswers(
+        kidId,
+        includeResolved: null,
+        prefs: p,
+      );
+      final initialLength = current.length;
+      final remaining = current
+          .where((r) => r.questionId != questionId)
+          .toList();
+      if (remaining.length == initialLength) return false;
+
+      if (remaining.isEmpty) {
+        await p.remove(storageKey(kidId));
+      } else {
+        final encoded = jsonEncode(remaining.map((r) => r.toMap()).toList());
+        await p.setString(storageKey(kidId), encoded);
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<int> markAllResolved(
+    String kidId, {
+    String? lessonId,
+    SharedPreferences? prefs,
+  }) async {
+    if (kidId.trim().isEmpty) return 0;
+    try {
+      final p = prefs ?? await SharedPreferences.getInstance();
+      final current = await getWrongAnswers(
+        kidId,
+        includeResolved: null,
+        prefs: p,
+      );
+      if (current.isEmpty) return 0;
+
+      var updatedCount = 0;
+      final updated = current.map((r) {
+        if ((lessonId == null || r.lessonId == lessonId) && !r.isResolved) {
+          updatedCount++;
+          return r.copyWith(isResolved: true);
+        }
+        return r;
+      }).toList();
+
+      if (updatedCount > 0) {
+        final encoded = jsonEncode(updated.map((r) => r.toMap()).toList());
+        await p.setString(storageKey(kidId), encoded);
+      }
+      return updatedCount;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  static Future<bool> recordReviewAttempt(
+    String kidId,
+    String questionId, {
+    required bool isCorrect,
+    SharedPreferences? prefs,
+  }) async {
+    if (kidId.trim().isEmpty || questionId.trim().isEmpty) return false;
+    try {
+      final p = prefs ?? await SharedPreferences.getInstance();
+      final current = await getWrongAnswers(
+        kidId,
+        includeResolved: null,
+        prefs: p,
+      );
+      final index = current.indexWhere((r) => r.questionId == questionId);
+      if (index < 0) return false;
+
+      final updated = List<WrongAnswerRecord>.from(current);
+      final existing = updated[index];
+      updated[index] = existing.copyWith(
+        isResolved: isCorrect,
+        reviewCount: existing.reviewCount + 1,
+        lastReviewedAt: DateTime.now(),
+      );
+
+      final encoded = jsonEncode(updated.map((r) => r.toMap()).toList());
+      await p.setString(storageKey(kidId), encoded);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<List<String>> getLessonIdsWithWrongAnswers(
+    String kidId, {
+    bool onlyUnresolved = true,
+    SharedPreferences? prefs,
+  }) async {
+    final list = await getWrongAnswers(
+      kidId,
+      includeResolved: onlyUnresolved ? false : null,
+      prefs: prefs,
+    );
+    final lessonIds = <String>{};
+    for (final item in list) {
+      if (item.lessonId != null && item.lessonId!.trim().isNotEmpty) {
+        lessonIds.add(item.lessonId!);
+      }
+    }
+    return lessonIds.toList();
+  }
 }
