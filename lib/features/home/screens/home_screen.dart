@@ -1,3 +1,5 @@
+import '../../../data/repositories/kid_repository.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -52,7 +54,7 @@ class HomeScreen extends StatelessWidget {
       appBar: const AppHeader(),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 150),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -338,55 +340,81 @@ class HomeScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
-                            .asMap()
-                            .entries
-                            .map((entry) {
-                              final isDone =
-                                  entry.key <
-                                  (kid.streakCount % 7 == 0
-                                      ? 7
-                                      : kid.streakCount % 7);
-                              return Column(
-                                children: [
-                                  Container(
-                                    width: 34,
-                                    height: 34,
-                                    decoration: BoxDecoration(
-                                      color: isDone
-                                          ? AppColors.accentGoldLight
-                                          : AppColors.surfaceSubtle,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: isDone
-                                            ? AppColors.accentGold
-                                            : AppColors.borderSubtle,
+                      FutureBuilder<Set<DateTime>>(
+                        future: KidRepository.fetchStudyDays(kid.id),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return const Text(
+                              'Chưa tải được lịch sử học',
+                              style: TextStyle(fontSize: 12, color: Colors.red),
+                            );
+                          }
+
+                          if (!snapshot.hasData) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+
+                          final studyDays = snapshot.data!;
+                          final now = DateTime.now();
+                          final monday = DateTime(
+                            now.year,
+                            now.month,
+                            now.day - now.weekday + 1,
+                          );
+
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
+                                .asMap()
+                                .entries
+                                .map((entry) {
+                                  final date = monday.add(
+                                    Duration(days: entry.key),
+                                  );
+                                  final isDone = studyDays.contains(date);
+
+                                  return Column(
+                                    children: [
+                                      Container(
+                                        width: 34,
+                                        height: 34,
+                                        decoration: BoxDecoration(
+                                          color: isDone
+                                              ? AppColors.accentGoldLight
+                                              : AppColors.surfaceSubtle,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: isDone
+                                                ? AppColors.accentGold
+                                                : AppColors.borderSubtle,
+                                          ),
+                                        ),
+                                        child: Center(
+                                          child: Icon(
+                                            Icons.check_rounded,
+                                            size: 18,
+                                            color: isDone
+                                                ? const Color(0xFFB45309)
+                                                : Colors.transparent,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                    child: Center(
-                                      child: Icon(
-                                        Icons.check_rounded,
-                                        size: 18,
-                                        color: isDone
-                                            ? const Color(0xFFB45309)
-                                            : Colors.transparent,
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        entry.value,
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.textSecondary,
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    entry.value,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              );
-                            })
-                            .toList(),
+                                    ],
+                                  );
+                                })
+                                .toList(),
+                          );
+                        },
                       ),
                     ],
                   ),
