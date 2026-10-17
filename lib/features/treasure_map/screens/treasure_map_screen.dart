@@ -1,7 +1,9 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
+
 import '../../../data/models/lesson.dart';
 import '../../../data/providers/app_state_provider.dart';
 import '../popups/lesson_intro_sheet.dart';
@@ -25,7 +27,9 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
       final state = context.read<AppStateProvider>();
       final lessons = state.currentLessons;
       final activeIndex = lessons.indexWhere(
-        (l) => l.status == LessonStatus.inProgress || l.status == LessonStatus.available,
+        (l) =>
+            l.status == LessonStatus.inProgress ||
+            l.status == LessonStatus.available,
       );
       if (activeIndex > 3 && _scrollController.hasClients) {
         _scrollController.animateTo(
@@ -48,16 +52,38 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
     final state = context.watch<AppStateProvider>();
     final kid = state.currentKid;
     final lessons = state.currentLessons;
+    if (lessons.isEmpty) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(state.syncError ?? 'Chưa có bài học khả dụng.'),
+              TextButton(
+                onPressed: state.refreshFromCloud,
+                child: const Text('Tải lại'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     // Tìm bài đang học
     final activeLesson = lessons.firstWhere(
-      (l) => l.status == LessonStatus.inProgress || l.status == LessonStatus.available,
+      (l) =>
+          l.status == LessonStatus.inProgress ||
+          l.status == LessonStatus.available,
       orElse: () => lessons.first,
     );
 
-    final completedCount = lessons.where((l) => l.status == LessonStatus.completed).length;
+    final completedCount = lessons
+        .where((l) => l.status == LessonStatus.completed)
+        .length;
     final totalCount = lessons.length;
-    final progressPercent = totalCount > 0 ? (completedCount / totalCount) : 0.0;
+    final progressPercent = totalCount > 0
+        ? (completedCount / totalCount)
+        : 0.0;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -79,7 +105,12 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                     child: Column(
                       children: [
                         // Card Header Chương Học
-                        _buildChapterCard(kid.grade, completedCount, totalCount, progressPercent),
+                        _buildChapterCard(
+                          kid.grade,
+                          completedCount,
+                          totalCount,
+                          progressPercent,
+                        ),
                         const SizedBox(height: 24),
 
                         // Lộ trình 30 Nodes quanh co
@@ -105,12 +136,18 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
   }
 
   /// 1. Top Bar với icon Cú MathLingo, Tag Lớp, Điểm Sao, Tim và Profile Avatar
-  Widget _buildTopStatsBar(BuildContext context, AppStateProvider state, dynamic kid) {
+  Widget _buildTopStatsBar(
+    BuildContext context,
+    AppStateProvider state,
+    dynamic kid,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1.5)),
+        border: Border(
+          bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1.5),
+        ),
       ),
       child: Row(
         children: [
@@ -138,8 +175,11 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
               child: Image.asset(
                 'assets/images/owl_mascot.jpg',
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    const Icon(Icons.school_rounded, color: Colors.white, size: 20),
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.school_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
               ),
             ),
           ),
@@ -151,26 +191,44 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                 children: [
                   const Text(
                     'MathLingo',
-                    style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15, color: Color(0xFF1E293B)),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 15,
+                      color: Color(0xFF1E293B),
+                    ),
                   ),
                   const SizedBox(width: 6),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFFFEDD5),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: const Color(0xFFFDBA74), width: 1),
+                      border: Border.all(
+                        color: const Color(0xFFFDBA74),
+                        width: 1,
+                      ),
                     ),
                     child: Text(
                       'LỚP ${kid.grade}',
-                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFFEA580C)),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFFEA580C),
+                      ),
                     ),
                   ),
                 ],
               ),
               const Text(
                 'Hành trình bài học',
-                style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8), fontWeight: FontWeight.w500),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Color(0xFF94A3B8),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
@@ -190,7 +248,11 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                 const SizedBox(width: 3),
                 Text(
                   '${kid.streakCount}',
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: Color(0xFFD97706)),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    color: Color(0xFFD97706),
+                  ),
                 ),
               ],
             ),
@@ -207,11 +269,19 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.favorite_rounded, color: Color(0xFFF43F5E), size: 14),
+                const Icon(
+                  Icons.favorite_rounded,
+                  color: Color(0xFFF43F5E),
+                  size: 14,
+                ),
                 const SizedBox(width: 3),
                 Text(
                   '${kid.currentHearts}/5',
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: Color(0xFFE11D48)),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12,
+                    color: Color(0xFFE11D48),
+                  ),
                 ),
               ],
             ),
@@ -228,7 +298,8 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                 width: 32,
                 height: 32,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const Text('🦉', style: TextStyle(fontSize: 16)),
+                errorBuilder: (_, _, _) =>
+                    const Text('🦉', style: TextStyle(fontSize: 16)),
               ),
             ),
           ),
@@ -238,7 +309,12 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
   }
 
   /// 2. Header Thẻ Chương Học & Thanh Tiến Độ
-  Widget _buildChapterCard(int grade, int completed, int total, double progress) {
+  Widget _buildChapterCard(
+    int grade,
+    int completed,
+    int total,
+    double progress,
+  ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
@@ -278,7 +354,11 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
               const SizedBox(width: 8),
               Text(
                 'Lớp $grade • Kỳ 1 & 2',
-                style: const TextStyle(fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF64748B),
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const Spacer(),
               Container(
@@ -290,11 +370,19 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.stars_rounded, color: Color(0xFFF59E0B), size: 14),
+                    const Icon(
+                      Icons.stars_rounded,
+                      color: Color(0xFFF59E0B),
+                      size: 14,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       '$completed/$total',
-                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: Color(0xFFB45309)),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                        color: Color(0xFFB45309),
+                      ),
                     ),
                   ],
                 ),
@@ -306,16 +394,27 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
             grade == 5
                 ? 'Toán Lớp 5: Phân Số, Số Thập Phân & Chuyển Động'
                 : 'Khám Phá Bản Đồ 30 Bài Toán Thú Vị Lớp $grade',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF0F172A),
+            ),
           ),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Tiến độ lộ trình', style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+              const Text(
+                'Tiến độ lộ trình',
+                style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+              ),
               Text(
                 '$completed/$total Bài (${(progress * 100).toInt()}%)',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF059669)),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF059669),
+                ),
               ),
             ],
           ),
@@ -326,7 +425,9 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
               value: progress,
               minHeight: 8,
               backgroundColor: const Color(0xFFE2E8F0),
-              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                Color(0xFF10B981),
+              ),
             ),
           ),
         ],
@@ -335,7 +436,11 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
   }
 
   /// 3. Lộ Trình Vẽ Đường Cong Quanh Co (S-Curve Road)
-  Widget _buildCurvedMapPath(BuildContext context, List<Lesson> lessons, Lesson activeLesson) {
+  Widget _buildCurvedMapPath(
+    BuildContext context,
+    List<Lesson> lessons,
+    Lesson activeLesson,
+  ) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final screenWidth = constraints.maxWidth;
@@ -367,16 +472,35 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
               ),
 
               // Thêm Rương Thần Kỳ hoặc Quà Tặng dọc đường (Sau bài 5, 10, 20...)
-              _buildMilestoneReward(positions, 4, 'RƯƠNG VÀNG LỘ TRÌNH', 'Mở sau bài 5'),
-              _buildMilestoneReward(positions, 9, 'ĐẤU TRƯỜNG BOSS CUỐI', 'Mở sau bài 10'),
-              _buildMilestoneReward(positions, 19, 'HUY HIỆU DŨNG CĨ', 'Mở sau bài 20'),
+              _buildMilestoneReward(
+                positions,
+                4,
+                'RƯƠNG VÀNG LỘ TRÌNH',
+                'Mở sau bài 5',
+              ),
+              _buildMilestoneReward(
+                positions,
+                9,
+                'ĐẤU TRƯỜNG BOSS CUỐI',
+                'Mở sau bài 10',
+              ),
+              _buildMilestoneReward(
+                positions,
+                19,
+                'HUY HIỆU DŨNG CĨ',
+                'Mở sau bài 20',
+              ),
 
               // Vẽ 30 Trạm Node Học
               for (int i = 0; i < lessons.length; i++)
                 Positioned(
                   left: positions[i].dx - 36, // Tâm của nút 72px
                   top: positions[i].dy - 36,
-                  child: _buildStationNode(context, lessons[i], activeLesson.lessonNumber == lessons[i].lessonNumber),
+                  child: _buildStationNode(
+                    context,
+                    lessons[i],
+                    activeLesson.lessonNumber == lessons[i].lessonNumber,
+                  ),
                 ),
             ],
           ),
@@ -404,36 +528,45 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
               if (isActive)
                 Positioned(
                   top: -34,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFFF7A00).withAlpha(120), width: 1.5),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFFF7A00).withAlpha(40),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Text('🦉', style: TextStyle(fontSize: 12)),
-                        SizedBox(width: 4),
-                        Text(
-                          'Học ở đây nè!',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFFEA580C),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ).animate(onPlay: (c) => c.repeat(reverse: true)).moveY(begin: 0, end: -4, duration: 800.ms),
+                  child:
+                      Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: const Color(0xFFFF7A00).withAlpha(120),
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFFFF7A00).withAlpha(40),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Text('🦉', style: TextStyle(fontSize: 12)),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Học ở đây nè!',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFFEA580C),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                          .animate(onPlay: (c) => c.repeat(reverse: true))
+                          .moveY(begin: 0, end: -4, duration: 800.ms),
                 ),
 
               // Hiệu ứng Glow tỏa sáng khi Đang Học
@@ -466,28 +599,26 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                           end: Alignment.bottomRight,
                         )
                       : isActive
-                          ? const LinearGradient(
-                              colors: [Color(0xFFFFA500), Color(0xFFFF5500)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            )
-                          : const LinearGradient(
-                              colors: [Color(0xFFE2E8F0), Color(0xFFCBD5E1)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 3.5,
-                  ),
+                      ? const LinearGradient(
+                          colors: [Color(0xFFFFA500), Color(0xFFFF5500)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                      : const LinearGradient(
+                          colors: [Color(0xFFE2E8F0), Color(0xFFCBD5E1)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                  border: Border.all(color: Colors.white, width: 3.5),
                   boxShadow: [
                     BoxShadow(
-                      color: (isCompleted
-                              ? const Color(0xFF059669)
-                              : isActive
+                      color:
+                          (isCompleted
+                                  ? const Color(0xFF059669)
+                                  : isActive
                                   ? const Color(0xFFFF5500)
                                   : const Color(0xFF94A3B8))
-                          .withAlpha(isLocked ? 30 : 90),
+                              .withAlpha(isLocked ? 30 : 90),
                       blurRadius: isLocked ? 4 : 12,
                       offset: const Offset(0, 4),
                     ),
@@ -495,10 +626,22 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                 ),
                 child: Center(
                   child: isCompleted
-                      ? const Icon(Icons.check_rounded, color: Colors.white, size: 34)
+                      ? const Icon(
+                          Icons.check_rounded,
+                          color: Colors.white,
+                          size: 34,
+                        )
                       : isActive
-                          ? const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 38)
-                          : const Icon(Icons.lock_rounded, color: Color(0xFF64748B), size: 28),
+                      ? const Icon(
+                          Icons.play_arrow_rounded,
+                          color: Colors.white,
+                          size: 38,
+                        )
+                      : const Icon(
+                          Icons.lock_rounded,
+                          color: Color(0xFF64748B),
+                          size: 28,
+                        ),
                 ),
               ),
             ],
@@ -524,7 +667,9 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
               ],
             ),
             child: Text(
-              isActive ? 'Bài ${lesson.lessonNumber} • ĐANG HỌC' : 'Bài ${lesson.lessonNumber}',
+              isActive
+                  ? 'Bài ${lesson.lessonNumber} • ĐANG HỌC'
+                  : 'Bài ${lesson.lessonNumber}',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
@@ -538,7 +683,12 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
   }
 
   /// Mốc Rương / Phần Thưởng phụ trên bản đồ
-  Widget _buildMilestoneReward(List<Offset> positions, int index, String label, String sub) {
+  Widget _buildMilestoneReward(
+    List<Offset> positions,
+    int index,
+    String label,
+    String sub,
+  ) {
     if (index >= positions.length) return const SizedBox.shrink();
     final pos = positions[index];
 
@@ -571,11 +721,19 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Color(0xFFB45309)),
+                  style: const TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFFB45309),
+                  ),
                 ),
                 Text(
                   sub,
-                  style: const TextStyle(fontSize: 8, color: Color(0xFF94A3B8), fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 8,
+                    color: Color(0xFF94A3B8),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -592,7 +750,10 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFFDBA74).withAlpha(160), width: 1.5),
+        border: Border.all(
+          color: const Color(0xFFFDBA74).withAlpha(160),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFFFF7A00).withAlpha(35),
@@ -635,7 +796,11 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                 ),
                 child: Text(
                   '+${activeLesson.xpReward} XP',
-                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFFB45309)),
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFFB45309),
+                  ),
                 ),
               ),
               const SizedBox(width: 6),
@@ -647,7 +812,11 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                 ),
                 child: const Text(
                   '+10 Xu 🪙',
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFFB45309)),
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFFB45309),
+                  ),
                 ),
               ),
             ],
@@ -657,7 +826,11 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
             activeLesson.title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF0F172A),
+            ),
           ),
           Text(
             activeLesson.subtitle,
@@ -703,7 +876,11 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                           ),
                         ),
                         SizedBox(width: 6),
-                        Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 18),
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          color: Colors.white,
+                          size: 18,
+                        ),
                       ],
                     ),
                   ),
@@ -725,15 +902,26 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFF7ED),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFFFEDD5), width: 1.5),
+                    border: Border.all(
+                      color: const Color(0xFFFFEDD5),
+                      width: 1.5,
+                    ),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
-                      Icon(Icons.camera_alt_outlined, color: Color(0xFFEA580C), size: 18),
+                      Icon(
+                        Icons.camera_alt_outlined,
+                        color: Color(0xFFEA580C),
+                        size: 18,
+                      ),
                       Text(
                         'AI SCAN',
-                        style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Color(0xFFEA580C)),
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFFEA580C),
+                        ),
                       ),
                     ],
                   ),
@@ -779,7 +967,9 @@ class _MapCurvedRoadPainter extends CustomPainter {
       final isCompletedPath = i < activeLessonIndex;
 
       final paintRoad = Paint()
-        ..color = isCompletedPath ? const Color(0xFF10B981) : const Color(0xFFCBD5E1)
+        ..color = isCompletedPath
+            ? const Color(0xFF10B981)
+            : const Color(0xFFCBD5E1)
         ..strokeWidth = isCompletedPath ? 5.5 : 4.0
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round;
@@ -789,14 +979,7 @@ class _MapCurvedRoadPainter extends CustomPainter {
 
       // Điểm uốn cong Bezier mượt mà giữa 2 trạm
       final midY = (p1.dy + p2.dy) / 2;
-      path.cubicTo(
-        p1.dx,
-        midY,
-        p2.dx,
-        midY,
-        p2.dx,
-        p2.dy,
-      );
+      path.cubicTo(p1.dx, midY, p2.dx, midY, p2.dx, p2.dy);
 
       canvas.drawPath(path, paintRoad);
     }

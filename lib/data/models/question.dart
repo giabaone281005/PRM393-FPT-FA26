@@ -19,6 +19,31 @@ class SocraticHint {
 }
 
 class Question {
+  factory Question.fromMap(Map<String, dynamic> q) {
+    final payload = Map<String, dynamic>.from(q['payload'] as Map? ?? {});
+    return Question(
+      id: q['id'].toString(),
+      type: switch (q['question_type']) {
+        'drag_counters' => QuestionType.dragCounters,
+        'clock_rotation' => QuestionType.clockRotation,
+        'area_grid' => QuestionType.areaGrid,
+        'multiplication_table' => QuestionType.multiplicationTable,
+        _ => QuestionType.wordProblem,
+      },
+      prompt: q['prompt']?.toString() ?? '',
+      data: payload,
+      correctAnswer: payload['correctAnswer'] ?? payload['answer'],
+      socraticHints: (q['socratic_hints'] as List? ?? [])
+          .map(
+            (h) => SocraticHint(
+              step: h['step'] ?? 1,
+              questionText: h['questionText'] ?? h['question_text'] ?? '',
+              hintText: h['hintText'] ?? h['hint_text'] ?? '',
+            ),
+          )
+          .toList(),
+    );
+  }
   final String id;
   final QuestionType type;
   final String prompt;

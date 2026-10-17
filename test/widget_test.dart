@@ -1,15 +1,16 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:mathlingo/main.dart';
 import 'package:mathlingo/data/providers/app_state_provider.dart';
 
 void main() {
-  testWidgets('MathLingo smoke test - renders header and title', (WidgetTester tester) async {
+  testWidgets('MathLingo smoke test - renders header and title', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => AppStateProvider()),
-        ],
+        providers: [ChangeNotifierProvider(create: (_) => AppStateProvider())],
         child: const MathLingoApp(),
       ),
     );
@@ -19,6 +20,9 @@ void main() {
 
     // Advance splash timer to complete navigation cleanly
     await tester.pump(const Duration(milliseconds: 2500));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
+    // Auth mascot intentionally animates continuously; settling is not expected.
+    expect(find.text('Đăng Nhập'), findsWidgets);
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 }

@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 
 class WordProblemWidget extends StatefulWidget {
   final Map<String, dynamic> data;
   final Function(bool isCorrect) onAnswerSubmitted;
+  final ValueChanged<dynamic>? onAnswerValue;
 
   const WordProblemWidget({
     super.key,
     required this.data,
     required this.onAnswerSubmitted,
+    this.onAnswerValue,
   });
 
   @override
@@ -29,11 +32,19 @@ class _WordProblemWidgetState extends State<WordProblemWidget> {
     super.initState();
     final rawOptions = widget.data['options'] as List? ?? [];
     _options = rawOptions.map((e) => e.toString()).toList();
-    _correctAnswer = (widget.data['correctAnswer'] ?? widget.data['answer'] ?? (_options.isNotEmpty ? _options.first : '')).toString();
+    _correctAnswer =
+        (widget.data['correctAnswer'] ??
+                widget.data['answer'] ??
+                (_options.isNotEmpty ? _options.first : ''))
+            .toString();
 
-    _highlightGiven = widget.data['given']?.toString() ?? 'Dữ kiện đề bài toán đã cho';
-    _highlightAction = widget.data['action']?.toString() ?? 'Phép tính hoặc thao tác phân tích';
-    _highlightTarget = widget.data['target']?.toString() ?? 'Đáp án hoặc kết quả cần tìm';
+    _highlightGiven =
+        widget.data['given']?.toString() ?? 'Dữ kiện đề bài toán đã cho';
+    _highlightAction =
+        widget.data['action']?.toString() ??
+        'Phép tính hoặc thao tác phân tích';
+    _highlightTarget =
+        widget.data['target']?.toString() ?? 'Đáp án hoặc kết quả cần tìm';
   }
 
   @override
@@ -55,7 +66,11 @@ class _WordProblemWidgetState extends State<WordProblemWidget> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.psychology_alt_rounded, color: Color(0xFF2563EB), size: 20),
+                  const Icon(
+                    Icons.psychology_alt_rounded,
+                    color: Color(0xFF2563EB),
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'PHÂN TÍCH TỪ KHÓA BÀI TOÁN',
@@ -70,17 +85,27 @@ class _WordProblemWidgetState extends State<WordProblemWidget> {
               const SizedBox(height: 10),
               RichText(
                 text: TextSpan(
-                  style: const TextStyle(fontSize: 14, color: AppColors.textPrimary, height: 1.5),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textPrimary,
+                    height: 1.5,
+                  ),
                   children: [
                     const TextSpan(text: '• Dữ liệu đã cho: '),
                     TextSpan(
                       text: '$_highlightGiven\n',
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryHover),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryHover,
+                      ),
                     ),
                     const TextSpan(text: '• Bản chất phép tính: '),
                     TextSpan(
                       text: '$_highlightAction\n',
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2563EB)),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2563EB),
+                      ),
                     ),
                     const TextSpan(text: '• Mục tiêu: '),
                     TextSpan(
@@ -117,7 +142,9 @@ class _WordProblemWidgetState extends State<WordProblemWidget> {
                 color: isSelected ? AppColors.primaryLight : Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : AppColors.borderSubtle,
+                  color: isSelected
+                      ? AppColors.primary
+                      : AppColors.borderSubtle,
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -129,7 +156,9 @@ class _WordProblemWidgetState extends State<WordProblemWidget> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isSelected ? AppColors.primary : AppColors.textMuted,
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.textMuted,
                         width: 2,
                       ),
                     ),
@@ -152,7 +181,9 @@ class _WordProblemWidgetState extends State<WordProblemWidget> {
                       option,
                       style: AppTypography.titleMedium.copyWith(
                         fontSize: 15,
-                        color: isSelected ? AppColors.primaryHover : AppColors.textPrimary,
+                        color: isSelected
+                            ? AppColors.primaryHover
+                            : AppColors.textPrimary,
                       ),
                     ),
                   ),
@@ -168,15 +199,25 @@ class _WordProblemWidgetState extends State<WordProblemWidget> {
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(52),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
           onPressed: _selectedOption == null
               ? null
               : () {
-                  final isRight = _selectedOption?.trim() == _correctAnswer.trim();
-                  widget.onAnswerSubmitted(isRight);
+                  final isRight =
+                      _selectedOption?.trim() == _correctAnswer.trim();
+                  if (widget.onAnswerValue != null) {
+                    widget.onAnswerValue!(_selectedOption);
+                  } else {
+                    widget.onAnswerSubmitted(isRight);
+                  }
                 },
-          child: const Text('CHỌN ĐÁP ÁN NÀY', style: TextStyle(fontWeight: FontWeight.bold)),
+          child: const Text(
+            'CHỌN ĐÁP ÁN NÀY',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );

@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -6,7 +7,9 @@ import 'package:mathlingo/features/onboarding/onboarding_screen.dart';
 import 'package:mathlingo/data/providers/app_state_provider.dart';
 
 void main() {
-  testWidgets('OnboardingScreen renders and pumps without layout exception', (tester) async {
+  testWidgets('OnboardingScreen renders and pumps without layout exception', (
+    tester,
+  ) async {
     // Set a typical mobile/tablet test size
     tester.view.physicalSize = const Size(800, 1200);
     tester.view.devicePixelRatio = 1.0;
@@ -14,12 +17,8 @@ void main() {
 
     await tester.pumpWidget(
       MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => AppStateProvider()),
-        ],
-        child: const MaterialApp(
-          home: OnboardingScreen(),
-        ),
+        providers: [ChangeNotifierProvider(create: (_) => AppStateProvider())],
+        child: const MaterialApp(home: OnboardingScreen()),
       ),
     );
 

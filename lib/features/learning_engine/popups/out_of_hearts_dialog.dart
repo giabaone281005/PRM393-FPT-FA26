@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../practice_garden/practice_garden_screen.dart';
@@ -18,10 +19,16 @@ class OutOfHeartsDialog extends StatelessWidget {
               color: AppColors.accentRedLight,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.favorite_border_rounded, color: AppColors.heart),
+            child: const Icon(
+              Icons.favorite_border_rounded,
+              color: AppColors.heart,
+            ),
           ),
           const SizedBox(width: 10),
-          Text('Bé Đã Hết Tim! (BR-03)', style: AppTypography.titleLarge.copyWith(fontSize: 18)),
+          Text(
+            'Bé Đã Hết Tim! (BR-03)',
+            style: AppTypography.titleLarge.copyWith(fontSize: 18),
+          ),
         ],
       ),
       content: Column(
@@ -47,7 +54,11 @@ class OutOfHeartsDialog extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Mỗi câu tính nhẩm đúng = hồi phục 1 Tim năng lượng ❤️',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF15803D)),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF15803D),
+                    ),
                   ),
                 ),
               ],
@@ -67,7 +78,9 @@ class OutOfHeartsDialog extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.accentGreen,
             foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
           ),
           onPressed: () {
             Navigator.pop(context);

@@ -1,10 +1,13 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../../core/supabase/supabase_service.dart';
 import '../models/subscription_model.dart';
 
 class SubscriptionRepository {
   /// Lấy gói dịch vụ hiện tại của phụ huynh
-  static Future<SubscriptionModel> fetchCurrentSubscription({String? parentId}) async {
+  static Future<SubscriptionModel> fetchCurrentSubscription({
+    String? parentId,
+  }) async {
     final client = SupabaseService.client;
     final uid = parentId ?? SupabaseService.currentUser?.id;
 
@@ -23,8 +26,8 @@ class SubscriptionRepository {
         return SubscriptionModel.fromMap(res);
       }
       return SubscriptionModel.defaultBasic(uid);
-    } catch (e) {
-      return SubscriptionModel.defaultBasic(uid);
+    } catch (_) {
+      rethrow;
     }
   }
 
@@ -32,31 +35,11 @@ class SubscriptionRepository {
   static Future<bool> checkIfAdmin() async {
     final client = SupabaseService.client;
     final uid = SupabaseService.currentUser?.id;
-    final email = SupabaseService.currentUser?.email?.toLowerCase();
-
-    // Fallback nhận diện trực tiếp qua email
-    if (email == 'admin@mathlingo.vn' || email == 'admin.moi@mathlingo.vn') return true;
 
     if (client == null || uid == null) return false;
 
     try {
-      // 1. Kiểm tra bảng public.admins (như trên Supabase Dashboard của bạn)
-      final adminRow = await client
-          .from('admins')
-          .select('id')
-          .or('id.eq.$uid,email.eq.${email ?? ""}')
-          .maybeSingle();
-      if (adminRow != null) return true;
-
-      // 2. Kiểm tra bảng public.user_roles
-      final res = await client
-          .from('user_roles')
-          .select()
-          .eq('user_id', uid)
-          .eq('role', 'admin')
-          .maybeSingle();
-
-      return res != null;
+      return await client.rpc('is_admin') == true;
     } catch (_) {
       return false;
     }
@@ -75,12 +58,15 @@ class SubscriptionRepository {
     }
 
     try {
-      await client.rpc('admin_upgrade_subscription', params: {
-        'target_parent_id': parentId,
-        'new_tier': tier.name,
-        'duration_days': durationDays,
-        'upgrade_notes': notes,
-      });
+      await client.rpc(
+        'admin_upgrade_subscription',
+        params: {
+          'target_parent_id': parentId,
+          'new_tier': tier.name,
+          'duration_days': durationDays,
+          'upgrade_notes': notes,
+        },
+      );
       return (success: true, error: null);
     } on PostgrestException catch (e) {
       return (success: false, error: e.message);

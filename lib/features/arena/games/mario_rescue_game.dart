@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+
 import '../../../../data/providers/app_state_provider.dart';
 
 class MarioPrincessRescueGame extends StatefulWidget {
@@ -13,7 +15,8 @@ class MarioPrincessRescueGame extends StatefulWidget {
   });
 
   @override
-  State<MarioPrincessRescueGame> createState() => _MarioPrincessRescueGameState();
+  State<MarioPrincessRescueGame> createState() =>
+      _MarioPrincessRescueGameState();
 }
 
 class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
@@ -334,14 +337,18 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
                   ),
                   // Close button
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white, size: 20),
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                     onPressed: () {
                       widget.onGameOver();
                       Navigator.pop(context);
                     },
-                  )
+                  ),
                 ],
               ),
             ),
@@ -369,31 +376,54 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
                         child: Stack(
                           children: [
                             // 1. Mây trắng viền đen mắt đen kiểu Mario Bros 3
-                            Positioned(top: 25, left: 120, child: _buildRetroMarioCloud()),
-                            Positioned(top: 45, left: 450, child: _buildRetroMarioCloud()),
-                            Positioned(top: 30, left: 820, child: _buildRetroMarioCloud()),
-                            Positioned(top: 40, left: 1120, child: _buildRetroMarioCloud()),
+                            Positioned(
+                              top: 25,
+                              left: 120,
+                              child: _buildRetroMarioCloud(),
+                            ),
+                            Positioned(
+                              top: 45,
+                              left: 450,
+                              child: _buildRetroMarioCloud(),
+                            ),
+                            Positioned(
+                              top: 30,
+                              left: 820,
+                              child: _buildRetroMarioCloud(),
+                            ),
+                            Positioned(
+                              top: 40,
+                              left: 1120,
+                              child: _buildRetroMarioCloud(),
+                            ),
 
                             // 2. Tiền xu lơ lửng dọc đường (Giống hàng đồng xu trên ảnh mẫu)
-                            ...List.generate(5, (i) => Positioned(
-                              left: 60.0 + (i * 26.0),
-                              bottom: 55,
-                              child: _buildPixelCoin(),
-                            )),
+                            ...List.generate(
+                              5,
+                              (i) => Positioned(
+                                left: 60.0 + (i * 26.0),
+                                bottom: 55,
+                                child: _buildPixelCoin(),
+                              ),
+                            ),
 
                             // 3. Khối tháp hộp xanh (Blue X-Blocks kiểu Mario 3)
-                            ..._blueBlockTowerX.map((bx) => Positioned(
-                                  left: bx,
-                                  bottom: 40,
-                                  child: _buildBlueBlockTower(),
-                                )),
+                            ..._blueBlockTowerX.map(
+                              (bx) => Positioned(
+                                left: bx,
+                                bottom: 40,
+                                child: _buildBlueBlockTower(),
+                              ),
+                            ),
 
                             // 4. Các ống nước xanh kinh điển chuẩn 8-bit (Green Warp Pipes)
-                            ..._pipePositions.map((px) => Positioned(
-                                  left: px,
-                                  bottom: 40,
-                                  child: _buildPixelGreenPipe(),
-                                )),
+                            ..._pipePositions.map(
+                              (px) => Positioned(
+                                left: px,
+                                bottom: 40,
+                                child: _buildPixelGreenPipe(),
+                              ),
+                            ),
 
                             // 5. Quái vật canh giữ dọc đường
                             ..._monsters.map((m) {
@@ -401,7 +431,10 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
                                 return Positioned(
                                   left: m['x'],
                                   bottom: 46,
-                                  child: const Text('💨', style: TextStyle(fontSize: 22)),
+                                  child: const Text(
+                                    '💨',
+                                    style: TextStyle(fontSize: 22),
+                                  ),
                                 );
                               }
                               return Positioned(
@@ -410,18 +443,31 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
                                 child: Column(
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 5,
+                                        vertical: 1,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: Colors.black,
-                                        border: Border.all(color: Colors.white, width: 1),
+                                        border: Border.all(
+                                          color: Colors.white,
+                                          width: 1,
+                                        ),
                                       ),
                                       child: const Text(
                                         'MATH',
-                                        style: TextStyle(fontSize: 7, fontWeight: FontWeight.w900, color: Colors.yellow),
+                                        style: TextStyle(
+                                          fontSize: 7,
+                                          fontWeight: FontWeight.w900,
+                                          color: Colors.yellow,
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(height: 2),
-                                    Text(m['emoji'], style: const TextStyle(fontSize: 28)),
+                                    Text(
+                                      m['emoji'],
+                                      style: const TextStyle(fontSize: 28),
+                                    ),
                                   ],
                                 ),
                               );
@@ -434,23 +480,39 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
                               child: Column(
                                 children: [
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: Colors.pink,
-                                      border: Border.all(color: Colors.white, width: 1.5),
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 1.5,
+                                      ),
                                     ),
                                     child: const Text(
                                       'CỨU CÔNG CHÚA',
-                                      style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(height: 2),
                                   Row(
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
-                                      Text(_won ? '💖👸💖' : '👸', style: const TextStyle(fontSize: 34)),
+                                      Text(
+                                        _won ? '💖👸💖' : '👸',
+                                        style: const TextStyle(fontSize: 34),
+                                      ),
                                       const SizedBox(width: 4),
-                                      const Text('🏰', style: TextStyle(fontSize: 48)),
+                                      const Text(
+                                        '🏰',
+                                        style: TextStyle(fontSize: 48),
+                                      ),
                                     ],
                                   ),
                                 ],
@@ -489,7 +551,10 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               color: Colors.black,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black,
                   border: Border.all(color: Colors.white, width: 2),
@@ -503,27 +568,94 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
                         children: [
                           Row(
                             children: [
-                              const Text('WORLD 3 ', style: TextStyle(fontFamily: 'Courier', color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                              const Text(
+                                'WORLD 3 ',
+                                style: TextStyle(
+                                  fontFamily: 'Courier',
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               // P-Meter speed arrows
-                              ...List.generate(6, (i) => Container(
-                                margin: const EdgeInsets.only(right: 2),
-                                child: Text('▶', style: TextStyle(fontSize: 8, color: (_isMovingLeft || _isMovingRight) && i < 4 ? const Color(0xFFFBD000) : Colors.white)),
-                              )),
+                              ...List.generate(
+                                6,
+                                (i) => Container(
+                                  margin: const EdgeInsets.only(right: 2),
+                                  child: Text(
+                                    '▶',
+                                    style: TextStyle(
+                                      fontSize: 8,
+                                      color:
+                                          (_isMovingLeft || _isMovingRight) &&
+                                              i < 4
+                                          ? const Color(0xFFFBD000)
+                                          : Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
-                                color: (_isMovingLeft || _isMovingRight) ? Colors.orange : Colors.white,
-                                child: Text('P', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: (_isMovingLeft || _isMovingRight) ? Colors.white : Colors.black)),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 3,
+                                  vertical: 1,
+                                ),
+                                color: (_isMovingLeft || _isMovingRight)
+                                    ? Colors.orange
+                                    : Colors.white,
+                                child: Text(
+                                  'P',
+                                  style: TextStyle(
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.bold,
+                                    color: (_isMovingLeft || _isMovingRight)
+                                        ? Colors.white
+                                        : Colors.black,
+                                  ),
+                                ),
                               ),
                               const SizedBox(width: 8),
-                              Text('\$$_coins', style: const TextStyle(fontFamily: 'Courier', color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                              Text(
+                                '\$$_coins',
+                                style: const TextStyle(
+                                  fontFamily: 'Courier',
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 2),
                           Row(
                             children: [
-                              const Text('M x 04  ', style: TextStyle(fontFamily: 'Courier', color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                              Text('${_score.toString().padLeft(6, '0')}  ', style: const TextStyle(fontFamily: 'Courier', color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                              Text('⏱ $_time', style: const TextStyle(fontFamily: 'Courier', color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                              const Text(
+                                'M x 04  ',
+                                style: TextStyle(
+                                  fontFamily: 'Courier',
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                '${_score.toString().padLeft(6, '0')}  ',
+                                style: const TextStyle(
+                                  fontFamily: 'Courier',
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                '⏱ $_time',
+                                style: const TextStyle(
+                                  fontFamily: 'Courier',
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ],
                           ),
                         ],
@@ -551,10 +683,10 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
               child: _won
                   ? _buildVictoryBox()
                   : _hearts <= 0
-                      ? _buildGameOverBox()
-                      : _isMathPromptOpen
-                          ? _buildMathQuestionBox()
-                          : _buildPixelButtonsController(),
+                  ? _buildGameOverBox()
+                  : _isMathPromptOpen
+                  ? _buildMathQuestionBox()
+                  : _buildPixelButtonsController(),
             ),
           ],
         ),
@@ -576,10 +708,16 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
           ),
           child: Row(
             children: [
-              Container(width: 8, color: const Color(0xFF88F888)), // Highlight vệt sáng
+              Container(
+                width: 8,
+                color: const Color(0xFF88F888),
+              ), // Highlight vệt sáng
               Container(width: 14, color: const Color(0xFF00D800)),
               Expanded(child: Container(color: const Color(0xFF00A800))),
-              Container(width: 10, color: const Color(0xFF005000)), // Bóng tối bên phải
+              Container(
+                width: 10,
+                color: const Color(0xFF005000),
+              ), // Bóng tối bên phải
             ],
           ),
         ),
@@ -593,7 +731,10 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
           ),
           child: Row(
             children: [
-              Container(width: 6, color: const Color(0xFF88F888)), // Highlight vệt sáng
+              Container(
+                width: 6,
+                color: const Color(0xFF88F888),
+              ), // Highlight vệt sáng
               Container(width: 12, color: const Color(0xFF00D800)),
               Expanded(child: Container(color: const Color(0xFF00A800))),
               Container(width: 8, color: const Color(0xFF005000)), // Bóng tối
@@ -665,7 +806,10 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
                 45,
                 (i) => Expanded(
                   child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 8,
+                    ),
                     height: 3,
                     color: const Color(0xFF88D8F8),
                   ),
@@ -741,7 +885,11 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
             children: [
               Container(width: 3, height: 4, color: Colors.black), // Mắt
               const SizedBox(width: 2),
-              Container(width: 6, height: 3, color: const Color(0xFF882000)), // Râu
+              Container(
+                width: 6,
+                height: 3,
+                color: const Color(0xFF882000),
+              ), // Râu
             ],
           ),
         ),
@@ -754,7 +902,11 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
             border: Border.all(color: Colors.black, width: 1.5),
           ),
           child: Center(
-            child: Container(width: 8, height: 8, color: const Color(0xFFE52521)),
+            child: Container(
+              width: 8,
+              height: 8,
+              color: const Color(0xFFE52521),
+            ),
           ),
         ),
       ],
@@ -769,9 +921,7 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
         color: Colors.white,
         border: Border.all(color: Colors.black, width: 2),
       ),
-      child: Center(
-        child: Text(symbol, style: const TextStyle(fontSize: 16)),
-      ),
+      child: Center(child: Text(symbol, style: const TextStyle(fontSize: 16))),
     );
   }
 
@@ -823,10 +973,7 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
           borderRadius: BorderRadius.circular(4),
           border: Border.all(color: Colors.black, width: 3.5),
           boxShadow: const [
-            BoxShadow(
-              color: Colors.black,
-              offset: Offset(0, 4),
-            ),
+            BoxShadow(color: Colors.black, offset: Offset(0, 4)),
           ],
         ),
         child: Center(
@@ -851,10 +998,7 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.black, width: 3.5),
           boxShadow: const [
-            BoxShadow(
-              color: Colors.black,
-              offset: Offset(0, 4),
-            ),
+            BoxShadow(color: Colors.black, offset: Offset(0, 4)),
           ],
         ),
         child: Column(
@@ -873,7 +1017,11 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 20),
+                    Icon(
+                      Icons.arrow_upward_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                     SizedBox(width: 4),
                     Text(
                       'JUMP',
@@ -932,7 +1080,10 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0068DE),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 10,
+                  ),
                   shape: RoundedRectangleBorder(
                     side: const BorderSide(color: Colors.black, width: 2),
                   ),
@@ -940,7 +1091,11 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
                 onPressed: () => _handleAnswer(opt),
                 child: Text(
                   '$opt',
-                  style: const TextStyle(fontFamily: 'Courier', fontSize: 18, fontWeight: FontWeight.w900),
+                  style: const TextStyle(
+                    fontFamily: 'Courier',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               );
             }).toList(),
@@ -968,7 +1123,12 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
         const Text(
           'BẠN ĐÃ GIẢI CỨU CÔNG CHÚA AN TOÀN!',
           textAlign: TextAlign.center,
-          style: TextStyle(fontFamily: 'Courier', color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontFamily: 'Courier',
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 10),
         ElevatedButton(
@@ -985,7 +1145,11 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
           },
           child: const Text(
             'NHẬN 200 XP & VỀ ĐẤU TRƯỜNG',
-            style: TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.w900, color: Colors.white),
+            style: TextStyle(
+              fontFamily: 'Courier',
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+            ),
           ),
         ),
       ],
@@ -997,19 +1161,34 @@ class _MarioPrincessRescueGameState extends State<MarioPrincessRescueGame>
       children: [
         const Text(
           'GAME OVER',
-          style: TextStyle(fontFamily: 'Courier', color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18, letterSpacing: 2),
+          style: TextStyle(
+            fontFamily: 'Courier',
+            color: Colors.white,
+            fontWeight: FontWeight.w900,
+            fontSize: 18,
+            letterSpacing: 2,
+          ),
         ),
         const SizedBox(height: 8),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(side: const BorderSide(color: Colors.black, width: 2)),
+            shape: RoundedRectangleBorder(
+              side: const BorderSide(color: Colors.black, width: 2),
+            ),
           ),
           onPressed: () {
             widget.onGameOver();
             Navigator.pop(context);
           },
-          child: const Text('TRY AGAIN', style: TextStyle(fontFamily: 'Courier', color: Colors.black, fontWeight: FontWeight.bold)),
+          child: const Text(
+            'TRY AGAIN',
+            style: TextStyle(
+              fontFamily: 'Courier',
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       ],
     );
@@ -1073,7 +1252,11 @@ class _BlueBlockPainter extends CustomPainter {
       ..color = const Color(0xFF88D8F8)
       ..strokeWidth = 2.0;
 
-    canvas.drawLine(const Offset(0, 0), Offset(size.width, size.height), paintLine);
+    canvas.drawLine(
+      const Offset(0, 0),
+      Offset(size.width, size.height),
+      paintLine,
+    );
     canvas.drawLine(Offset(0, size.height), Offset(size.width, 0), paintLine);
   }
 

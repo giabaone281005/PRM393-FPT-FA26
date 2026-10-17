@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 
 class AreaGridWidget extends StatefulWidget {
   final Map<String, dynamic> data;
   final Function(bool isCorrect) onAnswerSubmitted;
+  final ValueChanged<dynamic>? onAnswerValue;
 
   const AreaGridWidget({
     super.key,
     required this.data,
     required this.onAnswerSubmitted,
+    this.onAnswerValue,
   });
 
   @override
@@ -30,14 +33,17 @@ class _AreaGridWidgetState extends State<AreaGridWidget> {
     _rows = widget.data['rows'] ?? widget.data['gridHeight'] ?? 3;
     _cols = widget.data['cols'] ?? widget.data['gridWidth'] ?? 4;
 
-    final rawOptions = widget.data['options'] as List? ?? [
-      (_rows * _cols).toString(),
-      ((_rows * _cols) - 2).toString(),
-      ((_rows * _cols) + 3).toString(),
-      ((_rows * _cols) + 1).toString(),
-    ];
+    final rawOptions =
+        widget.data['options'] as List? ??
+        [
+          (_rows * _cols).toString(),
+          ((_rows * _cols) - 2).toString(),
+          ((_rows * _cols) + 3).toString(),
+          ((_rows * _cols) + 1).toString(),
+        ];
     _options = rawOptions.map((e) => e.toString()).toList();
-    _correctAnswer = (widget.data['correctAnswer'] ?? (_rows * _cols)).toString();
+    _correctAnswer = (widget.data['correctAnswer'] ?? (_rows * _cols))
+        .toString();
   }
 
   @override
@@ -63,7 +69,10 @@ class _AreaGridWidgetState extends State<AreaGridWidget> {
             children: [
               Text(
                 'Lưới hình chữ nhật ($_cols cột × $_rows hàng)',
-                style: AppTypography.labelSmall.copyWith(fontSize: 13, fontWeight: FontWeight.bold),
+                style: AppTypography.labelSmall.copyWith(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 12),
               Table(
@@ -86,10 +95,16 @@ class _AreaGridWidgetState extends State<AreaGridWidget> {
                         },
                         child: Container(
                           height: 48,
-                          color: isTapped ? AppColors.accentGreen.withAlpha(120) : Colors.transparent,
+                          color: isTapped
+                              ? AppColors.accentGreen.withAlpha(120)
+                              : Colors.transparent,
                           child: Center(
                             child: isTapped
-                                ? const Icon(Icons.check, color: AppColors.accentGreen, size: 20)
+                                ? const Icon(
+                                    Icons.check,
+                                    color: AppColors.accentGreen,
+                                    size: 20,
+                                  )
                                 : Text(
                                     '${cellId + 1}',
                                     style: TextStyle(
@@ -152,7 +167,9 @@ class _AreaGridWidgetState extends State<AreaGridWidget> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
-                      color: isSel ? AppColors.primaryHover : AppColors.textPrimary,
+                      color: isSel
+                          ? AppColors.primaryHover
+                          : AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -167,15 +184,25 @@ class _AreaGridWidgetState extends State<AreaGridWidget> {
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(52),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
           onPressed: _selectedOption == null
               ? null
               : () {
-                  final isRight = _selectedOption?.trim() == _correctAnswer.trim();
-                  widget.onAnswerSubmitted(isRight);
+                  final isRight =
+                      _selectedOption?.trim() == _correctAnswer.trim();
+                  if (widget.onAnswerValue != null) {
+                    widget.onAnswerValue!(_selectedOption);
+                  } else {
+                    widget.onAnswerSubmitted(isRight);
+                  }
                 },
-          child: const Text('KIỂM TRA ĐÁP ÁN', style: TextStyle(fontWeight: FontWeight.bold)),
+          child: const Text(
+            'KIỂM TRA ĐÁP ÁN',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );

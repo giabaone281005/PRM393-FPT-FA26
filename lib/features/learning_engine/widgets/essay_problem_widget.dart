@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 
@@ -57,14 +58,21 @@ class _EssayProblemWidgetState extends State<EssayProblemWidget> {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFFEF3C7),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(
                       'BÀI TẬP TỰ LUẬN TRÌNH BÀY',
-                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Color(0xFFB45309)),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFFB45309),
+                      ),
                     ),
                   ),
                 ],
@@ -72,7 +80,10 @@ class _EssayProblemWidgetState extends State<EssayProblemWidget> {
               const SizedBox(height: 10),
               Text(
                 widget.prompt,
-                style: AppTypography.titleMedium.copyWith(fontSize: 15, height: 1.4),
+                style: AppTypography.titleMedium.copyWith(
+                  fontSize: 15,
+                  height: 1.4,
+                ),
               ),
               if (widget.guidance != null && widget.guidance!.isNotEmpty) ...[
                 const SizedBox(height: 10),
@@ -86,12 +97,20 @@ class _EssayProblemWidgetState extends State<EssayProblemWidget> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.tips_and_updates_rounded, color: Color(0xFFF59E0B), size: 18),
+                      const Icon(
+                        Icons.tips_and_updates_rounded,
+                        color: Color(0xFFF59E0B),
+                        size: 18,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           '💡 Hướng dẫn của Cú: ${widget.guidance!}',
-                          style: const TextStyle(fontSize: 12, color: Color(0xFF475569), height: 1.4),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF475569),
+                            height: 1.4,
+                          ),
                         ),
                       ),
                     ],
@@ -106,7 +125,11 @@ class _EssayProblemWidgetState extends State<EssayProblemWidget> {
         // Vùng nhập lời giải
         const Text(
           '1. Các bước giải chi tiết (Lời giải & Phép tính):',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+            color: AppColors.textPrimary,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
@@ -131,7 +154,11 @@ class _EssayProblemWidgetState extends State<EssayProblemWidget> {
         // Vùng nhập đáp số
         const Text(
           '2. Đáp số cuối cùng:',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+            color: AppColors.textPrimary,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
@@ -158,12 +185,20 @@ class _EssayProblemWidgetState extends State<EssayProblemWidget> {
             ),
             child: Row(
               children: const [
-                Icon(Icons.check_circle_rounded, color: Color(0xFF16A34A), size: 24),
+                Icon(
+                  Icons.check_circle_rounded,
+                  color: Color(0xFF16A34A),
+                  size: 24,
+                ),
                 SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     'Bạn Cú đã chấm lời giải của bạn: Trình bày rất logic và mạch lạc!',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF15803D), fontSize: 13),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF15803D),
+                      fontSize: 13,
+                    ),
                   ),
                 ),
               ],
@@ -177,12 +212,16 @@ class _EssayProblemWidgetState extends State<EssayProblemWidget> {
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(52),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
           onPressed: () {
             if (_finalResultController.text.trim().isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Vui lòng điền đáp số trước khi nộp bài nhé!')),
+                const SnackBar(
+                  content: Text('Vui lòng điền đáp số trước khi nộp bài nhé!'),
+                ),
               );
               return;
             }
@@ -191,7 +230,10 @@ class _EssayProblemWidgetState extends State<EssayProblemWidget> {
             });
             widget.onSubmit(true);
           },
-          child: const Text('NỘP BÀI TỰ LUẬN', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          child: const Text(
+            'NỘP BÀI TỰ LUẬN',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
         ),
       ],
     );

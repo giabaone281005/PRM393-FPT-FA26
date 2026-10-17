@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_typography.dart';
 
 class MiniGameWidget extends StatefulWidget {
@@ -69,10 +71,26 @@ class _MiniGameWidgetState extends State<MiniGameWidget> {
     if (t.contains('Phân số') || t.contains('phân số')) {
       // Game 1: Bắt Cặp Phân Số Bằng Nhau
       final rounds = [
-        {'q': 'Tìm phân số BẰNG VỚI 1/2:', 'target': '2/4', 'items': ['2/4', '1/3', '3/5', '2/5']},
-        {'q': 'Tìm phân số BẰNG VỚI 2/3:', 'target': '4/6', 'items': ['4/6', '2/5', '3/4', '1/6']},
-        {'q': 'Tìm phân số TỐI GIẢN của 4/8:', 'target': '1/2', 'items': ['1/2', '2/4', '2/3', '3/8']},
-        {'q': 'Quy đồng 1/3 với mẫu 6 là:', 'target': '2/6', 'items': ['2/6', '3/6', '1/6', '4/6']},
+        {
+          'q': 'Tìm phân số BẰNG VỚI 1/2:',
+          'target': '2/4',
+          'items': ['2/4', '1/3', '3/5', '2/5'],
+        },
+        {
+          'q': 'Tìm phân số BẰNG VỚI 2/3:',
+          'target': '4/6',
+          'items': ['4/6', '2/5', '3/4', '1/6'],
+        },
+        {
+          'q': 'Tìm phân số TỐI GIẢN của 4/8:',
+          'target': '1/2',
+          'items': ['1/2', '2/4', '2/3', '3/8'],
+        },
+        {
+          'q': 'Quy đồng 1/3 với mẫu 6 là:',
+          'target': '2/6',
+          'items': ['2/6', '3/6', '1/6', '4/6'],
+        },
       ];
       final current = rounds[_score % rounds.length];
       _gameMission = '🍕 THỬ THÁCH BÁNH PIZZA PHÂN SỐ';
@@ -82,22 +100,52 @@ class _MiniGameWidgetState extends State<MiniGameWidget> {
     } else if (t.contains('thập phân')) {
       // Game 2: Thần Tốc Dấu Phẩy Thập Phân
       final rounds = [
-        {'q': '2.5 × 10 = ?', 'target': '25', 'items': ['25', '2.50', '0.25', '250']},
-        {'q': '14.2 : 10 = ?', 'target': '1.42', 'items': ['1.42', '142', '0.142', '14.02']},
-        {'q': '0.75 × 100 = ?', 'target': '75', 'items': ['75', '7.5', '750', '0.075']},
-        {'q': '3.14 × 10 = ?', 'target': '31.4', 'items': ['31.4', '314', '3.140', '0.314']},
+        {
+          'q': '2.5 × 10 = ?',
+          'target': '25',
+          'items': ['25', '2.50', '0.25', '250'],
+        },
+        {
+          'q': '14.2 : 10 = ?',
+          'target': '1.42',
+          'items': ['1.42', '142', '0.142', '14.02'],
+        },
+        {
+          'q': '0.75 × 100 = ?',
+          'target': '75',
+          'items': ['75', '7.5', '750', '0.075'],
+        },
+        {
+          'q': '3.14 × 10 = ?',
+          'target': '31.4',
+          'items': ['31.4', '314', '3.140', '0.314'],
+        },
       ];
       final current = rounds[_score % rounds.length];
       _gameMission = '⚡ THẦN TỐC DỊCH DẤU PHẨY';
       _questionFormula = current['q'] as String;
       _correctTarget = current['target'] as String;
       _gameItems = List<String>.from(current['items'] as List)..shuffle();
-    } else if (t.contains('Vận tốc') || t.contains('chuyển động') || t.contains('Quãng đường')) {
+    } else if (t.contains('Vận tốc') ||
+        t.contains('chuyển động') ||
+        t.contains('Quãng đường')) {
       // Game 3: Đua Xe Công Thức Vận Tốc
       final rounds = [
-        {'q': 'Đoàn tàu s = 100km, t = 2h. Vận tốc v = ?', 'target': '50 km/h', 'items': ['50 km/h', '200 km/h', '60 km/h', '25 km/h']},
-        {'q': 'Xe máy v = 40 km/h chạy 2h. Quãng đường s = ?', 'target': '80 km', 'items': ['80 km', '42 km', '20 km', '120 km']},
-        {'q': 'Ô tô v = 60 km/h đi 180 km. Thời gian t = ?', 'target': '3 giờ', 'items': ['3 giờ', '2 giờ', '120 phút', '4 giờ']},
+        {
+          'q': 'Đoàn tàu s = 100km, t = 2h. Vận tốc v = ?',
+          'target': '50 km/h',
+          'items': ['50 km/h', '200 km/h', '60 km/h', '25 km/h'],
+        },
+        {
+          'q': 'Xe máy v = 40 km/h chạy 2h. Quãng đường s = ?',
+          'target': '80 km',
+          'items': ['80 km', '42 km', '20 km', '120 km'],
+        },
+        {
+          'q': 'Ô tô v = 60 km/h đi 180 km. Thời gian t = ?',
+          'target': '3 giờ',
+          'items': ['3 giờ', '2 giờ', '120 phút', '4 giờ'],
+        },
       ];
       final current = rounds[_score % rounds.length];
       _gameMission = '🏎️ ĐUA XE BẮT TỐC ĐỘ VẬN TỐC';
@@ -107,9 +155,21 @@ class _MiniGameWidgetState extends State<MiniGameWidget> {
     } else {
       // Game 4: Siêu Trí Nhớ Lưới Diện Tích & Bảng Tính
       final rounds = [
-        {'q': 'Hình chữ nhật 4cm × 5cm. Diện tích = ?', 'target': '20 cm²', 'items': ['20 cm²', '18 cm²', '9 cm²', '24 cm²']},
-        {'q': 'Hình vuông cạnh 6cm. Diện tích = ?', 'target': '36 cm²', 'items': ['36 cm²', '24 cm²', '12 cm²', '30 cm²']},
-        {'q': 'Tính nhẩm thần tốc: 7 × 8 = ?', 'target': '56', 'items': ['56', '54', '48', '63']},
+        {
+          'q': 'Hình chữ nhật 4cm × 5cm. Diện tích = ?',
+          'target': '20 cm²',
+          'items': ['20 cm²', '18 cm²', '9 cm²', '24 cm²'],
+        },
+        {
+          'q': 'Hình vuông cạnh 6cm. Diện tích = ?',
+          'target': '36 cm²',
+          'items': ['36 cm²', '24 cm²', '12 cm²', '30 cm²'],
+        },
+        {
+          'q': 'Tính nhẩm thần tốc: 7 × 8 = ?',
+          'target': '56',
+          'items': ['56', '54', '48', '63'],
+        },
       ];
       final current = rounds[_score % rounds.length];
       _gameMission = '📐 ĐO LƯỜNG DIỆN TÍCH THẦN TỐC';
@@ -193,18 +253,29 @@ class _MiniGameWidgetState extends State<MiniGameWidget> {
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.timer_rounded, color: Color(0xFF4F46E5), size: 16),
+                    const Icon(
+                      Icons.timer_rounded,
+                      color: Color(0xFF4F46E5),
+                      size: 16,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       '${_secondsLeft}s',
-                      style: const TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF4F46E5), fontSize: 13),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF4F46E5),
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
@@ -226,7 +297,11 @@ class _MiniGameWidgetState extends State<MiniGameWidget> {
               children: [
                 Text(
                   'Mục tiêu: Đạt 3 điểm (Hiện tại: $_score/$_targetScore)',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF6366F1)),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF6366F1),
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -306,7 +381,11 @@ class _MiniGameWidgetState extends State<MiniGameWidget> {
                   SizedBox(width: 8),
                   Text(
                     'XUẤT SẮC! BẠN ĐÃ CHIẾN THẮNG GAME (+20 XP)!',
-                    style: TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF15803D), fontSize: 13),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF15803D),
+                      fontSize: 13,
+                    ),
                   ),
                 ],
               ),
@@ -315,8 +394,16 @@ class _MiniGameWidgetState extends State<MiniGameWidget> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _startNewGame,
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4F46E5)),
-              child: const Text('HẾT GIỜ! BẤM ĐỂ CHƠI LẠI', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4F46E5),
+              ),
+              child: const Text(
+                'HẾT GIỜ! BẤM ĐỂ CHƠI LẠI',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         ],

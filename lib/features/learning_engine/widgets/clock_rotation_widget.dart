@@ -1,16 +1,20 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 
 class ClockRotationWidget extends StatefulWidget {
   final Map<String, dynamic> data;
   final Function(bool isCorrect) onAnswerSubmitted;
+  final ValueChanged<dynamic>? onAnswerValue;
 
   const ClockRotationWidget({
     super.key,
     required this.data,
     required this.onAnswerSubmitted,
+    this.onAnswerValue,
   });
 
   @override
@@ -32,7 +36,8 @@ class _ClockRotationWidgetState extends State<ClockRotationWidget> {
   @override
   Widget build(BuildContext context) {
     final minuteAngle = (_currentMinute / 60.0) * 2 * pi;
-    final hourAngle = ((_targetHour % 12) / 12.0) * 2 * pi + (minuteAngle / 12.0);
+    final hourAngle =
+        ((_targetHour % 12) / 12.0) * 2 * pi + (minuteAngle / 12.0);
 
     return Column(
       children: [
@@ -160,7 +165,9 @@ class _ClockRotationWidgetState extends State<ClockRotationWidget> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.surfaceSubtle,
                 foregroundColor: AppColors.textPrimary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               onPressed: () {
                 setState(() {
@@ -175,7 +182,9 @@ class _ClockRotationWidgetState extends State<ClockRotationWidget> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.surfaceSubtle,
                 foregroundColor: AppColors.textPrimary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               onPressed: () {
                 setState(() {
@@ -194,12 +203,24 @@ class _ClockRotationWidgetState extends State<ClockRotationWidget> {
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(52),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
           onPressed: () {
-            widget.onAnswerSubmitted(_currentMinute == _targetMinute);
+            if (widget.onAnswerValue != null) {
+              widget.onAnswerValue!({
+                'hour': _targetHour,
+                'minute': _currentMinute,
+              });
+            } else {
+              widget.onAnswerSubmitted(_currentMinute == _targetMinute);
+            }
           },
-          child: const Text('KIỂM TRA ĐỒNG HỒ', style: TextStyle(fontWeight: FontWeight.bold)),
+          child: const Text(
+            'KIỂM TRA ĐỒNG HỒ',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );

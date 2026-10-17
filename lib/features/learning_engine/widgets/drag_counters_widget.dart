@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 
 class DragCountersWidget extends StatefulWidget {
   final Map<String, dynamic> data;
   final Function(bool isCorrect) onAnswerSubmitted;
+  final ValueChanged<dynamic>? onAnswerValue;
 
   const DragCountersWidget({
     super.key,
     required this.data,
     required this.onAnswerSubmitted,
+    this.onAnswerValue,
   });
 
   @override
@@ -53,7 +56,9 @@ class _DragCountersWidgetState extends State<DragCountersWidget> {
                 color: isHovering ? AppColors.accentGoldLight : Colors.white,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                  color: isHovering ? AppColors.accentGold : AppColors.borderSubtle,
+                  color: isHovering
+                      ? AppColors.accentGold
+                      : AppColors.borderSubtle,
                   width: isHovering ? 2.5 : 1.5,
                 ),
                 boxShadow: [
@@ -149,9 +154,15 @@ class _DragCountersWidgetState extends State<DragCountersWidget> {
                     ),
                     childWhenDragging: Opacity(
                       opacity: 0.3,
-                      child: Text(_itemIcon, style: const TextStyle(fontSize: 32)),
+                      child: Text(
+                        _itemIcon,
+                        style: const TextStyle(fontSize: 32),
+                      ),
                     ),
-                    child: Text(_itemIcon, style: const TextStyle(fontSize: 32)),
+                    child: Text(
+                      _itemIcon,
+                      style: const TextStyle(fontSize: 32),
+                    ),
                   ),
                 ),
               ),
@@ -166,12 +177,21 @@ class _DragCountersWidgetState extends State<DragCountersWidget> {
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(52),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
           onPressed: () {
-            widget.onAnswerSubmitted(_basketCount == _targetCount);
+            if (widget.onAnswerValue != null) {
+              widget.onAnswerValue!(_basketCount);
+            } else {
+              widget.onAnswerSubmitted(_basketCount == _targetCount);
+            }
           },
-          child: const Text('KIỂM TRA ĐÁP ÁN', style: TextStyle(fontWeight: FontWeight.bold)),
+          child: const Text(
+            'KIỂM TRA ĐÁP ÁN',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );

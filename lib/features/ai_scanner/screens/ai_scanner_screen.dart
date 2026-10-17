@@ -1,260 +1,198 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_typography.dart';
-import '../popups/sample_math_dialog.dart';
-import '../popups/socratic_steps_sheet.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../../core/supabase/supabase_service.dart';
+import '../../../data/providers/app_state_provider.dart';
+import '../../../data/repositories/study_repository.dart';
 
 class AiScannerScreen extends StatefulWidget {
   const AiScannerScreen({super.key});
-
   @override
   State<AiScannerScreen> createState() => _AiScannerScreenState();
 }
 
 class _AiScannerScreenState extends State<AiScannerScreen> {
-  bool _isFlashOn = false;
-  bool _isScanning = false;
-  String _currentProblem = 'Một mảnh vườn hình chữ nhật có chiều dài 12m và chiều rộng 8m. Tính diện tích và chu vi của mảnh vườn đó.';
-  String _currentTitle = 'Toán Hình Học Lớp 4';
+  final _problem = TextEditingController();
+  Uint8List? _image;
+  String _mime = 'image/jpeg';
+  List<String> _hints = [];
+  int _step = 0;
+  bool _busy = false;
+  String? _error, _notice;
+  String? _request, _phase;
+  @override
+  void dispose() {
+    _problem.dispose();
+    super.dispose();
+  }
 
-  void _triggerScan() {
-    setState(() => _isScanning = true);
-    Future.delayed(const Duration(milliseconds: 1200), () {
+  Future<void> _pick(ImageSource source) async {
+    try {
+      final file = await ImagePicker().pickImage(
+        source: source,
+        maxWidth: 1600,
+        maxHeight: 1600,
+        imageQuality: 85,
+      );
+      if (file == null) return;
+      final bytes = await file.readAsBytes();
+      if (bytes.length > 3 * 1024 * 1024) {
+        throw StateError('Ảnh cần dưới 3 MB.');
+      }
       if (!mounted) return;
-      setState(() => _isScanning = false);
-      _openSocraticSheet();
+      setState(() {
+        _image = bytes;
+        _mime = bytes.length > 3 && bytes[0] == 137
+            ? 'image/png'
+            : 'image/jpeg';
+        _request = null;
+        _hints = [];
+        _notice = null;
+      });
+      await _send('ocr');
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => _error = 'Không mở được ảnh. Cho phép truy cập camera/thư viện hoặc nhập đề bằng tay.',
+        );
+      }
+    }
+  }
+
+  Future<void> _send(String phase) async {
+    if (_busy) return;
+    final state = context.read<AppStateProvider>();
+    if (!state.hasKids) return;
+    if (phase == 'hint' && _problem.text.trim().length < 5) {
+      setState(() => _error = 'Hãy nhập hoặc sửa lại đề toán trước.');
+      return;
+    }
+    if (_phase != phase) {
+      _request = null;
+      _phase = phase;
+    }
+    _request ??= StudyRepository.requestId();
+    setState(() {
+      _busy = true;
+      _error = null;
     });
-  }
-
-  void _openSocraticSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => SocraticStepsSheet(
-        problemText: _currentProblem,
-        problemTitle: _currentTitle,
-      ),
-    );
-  }
-
-  void _openSampleProblems() {
-    showDialog(
-      context: context,
-      builder: (_) => SampleMathDialog(
-        onSelectProblem: (problem, title, grade) {
-          setState(() {
-            _currentProblem = problem;
-            _currentTitle = title;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('📷 Đã nhận diện bài toán: $title'),
-              backgroundColor: AppColors.primary,
-            ),
-          );
+    try {
+      final response = await SupabaseService.client!.functions.invoke(
+        'ai-tutor',
+        body: {
+          'kidId': state.currentKid.id,
+          'requestId': _request,
+          'phase': phase,
+          if (phase == 'ocr') ...{
+            'image': base64Encode(_image!),
+            'mime': _mime,
+          } else
+            'problem': _problem.text.trim(),
         },
-      ),
-    );
+      );
+      final data = Map<String, dynamic>.from(response.data);
+      if (!mounted) return;
+      setState(() {
+        _request = null;
+        if (phase == 'ocr') {
+          _problem.text = data['problem'] ?? '';
+          _notice = 'Kiểm tra và sửa đề trước khi nhận gợi ý.';
+        } else {
+          _hints = List<String>.from(data['hints'] ?? []);
+          _step = 1;
+          _notice = data['notice'];
+        }
+      });
+    } on FunctionException catch (e) {
+      if (mounted) {
+        setState(
+          () => _error =
+              (e.details is Map ? e.details['error'] : null)?.toString() ??
+              'AI tạm thời chưa sẵn sàng.',
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => _error = 'Mất kết nối. Ảnh được giữ trên màn hình để thử lại.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 1,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
-          onPressed: () => Navigator.pop(context),
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Cùng suy nghĩ với Cú AI')),
+    body: ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        const Text(
+          'Ảnh sẽ được gửi tới dịch vụ AI để đọc đề, không lưu vào kho ảnh của ứng dụng. Chỉ chụp đề toán, tránh thông tin cá nhân.',
         ),
-        title: Row(
+        Wrap(
+          spacing: 12,
           children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [AppColors.accentGold, AppColors.primary]),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.document_scanner_rounded, color: Colors.white, size: 18),
+            OutlinedButton.icon(
+              onPressed: _busy ? null : () => _pick(ImageSource.camera),
+              icon: const Icon(Icons.camera_alt),
+              label: const Text('Chụp đề'),
             ),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text('MathLingo', style: AppTypography.titleMedium.copyWith(fontSize: 16)),
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryLight,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Text(
-                        'QUÉT ĐỀ AI',
-                        style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.primaryHover),
-                      ),
-                    ),
-                  ],
-                ),
-                Text('Nhận diện đề toán & Gia sư Socratic', style: AppTypography.bodySmall.copyWith(fontSize: 10)),
-              ],
+            OutlinedButton.icon(
+              onPressed: _busy ? null : () => _pick(ImageSource.gallery),
+              icon: const Icon(Icons.photo_library),
+              label: const Text('Chọn ảnh'),
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: Icon(_isFlashOn ? Icons.flash_on_rounded : Icons.flash_off_rounded, color: AppColors.accentGold),
-            tooltip: 'Bật/Tắt Flash',
-            onPressed: () {
-              setState(() => _isFlashOn = !_isFlashOn);
-            },
+        if (_image != null)
+          Image.memory(_image!, height: 180, fit: BoxFit.contain),
+        TextField(
+          controller: _problem,
+          maxLines: 5,
+          maxLength: 3000,
+          decoration: const InputDecoration(
+            labelText: 'Đề toán (kiểm tra hoặc nhập bằng tay)',
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // Khung Ngắm Quét Đề
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(color: AppColors.borderSubtle),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(8),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  // Viewfinder Frame
-                  Container(
-                    height: 220,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.black.withAlpha(240),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.primary, width: 2),
-                    ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                _currentProblem,
-                                style: const TextStyle(color: Colors.white, fontSize: 13, height: 1.4),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (_isScanning)
-                          const Center(
-                            child: CircularProgressIndicator(color: AppColors.primary),
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Actions row: Chọn bài mẫu hoặc Quét ảnh
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(48),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                          ),
-                          onPressed: _openSampleProblems,
-                          icon: const Icon(Icons.menu_book_rounded, size: 18),
-                          label: const Text('Chọn Đề Mẫu SGK', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size.fromHeight(48),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                          ),
-                          onPressed: _isScanning ? null : _triggerScan,
-                          icon: const Icon(Icons.camera_alt_rounded, size: 18),
-                          label: const Text('Chụp & Quét AI', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Card Gia Sư Socratic
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF5F3FF),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFFDDD6FE)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.asset(
-                          'assets/images/owl_mascot.jpg',
-                          width: 30,
-                          height: 30,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Text('🦉', style: TextStyle(fontSize: 26)),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Text('Phương Pháp Socratic Math AI', style: AppTypography.titleMedium.copyWith(fontSize: 15)),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'AI không giải hộ đáp án số mà chia nhỏ đề bài thành các câu hỏi gợi mở, giúp bé tự tư duy và tìm ra cách giải đúng nhất!',
-                    style: AppTypography.bodySmall.copyWith(color: const Color(0xFF5B21B6)),
-                  ),
-                  const SizedBox(height: 12),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7C3AED),
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size.fromHeight(44),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    onPressed: _openSocraticSheet,
-                    child: const Text('MỞ HƯỚNG DẪN BƯỚC GIẢI'),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          onChanged: (_) {
+            _request = null;
+            _hints = [];
+          },
         ),
-      ),
-    );
-  }
+        if (_busy) const LinearProgressIndicator(),
+        if (_error != null) Text(_error!),
+        if (_notice?.isNotEmpty == true) Text(_notice!),
+        if (_image != null)
+          TextButton(
+            onPressed: _busy ? null : () => _send('ocr'),
+            child: const Text('Đọc lại ảnh'),
+          ),
+        FilledButton(
+          onPressed: _busy ? null : () => _send('hint'),
+          child: const Text('Gợi ý cách suy nghĩ'),
+        ),
+        for (var i = 0; i < _hints.length && i < _step; i++)
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text('Bước ${i + 1}: ${_hints[i]}'),
+            ),
+          ),
+        if (_step < _hints.length)
+          TextButton(
+            onPressed: () => setState(() => _step++),
+            child: const Text('Xem gợi ý tiếp theo'),
+          ),
+        const Text(
+          'Gợi ý AI có thể sai. Em hãy đối chiếu dữ kiện, tự kiểm tra phép tính và hỏi phụ huynh hoặc giáo viên khi chưa chắc chắn.',
+        ),
+      ],
+    ),
+  );
 }

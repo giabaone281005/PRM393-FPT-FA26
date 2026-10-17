@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 
@@ -52,10 +53,16 @@ class SampleMathDialog extends StatelessWidget {
               color: AppColors.primaryLight,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.auto_stories_rounded, color: AppColors.primary),
+            child: const Icon(
+              Icons.auto_stories_rounded,
+              color: AppColors.primary,
+            ),
           ),
           const SizedBox(width: 10),
-          Text('Chọn Bài Toán Mẫu SGK', style: AppTypography.titleLarge.copyWith(fontSize: 18)),
+          Text(
+            'Chọn Bài Toán Mẫu SGK',
+            style: AppTypography.titleLarge.copyWith(fontSize: 18),
+          ),
         ],
       ),
       content: SizedBox(
@@ -86,7 +93,10 @@ class SampleMathDialog extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(p['icon'] as String, style: const TextStyle(fontSize: 24)),
+                    Text(
+                      p['icon'] as String,
+                      style: const TextStyle(fontSize: 24),
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(
@@ -96,18 +106,28 @@ class SampleMathDialog extends StatelessWidget {
                             children: [
                               Text(
                                 p['title'] as String,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
                               ),
                               const SizedBox(width: 6),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 1,
+                                ),
                                 decoration: BoxDecoration(
                                   color: AppColors.primaryLight,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
                                   'LỚP ${p['grade']}',
-                                  style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.primaryHover),
+                                  style: const TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primaryHover,
+                                  ),
                                 ),
                               ),
                             ],
@@ -115,7 +135,9 @@ class SampleMathDialog extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             p['content'] as String,
-                            style: AppTypography.bodySmall.copyWith(fontSize: 11),
+                            style: AppTypography.bodySmall.copyWith(
+                              fontSize: 11,
+                            ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),

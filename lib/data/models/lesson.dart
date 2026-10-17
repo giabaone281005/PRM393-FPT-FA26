@@ -1,11 +1,6 @@
 import 'question.dart';
 
-enum LessonStatus {
-  locked,
-  available,
-  inProgress,
-  completed,
-}
+enum LessonStatus { locked, available, inProgress, completed }
 
 class Lesson {
   final String id;
@@ -23,6 +18,7 @@ class Lesson {
   final String? essayGuidance;
   final String? miniGameType;
   final List<Question> questions;
+  final bool requiresPlus;
 
   Lesson({
     required this.id,
@@ -40,5 +36,6 @@ class Lesson {
     this.essayGuidance,
     this.miniGameType,
     required this.questions,
+    this.requiresPlus = false,
   });
 }

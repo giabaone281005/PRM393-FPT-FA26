@@ -1,20 +1,17 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
-enum MascotState {
-  idle,
-  typingEmail,
-  typingPassword,
-  tapped,
-  celebrate,
-}
+enum MascotState { idle, typingEmail, typingPassword, tapped, celebrate }
 
 class MascotOwl3D extends StatefulWidget {
   final MascotState state;
   final VoidCallback? onTap;
   final double size;
-  final String? hat; // 'Mũ Thám Tử', 'Mũ Bác Học', 'Mũ Phù Thủy', 'Vương Miện', 'Không đội'
-  final String? glasses; // 'Kính Tri Thức', 'Kính Ngôi Sao', 'Kính Thám Tử', 'Không đeo'
+  final String?
+  hat; // 'Mũ Thám Tử', 'Mũ Bác Học', 'Mũ Phù Thủy', 'Vương Miện', 'Không đội'
+  final String?
+  glasses; // 'Kính Tri Thức', 'Kính Ngôi Sao', 'Kính Thám Tử', 'Không đeo'
   final String? wings; // 'Cánh Hào Quang', 'Không có'
 
   const MascotOwl3D({
@@ -45,13 +42,15 @@ class _MascotOwl3DState extends State<MascotOwl3D>
       duration: const Duration(milliseconds: 2200),
     )..repeat(reverse: true);
 
-    _breatheAnim = Tween<double>(begin: -4.0, end: 4.0).animate(
-      CurvedAnimation(parent: _animCtrl, curve: Curves.easeInOutSine),
-    );
+    _breatheAnim = Tween<double>(
+      begin: -4.0,
+      end: 4.0,
+    ).animate(CurvedAnimation(parent: _animCtrl, curve: Curves.easeInOutSine));
 
-    _rotateAnim = Tween<double>(begin: -0.04, end: 0.04).animate(
-      CurvedAnimation(parent: _animCtrl, curve: Curves.easeInOutSine),
-    );
+    _rotateAnim = Tween<double>(
+      begin: -0.04,
+      end: 0.04,
+    ).animate(CurvedAnimation(parent: _animCtrl, curve: Curves.easeInOutSine));
   }
 
   @override
@@ -162,7 +161,9 @@ class _ClayOwlPainter extends CustomPainter {
     final center = Offset(w / 2, h / 2);
 
     // ================= 0. AURA WINGS (CÁNH HÀO QUANG NẾU CÓ) =================
-    final hasWings = wings != null && (wings!.contains('Cánh') || wings!.contains('Hào Quang'));
+    final hasWings =
+        wings != null &&
+        (wings!.contains('Cánh') || wings!.contains('Hào Quang'));
     if (hasWings) {
       final glowPaint = Paint()
         ..shader = const RadialGradient(
@@ -210,14 +211,22 @@ class _ClayOwlPainter extends CustomPainter {
     // Left claw
     canvas.drawRRect(
       RRect.fromRectAndRadius(
-        Rect.fromCenter(center: Offset(w * 0.38, h * 0.89), width: w * 0.2, height: h * 0.1),
+        Rect.fromCenter(
+          center: Offset(w * 0.38, h * 0.89),
+          width: w * 0.2,
+          height: h * 0.1,
+        ),
         const Radius.circular(8),
       ),
       feetShadow,
     );
     canvas.drawRRect(
       RRect.fromRectAndRadius(
-        Rect.fromCenter(center: Offset(w * 0.38, h * 0.88), width: w * 0.2, height: h * 0.1),
+        Rect.fromCenter(
+          center: Offset(w * 0.38, h * 0.88),
+          width: w * 0.2,
+          height: h * 0.1,
+        ),
         const Radius.circular(8),
       ),
       feetPaint,
@@ -226,14 +235,22 @@ class _ClayOwlPainter extends CustomPainter {
     // Right claw
     canvas.drawRRect(
       RRect.fromRectAndRadius(
-        Rect.fromCenter(center: Offset(w * 0.62, h * 0.89), width: w * 0.2, height: h * 0.1),
+        Rect.fromCenter(
+          center: Offset(w * 0.62, h * 0.89),
+          width: w * 0.2,
+          height: h * 0.1,
+        ),
         const Radius.circular(8),
       ),
       feetShadow,
     );
     canvas.drawRRect(
       RRect.fromRectAndRadius(
-        Rect.fromCenter(center: Offset(w * 0.62, h * 0.88), width: w * 0.2, height: h * 0.1),
+        Rect.fromCenter(
+          center: Offset(w * 0.62, h * 0.88),
+          width: w * 0.2,
+          height: h * 0.1,
+        ),
         const Radius.circular(8),
       ),
       feetPaint,
@@ -264,8 +281,12 @@ class _ClayOwlPainter extends CustomPainter {
     canvas.drawPath(rightEarPath, earPaint);
 
     // ================= 3. 3D CLAY BODY =================
-    final bodyRect = Rect.fromCenter(center: Offset(center.dx, center.dy + 4), width: w * 0.76, height: h * 0.76);
-    
+    final bodyRect = Rect.fromCenter(
+      center: Offset(center.dx, center.dy + 4),
+      width: w * 0.76,
+      height: h * 0.76,
+    );
+
     // Clay outer shadow
     final bodyShadow = Paint()
       ..color = const Color(0xFF3B0764).withValues(alpha: 0.35)
@@ -287,7 +308,11 @@ class _ClayOwlPainter extends CustomPainter {
     canvas.drawOval(bodyRect, bodyPaint);
 
     // ================= 4. BELLY (Soft cream clay patch) =================
-    final bellyRect = Rect.fromCenter(center: Offset(center.dx, center.dy + h * 0.14), width: w * 0.48, height: h * 0.44);
+    final bellyRect = Rect.fromCenter(
+      center: Offset(center.dx, center.dy + h * 0.14),
+      width: w * 0.48,
+      height: h * 0.44,
+    );
     final bellyPaint = Paint()
       ..shader = const RadialGradient(
         center: Alignment(0, -0.3),
@@ -304,10 +329,28 @@ class _ClayOwlPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final fY1 = bellyRect.center.dy - 6;
-    canvas.drawArc(Rect.fromCenter(center: Offset(w * 0.44, fY1), width: 12, height: 8), 0.2, math.pi * 0.8, false, featherPaint);
-    canvas.drawArc(Rect.fromCenter(center: Offset(w * 0.56, fY1), width: 12, height: 8), 0.2, math.pi * 0.8, false, featherPaint);
+    canvas.drawArc(
+      Rect.fromCenter(center: Offset(w * 0.44, fY1), width: 12, height: 8),
+      0.2,
+      math.pi * 0.8,
+      false,
+      featherPaint,
+    );
+    canvas.drawArc(
+      Rect.fromCenter(center: Offset(w * 0.56, fY1), width: 12, height: 8),
+      0.2,
+      math.pi * 0.8,
+      false,
+      featherPaint,
+    );
     final fY2 = bellyRect.center.dy + 10;
-    canvas.drawArc(Rect.fromCenter(center: Offset(w * 0.5, fY2), width: 14, height: 8), 0.2, math.pi * 0.8, false, featherPaint);
+    canvas.drawArc(
+      Rect.fromCenter(center: Offset(w * 0.5, fY2), width: 14, height: 8),
+      0.2,
+      math.pi * 0.8,
+      false,
+      featherPaint,
+    );
 
     // ================= 5. EYES / GLASSES =================
     final leftEyeCenter = Offset(w * 0.36, h * 0.40);
@@ -326,10 +369,18 @@ class _ClayOwlPainter extends CustomPainter {
       ..color = Colors.black.withValues(alpha: 0.15)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
 
-    canvas.drawCircle(leftEyeCenter.translate(0, 1.5), eyeRadius, eyeSocketShadow);
+    canvas.drawCircle(
+      leftEyeCenter.translate(0, 1.5),
+      eyeRadius,
+      eyeSocketShadow,
+    );
     canvas.drawCircle(leftEyeCenter, eyeRadius, eyeSocketPaint);
 
-    canvas.drawCircle(rightEyeCenter.translate(0, 1.5), eyeRadius, eyeSocketShadow);
+    canvas.drawCircle(
+      rightEyeCenter.translate(0, 1.5),
+      eyeRadius,
+      eyeSocketShadow,
+    );
     canvas.drawCircle(rightEyeCenter, eyeRadius, eyeSocketPaint);
 
     // EYES BEHAVIOR BASED ON STATE
@@ -341,12 +392,26 @@ class _ClayOwlPainter extends CustomPainter {
         ..strokeCap = StrokeCap.round;
 
       canvas.drawArc(
-        Rect.fromCenter(center: Offset(leftEyeCenter.dx, leftEyeCenter.dy + 2), width: eyeRadius * 1.2, height: eyeRadius * 0.8),
-        0.1, math.pi * 0.8, false, closedEyePaint,
+        Rect.fromCenter(
+          center: Offset(leftEyeCenter.dx, leftEyeCenter.dy + 2),
+          width: eyeRadius * 1.2,
+          height: eyeRadius * 0.8,
+        ),
+        0.1,
+        math.pi * 0.8,
+        false,
+        closedEyePaint,
       );
       canvas.drawArc(
-        Rect.fromCenter(center: Offset(rightEyeCenter.dx, rightEyeCenter.dy + 2), width: eyeRadius * 1.2, height: eyeRadius * 0.8),
-        0.1, math.pi * 0.8, false, closedEyePaint,
+        Rect.fromCenter(
+          center: Offset(rightEyeCenter.dx, rightEyeCenter.dy + 2),
+          width: eyeRadius * 1.2,
+          height: eyeRadius * 0.8,
+        ),
+        0.1,
+        math.pi * 0.8,
+        false,
+        closedEyePaint,
       );
     } else {
       double pupilOffsetX = 0;
@@ -363,22 +428,56 @@ class _ClayOwlPainter extends CustomPainter {
       final pupilPaint = Paint()..color = const Color(0xFF1E1B4B);
 
       // Left Pupil
-      final lPupilCenter = Offset(leftEyeCenter.dx + pupilOffsetX, leftEyeCenter.dy + pupilOffsetY);
+      final lPupilCenter = Offset(
+        leftEyeCenter.dx + pupilOffsetX,
+        leftEyeCenter.dy + pupilOffsetY,
+      );
       canvas.drawCircle(lPupilCenter, pupilRadius, pupilPaint);
       final irisRingPaint = Paint()
         ..color = const Color(0xFF06B6D4)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.8;
       canvas.drawCircle(lPupilCenter, pupilRadius - 1, irisRingPaint);
-      canvas.drawCircle(Offset(lPupilCenter.dx - pupilRadius * 0.35, lPupilCenter.dy - pupilRadius * 0.35), pupilRadius * 0.35, Paint()..color = Colors.white);
-      canvas.drawCircle(Offset(lPupilCenter.dx + pupilRadius * 0.25, lPupilCenter.dy + pupilRadius * 0.25), pupilRadius * 0.16, Paint()..color = Colors.white);
+      canvas.drawCircle(
+        Offset(
+          lPupilCenter.dx - pupilRadius * 0.35,
+          lPupilCenter.dy - pupilRadius * 0.35,
+        ),
+        pupilRadius * 0.35,
+        Paint()..color = Colors.white,
+      );
+      canvas.drawCircle(
+        Offset(
+          lPupilCenter.dx + pupilRadius * 0.25,
+          lPupilCenter.dy + pupilRadius * 0.25,
+        ),
+        pupilRadius * 0.16,
+        Paint()..color = Colors.white,
+      );
 
       // Right Pupil
-      final rPupilCenter = Offset(rightEyeCenter.dx + pupilOffsetX, rightEyeCenter.dy + pupilOffsetY);
+      final rPupilCenter = Offset(
+        rightEyeCenter.dx + pupilOffsetX,
+        rightEyeCenter.dy + pupilOffsetY,
+      );
       canvas.drawCircle(rPupilCenter, pupilRadius, pupilPaint);
       canvas.drawCircle(rPupilCenter, pupilRadius - 1, irisRingPaint);
-      canvas.drawCircle(Offset(rPupilCenter.dx - pupilRadius * 0.35, rPupilCenter.dy - pupilRadius * 0.35), pupilRadius * 0.35, Paint()..color = Colors.white);
-      canvas.drawCircle(Offset(rPupilCenter.dx + pupilRadius * 0.25, rPupilCenter.dy + pupilRadius * 0.25), pupilRadius * 0.16, Paint()..color = Colors.white);
+      canvas.drawCircle(
+        Offset(
+          rPupilCenter.dx - pupilRadius * 0.35,
+          rPupilCenter.dy - pupilRadius * 0.35,
+        ),
+        pupilRadius * 0.35,
+        Paint()..color = Colors.white,
+      );
+      canvas.drawCircle(
+        Offset(
+          rPupilCenter.dx + pupilRadius * 0.25,
+          rPupilCenter.dy + pupilRadius * 0.25,
+        ),
+        pupilRadius * 0.16,
+        Paint()..color = Colors.white,
+      );
     }
 
     // ================= 6. BEAK (Chunky 3D Orange Cone) =================
@@ -397,7 +496,11 @@ class _ClayOwlPainter extends CustomPainter {
       ).createShader(Rect.fromCircle(center: beakCenter, radius: 12));
 
     canvas.drawPath(beakPath, beakPaint);
-    canvas.drawCircle(Offset(beakCenter.dx, beakCenter.dy + 1), 2.2, Paint()..color = Colors.white.withValues(alpha: 0.6));
+    canvas.drawCircle(
+      Offset(beakCenter.dx, beakCenter.dy + 1),
+      2.2,
+      Paint()..color = Colors.white.withValues(alpha: 0.6),
+    );
 
     // ================= 7. WINGS (Left & Right 3D Clay flaps) =================
     final wingPaint = Paint()
@@ -430,13 +533,20 @@ class _ClayOwlPainter extends CustomPainter {
     _drawHat(canvas, size);
   }
 
-  void _drawGlasses(Canvas canvas, Size size, Offset leftEyeCenter, Offset rightEyeCenter, double eyeRadius) {
+  void _drawGlasses(
+    Canvas canvas,
+    Size size,
+    Offset leftEyeCenter,
+    Offset rightEyeCenter,
+    double eyeRadius,
+  ) {
     if (glasses == null || glasses == 'Không đeo') return;
 
     if (glasses!.contains('Kính Tri Thức') || glasses!.contains('Kính Tròn')) {
       // Round Academic Glasses (Vintage tortoiseshell / dark wire)
       final framePaint = Paint()
-        ..color = const Color(0xFF78350F) // Warm brown
+        ..color =
+            const Color(0xFF78350F) // Warm brown
         ..style = PaintingStyle.stroke
         ..strokeWidth = 3.6;
 
@@ -453,7 +563,12 @@ class _ClayOwlPainter extends CustomPainter {
       // Nose bridge
       final bridgePath = Path()
         ..moveTo(leftEyeCenter.dx + eyeRadius * 0.9, leftEyeCenter.dy - 2)
-        ..quadraticBezierTo(size.width * 0.5, leftEyeCenter.dy - 8, rightEyeCenter.dx - eyeRadius * 0.9, rightEyeCenter.dy - 2);
+        ..quadraticBezierTo(
+          size.width * 0.5,
+          leftEyeCenter.dy - 8,
+          rightEyeCenter.dx - eyeRadius * 0.9,
+          rightEyeCenter.dy - 2,
+        );
       canvas.drawPath(bridgePath, bridgePaint);
 
       // Glass lens reflection highlight
@@ -462,16 +577,29 @@ class _ClayOwlPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.0;
       canvas.drawLine(
-        Offset(leftEyeCenter.dx - eyeRadius * 0.5, leftEyeCenter.dy - eyeRadius * 0.5),
-        Offset(leftEyeCenter.dx - eyeRadius * 0.1, leftEyeCenter.dy - eyeRadius * 0.7),
+        Offset(
+          leftEyeCenter.dx - eyeRadius * 0.5,
+          leftEyeCenter.dy - eyeRadius * 0.5,
+        ),
+        Offset(
+          leftEyeCenter.dx - eyeRadius * 0.1,
+          leftEyeCenter.dy - eyeRadius * 0.7,
+        ),
         glarePaint,
       );
       canvas.drawLine(
-        Offset(rightEyeCenter.dx - eyeRadius * 0.5, rightEyeCenter.dy - eyeRadius * 0.5),
-        Offset(rightEyeCenter.dx - eyeRadius * 0.1, rightEyeCenter.dy - eyeRadius * 0.7),
+        Offset(
+          rightEyeCenter.dx - eyeRadius * 0.5,
+          rightEyeCenter.dy - eyeRadius * 0.5,
+        ),
+        Offset(
+          rightEyeCenter.dx - eyeRadius * 0.1,
+          rightEyeCenter.dy - eyeRadius * 0.7,
+        ),
         glarePaint,
       );
-    } else if (glasses!.contains('Kính Ngôi Sao') || glasses!.contains('Kính Mát')) {
+    } else if (glasses!.contains('Kính Ngôi Sao') ||
+        glasses!.contains('Kính Mát')) {
       // Star sunglasses
       final starPaint = Paint()
         ..color = const Color(0xFFF59E0B)
@@ -482,7 +610,13 @@ class _ClayOwlPainter extends CustomPainter {
         ..strokeWidth = 2.5;
 
       _drawStar(canvas, leftEyeCenter, eyeRadius * 1.15, starPaint, starBorder);
-      _drawStar(canvas, rightEyeCenter, eyeRadius * 1.15, starPaint, starBorder);
+      _drawStar(
+        canvas,
+        rightEyeCenter,
+        eyeRadius * 1.15,
+        starPaint,
+        starBorder,
+      );
 
       // Bridge
       canvas.drawLine(
@@ -504,12 +638,23 @@ class _ClayOwlPainter extends CustomPainter {
         ..strokeWidth = 1.8;
       final chainPath = Path()
         ..moveTo(rightEyeCenter.dx + eyeRadius, rightEyeCenter.dy)
-        ..quadraticBezierTo(size.width * 0.85, size.height * 0.65, size.width * 0.75, size.height * 0.75);
+        ..quadraticBezierTo(
+          size.width * 0.85,
+          size.height * 0.65,
+          size.width * 0.75,
+          size.height * 0.75,
+        );
       canvas.drawPath(chainPath, chainPaint);
     }
   }
 
-  void _drawStar(Canvas canvas, Offset center, double radius, Paint fillPaint, Paint borderPaint) {
+  void _drawStar(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    Paint fillPaint,
+    Paint borderPaint,
+  ) {
     final path = Path();
     const int points = 5;
     final double innerRadius = radius * 0.5;
@@ -558,19 +703,38 @@ class _ClayOwlPainter extends CustomPainter {
 
       // Hat Brim
       final brimPaint = Paint()..color = const Color(0xFF92400E);
-      final brimRect = Rect.fromCenter(center: Offset(w * 0.5, h * 0.25), width: w * 0.74, height: h * 0.09);
-      canvas.drawRRect(RRect.fromRectAndRadius(brimRect, const Radius.circular(8)), brimPaint);
+      final brimRect = Rect.fromCenter(
+        center: Offset(w * 0.5, h * 0.25),
+        width: w * 0.74,
+        height: h * 0.09,
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(brimRect, const Radius.circular(8)),
+        brimPaint,
+      );
 
       // Ribbon ribbon bow
       final ribbonPaint = Paint()..color = const Color(0xFFD97706);
       canvas.drawRRect(
-        RRect.fromRectAndRadius(Rect.fromCenter(center: Offset(w * 0.5, h * 0.22), width: w * 0.45, height: h * 0.04), const Radius.circular(4)),
+        RRect.fromRectAndRadius(
+          Rect.fromCenter(
+            center: Offset(w * 0.5, h * 0.22),
+            width: w * 0.45,
+            height: h * 0.04,
+          ),
+          const Radius.circular(4),
+        ),
         ribbonPaint,
       );
       // Top button
-      canvas.drawCircle(Offset(w * 0.5, h * 0.06), 4.5, Paint()..color = const Color(0xFF78350F));
-
-    } else if (hat!.contains('Bác Học') || hat!.contains('Cử Nhân') || hat!.contains('Thủ Khoa')) {
+      canvas.drawCircle(
+        Offset(w * 0.5, h * 0.06),
+        4.5,
+        Paint()..color = const Color(0xFF78350F),
+      );
+    } else if (hat!.contains('Bác Học') ||
+        hat!.contains('Cử Nhân') ||
+        hat!.contains('Thủ Khoa')) {
       // 🎓 Academic Mortarboard Graduation Cap
       final capPaint = Paint()
         ..shader = const LinearGradient(
@@ -597,7 +761,11 @@ class _ClayOwlPainter extends CustomPainter {
       canvas.drawPath(basePath, basePaint);
 
       // Gold Tassel & button
-      canvas.drawCircle(Offset(w * 0.5, h * 0.13), 3.5, Paint()..color = const Color(0xFFFBBF24));
+      canvas.drawCircle(
+        Offset(w * 0.5, h * 0.13),
+        3.5,
+        Paint()..color = const Color(0xFFFBBF24),
+      );
       final tasselPaint = Paint()
         ..color = const Color(0xFFF59E0B)
         ..style = PaintingStyle.stroke
@@ -609,8 +777,11 @@ class _ClayOwlPainter extends CustomPainter {
         ..lineTo(w * 0.78, h * 0.18)
         ..lineTo(w * 0.82, h * 0.32);
       canvas.drawPath(tasselPath, tasselPaint);
-      canvas.drawCircle(Offset(w * 0.82, h * 0.33), 4, Paint()..color = const Color(0xFFD97706));
-
+      canvas.drawCircle(
+        Offset(w * 0.82, h * 0.33),
+        4,
+        Paint()..color = const Color(0xFFD97706),
+      );
     } else if (hat!.contains('Phù Thủy') || hat!.contains('Áo Choàng')) {
       // 🧙 Wizard Conical Hat
       final wizPaint = Paint()
@@ -628,12 +799,24 @@ class _ClayOwlPainter extends CustomPainter {
 
       // Wide Brim
       final brimPaint = Paint()..color = const Color(0xFF3730A3);
-      final brimRect = Rect.fromCenter(center: Offset(w * 0.5, h * 0.25), width: w * 0.78, height: h * 0.08);
+      final brimRect = Rect.fromCenter(
+        center: Offset(w * 0.5, h * 0.25),
+        width: w * 0.78,
+        height: h * 0.08,
+      );
       canvas.drawOval(brimRect, brimPaint);
 
       // Yellow Star patch on hat
-      _drawStar(canvas, Offset(w * 0.48, h * 0.16), 6.0, Paint()..color = const Color(0xFFFBBF24), Paint()..color = const Color(0xFFD97706)..strokeWidth = 1..style = PaintingStyle.stroke);
-
+      _drawStar(
+        canvas,
+        Offset(w * 0.48, h * 0.16),
+        6.0,
+        Paint()..color = const Color(0xFFFBBF24),
+        Paint()
+          ..color = const Color(0xFFD97706)
+          ..strokeWidth = 1
+          ..style = PaintingStyle.stroke,
+      );
     } else if (hat!.contains('Vương Miện')) {
       // 👑 Gold Royal Crown
       final crownPaint = Paint()
@@ -653,9 +836,21 @@ class _ClayOwlPainter extends CustomPainter {
       canvas.drawPath(crownPath, crownPaint);
 
       // Ruby gemstones
-      canvas.drawCircle(Offset(w * 0.5, h * 0.20), 3.5, Paint()..color = const Color(0xFFEF4444));
-      canvas.drawCircle(Offset(w * 0.34, h * 0.22), 2.8, Paint()..color = const Color(0xFF3B82F6));
-      canvas.drawCircle(Offset(w * 0.66, h * 0.22), 2.8, Paint()..color = const Color(0xFF10B981));
+      canvas.drawCircle(
+        Offset(w * 0.5, h * 0.20),
+        3.5,
+        Paint()..color = const Color(0xFFEF4444),
+      );
+      canvas.drawCircle(
+        Offset(w * 0.34, h * 0.22),
+        2.8,
+        Paint()..color = const Color(0xFF3B82F6),
+      );
+      canvas.drawCircle(
+        Offset(w * 0.66, h * 0.22),
+        2.8,
+        Paint()..color = const Color(0xFF10B981),
+      );
     }
   }
 

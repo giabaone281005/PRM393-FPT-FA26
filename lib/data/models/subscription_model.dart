@@ -14,11 +14,7 @@ enum SubscriptionTier {
   bool get isPlus => this == SubscriptionTier.plus;
 }
 
-enum SubscriptionStatus {
-  active,
-  expired,
-  canceled;
-}
+enum SubscriptionStatus { active, expired, canceled }
 
 class SubscriptionModel {
   final String id;
@@ -43,10 +39,15 @@ class SubscriptionModel {
 
   bool get isExpired {
     if (expiresAt == null) return false;
-    return DateTime.now().isAfter(expiresAt!);
+    return !DateTime.now().isBefore(expiresAt!);
   }
 
-  bool get isPlusActive => tier == SubscriptionTier.plus && status == SubscriptionStatus.active && !isExpired;
+  bool get isPlusActive =>
+      tier == SubscriptionTier.plus &&
+      status == SubscriptionStatus.active &&
+      !isExpired;
+
+  int get effectiveMaxKids => isPlusActive ? maxKids.clamp(1, 3) : 1;
 
   factory SubscriptionModel.fromMap(Map<String, dynamic> map) {
     final tierStr = (map['tier'] as String?)?.toLowerCase() ?? 'basic';
@@ -59,9 +60,10 @@ class SubscriptionModel {
       status: statusStr == 'expired'
           ? SubscriptionStatus.expired
           : statusStr == 'canceled'
-              ? SubscriptionStatus.canceled
-              : SubscriptionStatus.active,
-      maxKids: (map['max_kids'] as num?)?.toInt() ?? (tierStr == 'plus' ? 3 : 1),
+          ? SubscriptionStatus.canceled
+          : SubscriptionStatus.active,
+      maxKids:
+          (map['max_kids'] as num?)?.toInt() ?? (tierStr == 'plus' ? 3 : 1),
       startDate: map['start_date'] != null
           ? DateTime.tryParse(map['start_date'].toString()) ?? DateTime.now()
           : DateTime.now(),

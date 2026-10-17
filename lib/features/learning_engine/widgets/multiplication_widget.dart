@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 
 class MultiplicationWidget extends StatefulWidget {
   final Map<String, dynamic> data;
   final Function(bool isCorrect) onAnswerSubmitted;
+  final ValueChanged<dynamic>? onAnswerValue;
 
   const MultiplicationWidget({
     super.key,
     required this.data,
     required this.onAnswerSubmitted,
+    this.onAnswerValue,
   });
 
   @override
@@ -40,10 +43,13 @@ class _MultiplicationWidgetState extends State<MultiplicationWidget> {
     final rawOptions = widget.data['options'] as List? ?? [];
     _options = rawOptions.map((e) => e.toString()).toList();
 
-    _correctAnswer = (widget.data['correctAnswer'] ??
-            widget.data['answer'] ??
-            ((factorA is num && factorB is num) ? (factorA * factorB).toString() : (_options.isNotEmpty ? _options.first : '')))
-        .toString();
+    _correctAnswer =
+        (widget.data['correctAnswer'] ??
+                widget.data['answer'] ??
+                ((factorA is num && factorB is num)
+                    ? (factorA * factorB).toString()
+                    : (_options.isNotEmpty ? _options.first : '')))
+            .toString();
   }
 
   @override
@@ -114,12 +120,16 @@ class _MultiplicationWidgetState extends State<MultiplicationWidget> {
                   color: isSelected ? AppColors.primaryLight : Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: isSelected ? AppColors.primary : AppColors.borderSubtle,
+                    color: isSelected
+                        ? AppColors.primary
+                        : AppColors.borderSubtle,
                     width: isSelected ? 2.5 : 1.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: isSelected ? AppColors.primary.withAlpha(30) : Colors.black.withAlpha(5),
+                      color: isSelected
+                          ? AppColors.primary.withAlpha(30)
+                          : Colors.black.withAlpha(5),
                       blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),
@@ -129,7 +139,9 @@ class _MultiplicationWidgetState extends State<MultiplicationWidget> {
                   child: Text(
                     option,
                     style: AppTypography.titleLarge.copyWith(
-                      color: isSelected ? AppColors.primaryHover : AppColors.textPrimary,
+                      color: isSelected
+                          ? AppColors.primaryHover
+                          : AppColors.textPrimary,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
@@ -148,15 +160,25 @@ class _MultiplicationWidgetState extends State<MultiplicationWidget> {
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(52),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
           onPressed: _selectedAnswer == null
               ? null
               : () {
-                  final isRight = _selectedAnswer?.trim() == _correctAnswer.trim();
-                  widget.onAnswerSubmitted(isRight);
+                  final isRight =
+                      _selectedAnswer?.trim() == _correctAnswer.trim();
+                  if (widget.onAnswerValue != null) {
+                    widget.onAnswerValue!(_selectedAnswer);
+                  } else {
+                    widget.onAnswerSubmitted(isRight);
+                  }
                 },
-          child: const Text('KIỂM TRA ĐÁP ÁN', style: TextStyle(fontWeight: FontWeight.bold)),
+          child: const Text(
+            'KIỂM TRA ĐÁP ÁN',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );

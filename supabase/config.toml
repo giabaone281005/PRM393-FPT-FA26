@@ -1,0 +1,24 @@
+project_id = "mathlingo"
+
+[functions.vnpay-checkout]
+verify_jwt = false
+# Checkout authenticates using Auth /user itself (supports JWT signing-key changes).
+
+[functions.vnpay-ipn]
+verify_jwt = false
+# VNPay has no Supabase JWT. HMAC + merchant + order amount verified in handler.
+
+[functions.vnpay-return]
+verify_jwt = false
+
+[functions.vnpay-query]
+verify_jwt = false
+
+[functions.vnpay-refund]
+verify_jwt = false
+
+[functions.commerce-reconcile]
+verify_jwt = false
+
+[functions.ai-tutor]
+verify_jwt = false

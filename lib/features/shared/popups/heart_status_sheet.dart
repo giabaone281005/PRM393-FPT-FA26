@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../data/models/kid_profile.dart';
@@ -33,14 +34,24 @@ class HeartStatusSheet extends StatelessWidget {
                       color: AppColors.accentRedLight,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.favorite_rounded, color: AppColors.heart, size: 22),
+                    child: const Icon(
+                      Icons.favorite_rounded,
+                      color: AppColors.heart,
+                      size: 22,
+                    ),
                   ),
                   const SizedBox(width: 10),
-                  Text('Trái Tim Năng Lượng', style: AppTypography.titleLarge.copyWith(fontSize: 18)),
+                  Text(
+                    'Trái Tim Năng Lượng',
+                    style: AppTypography.titleLarge.copyWith(fontSize: 18),
+                  ),
                 ],
               ),
               IconButton(
-                icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
+                icon: const Icon(
+                  Icons.close_rounded,
+                  color: AppColors.textSecondary,
+                ),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -55,7 +66,9 @@ class HeartStatusSheet extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: Icon(
-                  isFilled ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                  isFilled
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
                   color: isFilled ? AppColors.heart : AppColors.textMuted,
                   size: 38,
                 ),
@@ -65,7 +78,11 @@ class HeartStatusSheet extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             '${kid.currentHearts}/${kid.maxHearts} Tim khả dụng',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFFBE123C)),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Color(0xFFBE123C),
+            ),
           ),
           const SizedBox(height: 16),
 
@@ -88,12 +105,19 @@ class HeartStatusSheet extends StatelessWidget {
                     children: [
                       const Text(
                         'Hồi Tim Miễn Phí Tại Vườn Luyện Tập (BR-03)',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF15803D)),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: Color(0xFF15803D),
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'MathLingo cam kết không thu phí nạp Tim. Bé có thể vào Vườn Luyện Tập tính nhẩm thư giãn để nạp lại đầy 5 Tim bất kỳ lúc nào!',
-                        style: AppTypography.bodySmall.copyWith(fontSize: 11, color: const Color(0xFF166534)),
+                        style: AppTypography.bodySmall.copyWith(
+                          fontSize: 11,
+                          color: const Color(0xFF166534),
+                        ),
                       ),
                     ],
                   ),
@@ -109,7 +133,9 @@ class HeartStatusSheet extends StatelessWidget {
               backgroundColor: AppColors.accentGreen,
               foregroundColor: Colors.white,
               minimumSize: const Size.fromHeight(50),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
             ),
             onPressed: () {
               Navigator.pop(context);

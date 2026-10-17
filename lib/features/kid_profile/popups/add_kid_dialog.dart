@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../data/providers/app_state_provider.dart';
@@ -50,7 +51,10 @@ class _AddKidDialogState extends State<AddKidDialog> {
         ),
       );
     } else {
-      setState(() => _error = 'Đã đạt giới hạn tối đa 3 bé (BR-04)!');
+      setState(
+        () => _error =
+            'Chưa tạo được hồ sơ. Kiểm tra mạng và giới hạn ${widget.state.maxAllowedKids} bé của gói hiện tại.',
+      );
     }
   }
 
@@ -66,10 +70,16 @@ class _AddKidDialogState extends State<AddKidDialog> {
               color: AppColors.primaryLight,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.person_add_rounded, color: AppColors.primary),
+            child: const Icon(
+              Icons.person_add_rounded,
+              color: AppColors.primary,
+            ),
           ),
           const SizedBox(width: 12),
-          Text('Thêm Hồ Sơ Bé (BR-04)', style: AppTypography.titleLarge.copyWith(fontSize: 18)),
+          Text(
+            'Thêm Hồ Sơ Bé (BR-04)',
+            style: AppTypography.titleLarge.copyWith(fontSize: 18),
+          ),
         ],
       ),
       content: SingleChildScrollView(
@@ -87,7 +97,9 @@ class _AddKidDialogState extends State<AddKidDialog> {
               decoration: InputDecoration(
                 labelText: 'Biệt danh của bé (VD: Bé Miu, Bo, Bắp)',
                 prefixIcon: const Icon(Icons.face_rounded),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
                 errorText: _error,
               ),
               textCapitalization: TextCapitalization.words,
@@ -98,7 +110,9 @@ class _AddKidDialogState extends State<AddKidDialog> {
               decoration: InputDecoration(
                 labelText: 'Khối Lớp',
                 prefixIcon: const Icon(Icons.school_rounded),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
               items: [1, 2, 3, 4, 5].map((g) {
                 return DropdownMenuItem(
@@ -122,14 +136,19 @@ class _AddKidDialogState extends State<AddKidDialog> {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
           ),
           onPressed: _isLoading ? null : _submit,
           child: _isLoading
               ? const SizedBox(
                   width: 18,
                   height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
                 )
               : const Text('Tạo Hồ Sơ'),
         ),

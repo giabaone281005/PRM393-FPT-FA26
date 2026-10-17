@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -13,17 +14,15 @@ void main() {
 
     await tester.pumpWidget(
       MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => AppStateProvider()),
-        ],
-        child: const MaterialApp(
-          home: MainScreen(),
-        ),
+        providers: [ChangeNotifierProvider(create: (_) => AppStateProvider())],
+        child: const MaterialApp(home: MainScreen()),
       ),
     );
 
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Gia đình MathLingo'), findsOneWidget);
+    expect(find.text('Đăng nhập'), findsOneWidget);
 
     // Simulate mouse move / hover
     final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);

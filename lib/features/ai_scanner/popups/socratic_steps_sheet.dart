@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 
@@ -55,17 +56,24 @@ class _SocraticStepsSheetState extends State<SocraticStepsSheet> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [AppColors.accentPurple, Color(0xFF6366F1)]),
+                  gradient: const LinearGradient(
+                    colors: [AppColors.accentPurple, Color(0xFF6366F1)],
+                  ),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Center(child: Text('🦉', style: TextStyle(fontSize: 26))),
+                child: const Center(
+                  child: Text('🦉', style: TextStyle(fontSize: 26)),
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Gia Sư Cú Socratic Hướng Dẫn', style: AppTypography.titleLarge.copyWith(fontSize: 16)),
+                    Text(
+                      'Gia Sư Cú Socratic Hướng Dẫn',
+                      style: AppTypography.titleLarge.copyWith(fontSize: 16),
+                    ),
                     Text(widget.problemTitle, style: AppTypography.bodySmall),
                   ],
                 ),
@@ -84,7 +92,11 @@ class _SocraticStepsSheetState extends State<SocraticStepsSheet> {
             ),
             child: Text(
               widget.problemText,
-              style: const TextStyle(fontSize: 13, fontStyle: FontStyle.italic, color: AppColors.textPrimary),
+              style: const TextStyle(
+                fontSize: 13,
+                fontStyle: FontStyle.italic,
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
           const SizedBox(height: 20),
@@ -96,9 +108,13 @@ class _SocraticStepsSheetState extends State<SocraticStepsSheet> {
               return Expanded(
                 child: Container(
                   height: 4,
-                  margin: EdgeInsets.only(right: idx < _steps.length - 1 ? 8 : 0),
+                  margin: EdgeInsets.only(
+                    right: idx < _steps.length - 1 ? 8 : 0,
+                  ),
                   decoration: BoxDecoration(
-                    color: isDone ? AppColors.accentPurple : AppColors.borderSubtle,
+                    color: isDone
+                        ? AppColors.accentPurple
+                        : AppColors.borderSubtle,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -108,7 +124,10 @@ class _SocraticStepsSheetState extends State<SocraticStepsSheet> {
           const SizedBox(height: 16),
 
           // Step content
-          Text(_steps[_activeStep]['title']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          Text(
+            _steps[_activeStep]['title']!,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(14),
@@ -128,7 +147,11 @@ class _SocraticStepsSheetState extends State<SocraticStepsSheet> {
                     Expanded(
                       child: Text(
                         _steps[_activeStep]['owl']!,
-                        style: const TextStyle(fontSize: 13, color: Color(0xFF5B21B6), height: 1.4),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF5B21B6),
+                          height: 1.4,
+                        ),
                       ),
                     ),
                   ],
@@ -136,7 +159,11 @@ class _SocraticStepsSheetState extends State<SocraticStepsSheet> {
                 const SizedBox(height: 10),
                 Text(
                   '💡 Gợi ý: ${_steps[_activeStep]['hint']!}',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF7C3AED)),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF7C3AED),
+                  ),
                 ),
               ],
             ),
@@ -151,7 +178,9 @@ class _SocraticStepsSheetState extends State<SocraticStepsSheet> {
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size.fromHeight(48),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                     onPressed: () => setState(() => _activeStep--),
                     child: const Text('Bước Trước'),
@@ -164,7 +193,9 @@ class _SocraticStepsSheetState extends State<SocraticStepsSheet> {
                     backgroundColor: AppColors.accentPurple,
                     foregroundColor: Colors.white,
                     minimumSize: const Size.fromHeight(48),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   onPressed: () {
                     if (_activeStep < _steps.length - 1) {
@@ -174,7 +205,9 @@ class _SocraticStepsSheetState extends State<SocraticStepsSheet> {
                     }
                   },
                   child: Text(
-                    _activeStep < _steps.length - 1 ? 'Bước Tiếp Theo ➔' : 'Bé Đã Hiểu Bài!',
+                    _activeStep < _steps.length - 1
+                        ? 'Bước Tiếp Theo ➔'
+                        : 'Bé Đã Hiểu Bài!',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),

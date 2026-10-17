@@ -1,4 +1,5 @@
 class KidProfile {
+  final bool archived;
   final String id;
   String nickname;
   int grade; // 1 to 5
@@ -13,17 +14,18 @@ class KidProfile {
   String? badgeTitle;
 
   KidProfile({
+    this.archived = false,
     required this.id,
     required this.nickname,
     required this.grade,
     this.currentHearts = 5,
     this.maxHearts = 5,
-    this.energyStars = 120,
+    this.energyStars = 0,
     this.screenTimeLimitMinutes = 30,
-    this.usedScreenTimeMinutes = 12,
+    this.usedScreenTimeMinutes = 0,
     this.avatarId = 'owl_detective',
-    this.streakCount = 7,
-    this.shieldCount = 1,
+    this.streakCount = 0,
+    this.shieldCount = 0,
     this.badgeTitle,
   });
 
@@ -52,6 +54,7 @@ class KidProfile {
   /// Parse từ Supabase response JSON
   factory KidProfile.fromJson(Map<String, dynamic> json) {
     return KidProfile(
+      archived: json['archived'] == true,
       id: json['id'] as String,
       nickname: json['nickname'] as String,
       grade: json['grade'] as int,
@@ -61,11 +64,19 @@ class KidProfile {
       screenTimeLimitMinutes: json['screen_time_limit_minutes'] as int? ?? 30,
       usedScreenTimeMinutes: 0, // Calculated locally
       avatarId: json['avatar_id'] as String? ?? 'owl_detective',
+      streakCount: (json['kid_streaks'] as Map?)?['streak_count'] as int? ?? 0,
+      shieldCount:
+          (json['kid_streaks'] as Map?)?['shields_available'] as int? ?? 0,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'archived': archived,
+      'kid_streaks': {
+        'streak_count': streakCount,
+        'shields_available': shieldCount,
+      },
       'id': id,
       'nickname': nickname,
       'grade': grade,
