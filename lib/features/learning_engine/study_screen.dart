@@ -14,12 +14,20 @@ import 'widgets/clock_rotation_widget.dart';
 import 'widgets/multiplication_widget.dart';
 import 'widgets/area_grid_widget.dart';
 import 'widgets/word_problem_widget.dart';
+import 'widgets/voice_answer_widget.dart';
+import '../../core/services/voice/speech_service.dart';
 import '../parent_portal/popups/parent_gate_dialog.dart';
 
 class StudyScreen extends StatefulWidget {
   final String? lessonId;
   final String kind;
-  const StudyScreen({super.key, this.lessonId, this.kind = 'lesson'});
+  final SpeechService? speechService;
+  const StudyScreen({
+    super.key,
+    this.lessonId,
+    this.kind = 'lesson',
+    this.speechService,
+  });
   @override
   State<StudyScreen> createState() => _StudyScreenState();
 }
@@ -446,6 +454,15 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
                       s.currentQuestion!.prompt,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
+                    const SizedBox(height: 8),
+                    VoiceAnswerWidget(
+                      key: ValueKey('voice_${s.currentQuestion!.id}'),
+                      question: s.currentQuestion!,
+                      speechService: widget.speechService,
+                      isBusy: _busy,
+                      onAnswerConfirmed: _answer,
+                    ),
+                    const SizedBox(height: 12),
                     AbsorbPointer(
                       absorbing: _busy,
                       child: _question(s.currentQuestion!),
