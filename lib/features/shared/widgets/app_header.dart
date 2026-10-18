@@ -11,8 +11,9 @@ import '../popups/streak_info_sheet.dart';
 
 class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onHeartTap;
+  final String? subtitle;
 
-  const AppHeader({super.key, this.onHeartTap});
+  const AppHeader({super.key, this.onHeartTap, this.subtitle});
 
   @override
   Size get preferredSize => const Size.fromHeight(68.0);
@@ -109,7 +110,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
                           ],
                         ),
                         Text(
-                          kid.nickname,
+                          subtitle ?? kid.nickname,
                           style: AppTypography.bodySmall.copyWith(
                             color: AppColors.textSecondary,
                             fontSize: 11,

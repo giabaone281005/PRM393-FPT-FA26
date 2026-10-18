@@ -39,6 +39,7 @@ class StudyScreen extends StatefulWidget {
 class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
   StudySession? _session;
   bool _busy = true, _heartbeatBusy = false, _foreground = true;
+  bool _allowExit = false;
   String? _error, _feedback;
   String _tab = 'theory';
   String _startRequest = StudyRepository.requestId();
@@ -363,229 +364,278 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
     );
   }
 
+  Future<void> _confirmExit() async {
+    if (_busy || _allowExit) return;
+
+    final shouldExit = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('🦉 Bạn muốn thoát bài học?'),
+        content: const Text('Bạn đang học dở. Bạn có muốn tiếp tục học không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Tiếp tục học'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Thoát bài'),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted || shouldExit != true) return;
+
+    setState(() {
+      _allowExit = true;
+    });
+
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = _session;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(s?.title ?? 'Đang mở bài học'),
-        actions: [
-          if (s != null)
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Text(
-                '❤️ ${s.hearts}  ⏱ ${_remaining ~/ 60}:${(_remaining % 60).toString().padLeft(2, '0')}',
-              ),
-            ),
-        ],
-      ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            if (_busy) const LinearProgressIndicator(),
-            if (s?.data['offline'] == true)
-              const Text(
-                'Đang ngoại tuyến · kết quả và phần thưởng chờ máy chủ xác nhận.',
-              ),
-            if (_error != null) ...[
-              Text(_error!, style: const TextStyle(color: Colors.red)),
-              TextButton(
-                onPressed: _busy
-                    ? null
-                    : () {
-                        if (_answerRequest != null) {
-                          _answer(_pendingAnswer);
-                        } else {
-                          _start();
-                        }
-                      },
-                child: const Text('Thử lại'),
-              ),
-              TextButton(
-                onPressed: () => showDialog(
-                  context: context,
-                  builder: (_) => const ParentGateDialog(),
-                ),
-                child: const Text('Cổng phụ huynh'),
-              ),
-            ],
-            if (_feedback != null)
-              Semantics(
-                liveRegion: true,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text(_feedback!),
+
+    return PopScope(
+      canPop: _allowExit,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _confirmExit();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+            tooltip: 'Quay lại',
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: _busy ? null : _confirmExit,
+          ),
+          title: Text(s?.title ?? 'Đang mở bài học'),
+          actions: [
+            if (s != null)
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  '❤️ ${s.hearts}  ⏱ ${_remaining ~/ 60}:${(_remaining % 60).toString().padLeft(2, '0')}',
                 ),
               ),
-            if (s != null && s.completed) ...[
-              const Icon(Icons.emoji_events, size: 80, color: Colors.amber),
-              const Text('Hoàn thành!'),
-              Text(
-                'Độ chính xác: ${s.data['accuracy_percent']}% · +${s.data['xp_earned']} XP · +${s.data['stars_awarded']} sao',
-              ),
-              if (s.kind == 'practice')
-                const Text('Tim của bé đã được hồi đầy đủ.'),
-              FilledButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Tiếp tục hành trình'),
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                onPressed: () {
-                  final kId = s.kidId.isNotEmpty
-                      ? s.kidId
-                      : (context.read<AppStateProvider>().hasKids
-                            ? context.read<AppStateProvider>().currentKid.id
-                            : '');
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ReviewWrongAnswersScreen(
-                        kidId: kId,
-                        lessonId: widget.lessonId ?? s.data['lesson_id']?.toString(),
-                      ),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.history_edu_rounded),
-                label: const Text('Xem lại câu trả lời sai'),
-              ),
-            ] else if (s != null) ...[
-              LinearProgressIndicator(
-                value: s.questions.isEmpty ? 0 : s.index / s.questions.length,
-              ),
-              Text('${s.index}/${s.questions.length} câu đã hoàn thành'),
-              if (_remaining <= 0 && !s.quizDone) ...[
+          ],
+        ), // Kết thúc AppBar
+        body: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              if (_busy) const LinearProgressIndicator(),
+              if (s?.data['offline'] == true)
                 const Text(
-                  'Đã hết thời gian học hôm nay. Hẹn em vào ngày mai nhé.',
+                  'Đang ngoại tuyến · kết quả và phần thưởng chờ máy chủ xác nhận.',
+                ),
+              if (_error != null) ...[
+                Text(_error!, style: const TextStyle(color: Colors.red)),
+                TextButton(
+                  onPressed: _busy
+                      ? null
+                      : () {
+                          if (_answerRequest != null) {
+                            _answer(_pendingAnswer);
+                          } else {
+                            _start();
+                          }
+                        },
+                  child: const Text('Thử lại'),
                 ),
                 TextButton(
                   onPressed: () => showDialog(
                     context: context,
                     builder: (_) => const ParentGateDialog(),
                   ),
-                  child: const Text('Nhờ phụ huynh điều chỉnh'),
+                  child: const Text('Cổng phụ huynh'),
                 ),
-              ] else ...[
-                Wrap(
-                  spacing: 8,
-                  children: [
-                    if (s.theory.isNotEmpty)
-                      ChoiceChip(
-                        label: const Text('Lý thuyết'),
-                        selected: _tab == 'theory',
-                        onSelected: (_) => setState(() => _tab = 'theory'),
-                      ),
-                    ChoiceChip(
-                      label: const Text('Câu hỏi'),
-                      selected: _tab == 'quiz',
-                      onSelected: (_) => setState(() => _tab = 'quiz'),
-                    ),
-                    if (s.quizDone && s.essayRequired)
-                      ChoiceChip(
-                        label: const Text('Tự luận'),
-                        selected: _tab == 'essay',
-                        onSelected: (_) => setState(() => _tab = 'essay'),
-                      ),
-                  ],
+              ],
+              if (_feedback != null)
+                Semantics(
+                  liveRegion: true,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(_feedback!),
+                  ),
                 ),
-                const SizedBox(height: 16),
-                if (_tab == 'theory') ...[
-                  SelectableText(s.theory.replaceAll(r'\n', '\n')),
-                  FilledButton(
-                    onPressed: () => setState(() => _tab = 'quiz'),
-                    child: const Text('Bắt đầu luyện tập'),
-                  ),
-                ] else if (_tab == 'essay') ...[
-                  Text(s.essayPrompt),
-                  TextField(
-                    controller: _solution,
-                    maxLines: 4,
-                    decoration: const InputDecoration(
-                      labelText: 'Cách giải của em',
-                    ),
-                  ),
-                  TextField(
-                    controller: _result,
-                    decoration: const InputDecoration(
-                      labelText: 'Đáp số (theo yêu cầu của đề)',
-                    ),
-                  ),
-                  FilledButton(
-                    onPressed: _busy ? null : _essay,
-                    child: const Text('Kiểm tra bài tự luận'),
-                  ),
-                ] else if (!s.quizDone && s.currentQuestion != null) ...[
-                  if (s.kind == 'lesson' && s.hearts == 0)
-                    FilledButton(
-                      onPressed: _practice,
-                      child: const Text('Luyện 5 câu để hồi tim miễn phí'),
-                    )
-                  else ...[
-                    Text(
-                      s.currentQuestion!.prompt,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 8),
-                    VoiceAnswerWidget(
-                      key: ValueKey('voice_${s.currentQuestion!.id}'),
-                      question: s.currentQuestion!,
-                      speechService: widget.speechService,
-                      isBusy: _busy,
-                      onAnswerConfirmed: _answer,
-                    ),
-                    const SizedBox(height: 12),
-                    AbsorbPointer(
-                      absorbing: _busy,
-                      child: _question(s.currentQuestion!),
-                    ),
-                  ],
-                  TextButton.icon(
-                    icon: const Icon(Icons.lightbulb_outline),
-                    label: const Text('Gợi ý từng bước'),
-                    onPressed: () {
-                      final hints = s.currentQuestion!.socraticHints;
-                      _hints++;
-                      showDialog(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: const Text('Cùng suy nghĩ nhé'),
-                          content: Text(
-                            hints.isEmpty
-                                ? 'Em biết những dữ kiện nào? Phép tính nào phù hợp?'
-                                : hints[(_hints - 1).clamp(0, hints.length - 1)]
-                                      .hintText,
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx),
-                              child: const Text('Em hiểu rồi'),
-                            ),
-                          ],
+              if (s != null && s.completed) ...[
+                const Icon(Icons.emoji_events, size: 80, color: Colors.amber),
+                const Text('Hoàn thành!'),
+                Text(
+                  'Độ chính xác: ${s.data['accuracy_percent']}% · +${s.data['xp_earned']} XP · +${s.data['stars_awarded']} sao',
+                ),
+                if (s.kind == 'practice')
+                  const Text('Tim của bé đã được hồi đầy đủ.'),
+                FilledButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Tiếp tục hành trình'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    final kId = s.kidId.isNotEmpty
+                        ? s.kidId
+                        : (context.read<AppStateProvider>().hasKids
+                              ? context.read<AppStateProvider>().currentKid.id
+                              : '');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ReviewWrongAnswersScreen(
+                          kidId: kId,
+                          lessonId:
+                              widget.lessonId ??
+                              s.data['lesson_id']?.toString(),
                         ),
-                      );
-                    },
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.history_edu_rounded),
+                  label: const Text('Xem lại câu trả lời sai'),
+                ),
+              ] else if (s != null) ...[
+                LinearProgressIndicator(
+                  value: s.questions.isEmpty ? 0 : s.index / s.questions.length,
+                ),
+                Text('${s.index}/${s.questions.length} câu đã hoàn thành'),
+                if (_remaining <= 0 && !s.quizDone) ...[
+                  const Text(
+                    'Đã hết thời gian học hôm nay. Hẹn em vào ngày mai nhé.',
                   ),
+                  TextButton(
+                    onPressed: () => showDialog(
+                      context: context,
+                      builder: (_) => const ParentGateDialog(),
+                    ),
+                    child: const Text('Nhờ phụ huynh điều chỉnh'),
+                  ),
+                ] else ...[
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      if (s.theory.isNotEmpty)
+                        ChoiceChip(
+                          label: const Text('Lý thuyết'),
+                          selected: _tab == 'theory',
+                          onSelected: (_) => setState(() => _tab = 'theory'),
+                        ),
+                      ChoiceChip(
+                        label: const Text('Câu hỏi'),
+                        selected: _tab == 'quiz',
+                        onSelected: (_) => setState(() => _tab = 'quiz'),
+                      ),
+                      if (s.quizDone && s.essayRequired)
+                        ChoiceChip(
+                          label: const Text('Tự luận'),
+                          selected: _tab == 'essay',
+                          onSelected: (_) => setState(() => _tab = 'essay'),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  if (_tab == 'theory') ...[
+                    SelectableText(s.theory.replaceAll(r'\n', '\n')),
+                    FilledButton(
+                      onPressed: () => setState(() => _tab = 'quiz'),
+                      child: const Text('Bắt đầu luyện tập'),
+                    ),
+                  ] else if (_tab == 'essay') ...[
+                    Text(s.essayPrompt),
+                    TextField(
+                      controller: _solution,
+                      maxLines: 4,
+                      decoration: const InputDecoration(
+                        labelText: 'Cách giải của em',
+                      ),
+                    ),
+                    TextField(
+                      controller: _result,
+                      decoration: const InputDecoration(
+                        labelText: 'Đáp số (theo yêu cầu của đề)',
+                      ),
+                    ),
+                    FilledButton(
+                      onPressed: _busy ? null : _essay,
+                      child: const Text('Kiểm tra bài tự luận'),
+                    ),
+                  ] else if (!s.quizDone && s.currentQuestion != null) ...[
+                    if (s.kind == 'lesson' && s.hearts == 0)
+                      FilledButton(
+                        onPressed: _practice,
+                        child: const Text('Luyện 5 câu để hồi tim miễn phí'),
+                      )
+                    else ...[
+                      Text(
+                        s.currentQuestion!.prompt,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      VoiceAnswerWidget(
+                        key: ValueKey('voice_${s.currentQuestion!.id}'),
+                        question: s.currentQuestion!,
+                        speechService: widget.speechService,
+                        isBusy: _busy,
+                        onAnswerConfirmed: _answer,
+                      ),
+                      const SizedBox(height: 12),
+                      AbsorbPointer(
+                        absorbing: _busy,
+                        child: _question(s.currentQuestion!),
+                      ),
+                    ],
+                    TextButton.icon(
+                      icon: const Icon(Icons.lightbulb_outline),
+                      label: const Text('Gợi ý từng bước'),
+                      onPressed: () {
+                        final hints = s.currentQuestion!.socraticHints;
+                        _hints++;
+                        showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Cùng suy nghĩ nhé'),
+                            content: Text(
+                              hints.isEmpty
+                                  ? 'Em biết những dữ kiện nào? Phép tính nào phù hợp?'
+                                  : hints[(_hints - 1).clamp(
+                                          0,
+                                          hints.length - 1,
+                                        )]
+                                        .hintText,
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx),
+                                child: const Text('Em hiểu rồi'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                  if (s.quizDone && (!s.essayRequired || s.essayPassed))
+                    FilledButton(
+                      onPressed: _busy ? null : _finish,
+                      child: const Text('Lưu kết quả và nhận thưởng'),
+                    ),
+                  if (s.quizDone &&
+                      s.essayRequired &&
+                      !s.essayPassed &&
+                      _tab != 'essay')
+                    FilledButton(
+                      onPressed: () => setState(() => _tab = 'essay'),
+                      child: const Text('Làm bài tự luận'),
+                    ),
                 ],
-                if (s.quizDone && (!s.essayRequired || s.essayPassed))
-                  FilledButton(
-                    onPressed: _busy ? null : _finish,
-                    child: const Text('Lưu kết quả và nhận thưởng'),
-                  ),
-                if (s.quizDone &&
-                    s.essayRequired &&
-                    !s.essayPassed &&
-                    _tab != 'essay')
-                  FilledButton(
-                    onPressed: () => setState(() => _tab = 'essay'),
-                    child: const Text('Làm bài tự luận'),
-                  ),
               ],
             ],
-          ],
+          ),
         ),
       ),
-    );
+    ); // PopScope
   }
 }

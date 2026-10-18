@@ -40,3 +40,23 @@ Bốn migrations cũ được giữ nguyên. Bốn migrations mới `20261018 �
 Commerce mới dùng `learning_orders`/`learning_payments` để tương thích với hai bảng `orders`/`payments` legacy đã có trên Cloud. Khi copy SQL từ bản trước, cần lấy lại nội dung migrations mới nhất.
 
 `scripts/build-android.ps1` hỗ trợ debug/release. Release yêu cầu upload keystore riêng qua `android/key.properties`; không dùng khóa debug. Giá gói và quota AI do admin cấu hình, không có giá/trial/demo success tự động.
+
+## Cap nhat nhanh khapv-latest (17/10/2026)
+
+### Giao dien Trang chu
+- Sua loi khong cuon duoc xuong cuoi Trang chu.
+- Dieu chinh khoang trong phia duoi de khong che cac the tinh nang.
+- Giu nguyen giao dien va cac chuc nang hien co.
+
+### Theo doi ngay hoc trong tuan
+- Bo sung ham `KidRepository.fetchStudyDays(kidId)`.
+- Doc du lieu tu bang Supabase `study_daily_usage`.
+- Hien thi dau tich cho cac ngay T2-CN co `total_seconds > 0`.
+- Hien thi lich su hoc rieng theo `kid_id` cua tung be.
+
+### Trang thai
+- Da kiem tra `flutter analyze` cho `kid_repository.dart`.
+- Da kiem tra giao dien hien thi dau tich ngay hoc.
+- Logic `kid_streaks.streak_count` chua duoc sua.
+- Can kiem tra them viec tu cap nhat khi hoan thanh buoi hoc.
+
