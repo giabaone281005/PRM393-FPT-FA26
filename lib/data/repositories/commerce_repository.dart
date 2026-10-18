@@ -7,16 +7,18 @@ import '../models/commerce_models.dart';
 
 class PaymentSession {
   final String orderId;
-  final String provider; // 'momo' hoặc 'vnpay'
+  final String provider; // 'momo', 'vnpay', 'demo-momo' hoặc 'demo-vnpay'
   final Uri payUrl;
   final String? deeplink; // chỉ MoMo
-  final String? qrData; // chỉ MoMo
+  final String? qrData; // MoMo hoặc demo
+  final int? amountVnd;
   const PaymentSession({
     required this.orderId,
     required this.provider,
     required this.payUrl,
     this.deeplink,
     this.qrData,
+    this.amountVnd,
   });
 }
 
@@ -45,7 +47,7 @@ class CommerceRepository {
     if (!admin) {
       query = query.eq('published', true).eq('learning_plans.published', true);
     }
-    final rows = await query.order('duration_months');
+    final rows = await query.order('duration_months', ascending: true);
     return rows.map(PlanPrice.fromMap).toList();
   }
 
@@ -91,25 +93,32 @@ class CommerceRepository {
   }
 
   static Future<PaymentSession> startPayment({
-    required String provider, // 'momo' hoặc 'vnpay'
+    required String provider, // 'momo', 'vnpay', 'demo-momo' hoặc 'demo-vnpay'
     required String parentToken,
     String? priceId,
     String? requestId,
     String? orderId,
+    bool qr = false, // chỉ VNPay: true = mở thẳng trang quét QR (VNPAYQR)
   }) async {
     final response = await _client.functions.invoke(
-      provider == 'momo' ? 'momo-checkout' : 'vnpay-checkout',
+      provider == 'momo'
+          ? 'momo-checkout'
+          : provider.startsWith('demo')
+          ? 'demo-pay'
+          : 'vnpay-checkout',
       body: {
         'parentToken': parentToken,
         'orderId': ?orderId,
         'priceId': ?priceId,
         'requestId': ?requestId,
+        if (provider == 'vnpay' && qr) 'method': 'qr',
       },
     );
     final data = Map<String, dynamic>.from(response.data as Map);
     final id = (data['order'] as Map?)?['id']?.toString();
-    final url =
-    (provider == 'momo' ? data['payUrl'] : data['checkoutUrl']) as String?;
+    final url = (provider == 'momo' || provider.startsWith('demo')
+        ? data['payUrl']
+        : data['checkoutUrl']) as String?;
     if (response.status != 200 || id == null || url == null) {
       throw StateError(
         data['error']?.toString() ?? 'Không thể tạo thanh toán.',
@@ -122,7 +131,10 @@ class CommerceRepository {
       'test-payment.momo.vn',
       'payment.momo.vn',
     ];
-    if (uri.scheme != 'https' || !allowedHosts.contains(uri.host)) {
+    // Thanh toán demo: link nằm trên chính Supabase của bạn
+    final hostOk = allowedHosts.contains(uri.host) ||
+        (provider.startsWith('demo') && uri.host.endsWith('.supabase.co'));
+    if (uri.scheme != 'https' || !hostOk) {
       throw StateError('Địa chỉ thanh toán không hợp lệ.');
     }
     return PaymentSession(
@@ -130,7 +142,8 @@ class CommerceRepository {
       provider: provider,
       payUrl: uri,
       deeplink: data['deeplink'] as String?,
-      qrData: data['qrCodeUrl'] as String?,
+      qrData: (data['qrCodeUrl'] ?? data['qrCode']) as String?,
+      amountVnd: ((data['order'] as Map?)?['amount_vnd'] as num?)?.toInt(),
     );
   }
 
@@ -141,6 +154,24 @@ class CommerceRepository {
         .eq('id', orderId)
         .single();
     return row['status'] as String;
+  }
+
+  /// Chỉ cho thanh toán demo: mô phỏng việc đã quét QR xong
+  static Future<void> simulateScan({
+    required String orderId,
+    required String parentToken,
+  }) async {
+    final response = await _client.functions.invoke(
+      'demo-pay',
+      body: {
+        'action': 'simulate',
+        'orderId': orderId,
+        'parentToken': parentToken,
+      },
+    );
+    if (response.status != 200) {
+      throw StateError('Chưa mô phỏng được thanh toán.');
+    }
   }
 
   static Future<void> reconcile(String orderId) async {
