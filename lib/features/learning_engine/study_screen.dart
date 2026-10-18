@@ -9,6 +9,7 @@ import '../../data/models/study_session.dart';
 import '../../data/models/question.dart';
 import '../../data/models/wrong_answer_record.dart';
 import '../../data/providers/app_state_provider.dart';
+import '../../data/repositories/learning_statistics_repository.dart';
 import '../../data/repositories/study_repository.dart';
 import '../../data/repositories/wrong_answer_repository.dart';
 import 'widgets/drag_counters_widget.dart';
@@ -189,6 +190,7 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
     _pendingAnswer ??= value;
     final currentQ = _session!.currentQuestion;
     final attemptedAnswer = _pendingAnswer;
+    final submittedRequestId = _answerRequest;
     final kidId = _session!.kidId.isNotEmpty
         ? _session!.kidId
         : (context.read<AppStateProvider>().hasKids
@@ -224,6 +226,25 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
       _feedback = isCorrect
           ? 'Chính xác! Em làm tốt lắm.'
           : 'Chưa đúng. Em thử xem gợi ý rồi tính lại nhé.';
+
+      // Record answer in learning statistics and daily streak
+      final eventId = '${_session!.id}:${currentQ?.id ?? ""}:$submittedRequestId';
+      try {
+        final appState = context.read<AppStateProvider>();
+        await appState.recordPracticeAnswer(
+          isCorrect: isCorrect,
+          kidId: kidId.trim().isNotEmpty ? kidId : null,
+          eventId: eventId,
+        );
+      } catch (_) {
+        try {
+          await LearningStatisticsRepository.recordAnswer(
+            isCorrect: isCorrect,
+            kidId: kidId.trim().isNotEmpty ? kidId : null,
+            eventId: eventId,
+          );
+        } catch (_) {}
+      }
       if (updated.data['correct'] == false &&
           currentQ != null &&
           kidId.trim().isNotEmpty) {
