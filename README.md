@@ -8,6 +8,8 @@
 
 Các luồng cốt lõi đã có mã tích hợp Supabase và đã được kiểm thử như bên dưới. Dự án đang ở giai đoạn QA/tích hợp, **chưa nghiệm thu phát hành production**. “Đã có mã”, “đã deploy” và “đã chạy với nhà cung cấp thật” là các mức hoàn thành khác nhau.
 
+Sau khi đồng bộ `main`, codebase còn có thêm giao diện ví/trial, lựa chọn MoMo/VNPay/QR và cổng thanh toán demo từ các commit của nhóm. Các luồng bổ sung này chưa được nghiệm thu với provider thật; kết quả demo không phải bằng chứng đã thu tiền. Dependencies nhận giọng nói và QR đã được khôi phục để mã hiện có biên dịch đầy đủ.
+
 | Phân hệ | Đã hoàn thành trong codebase | Bằng chứng và giới hạn |
 |---|---|---|
 | Tài khoản | Đăng nhập/đăng xuất, đăng ký, xác minh email, khôi phục mật khẩu và session Supabase | Đăng nhập thật bằng các tài khoản QA đạt; chưa nghiệm thu gửi email SMTP và deep link trên thiết bị |
