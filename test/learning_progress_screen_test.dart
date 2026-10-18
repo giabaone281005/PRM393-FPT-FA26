@@ -174,6 +174,7 @@ void main() {
       );
       expect(progressButton, findsOneWidget);
 
+      await tester.ensureVisible(progressButton);
       await tester.tap(progressButton);
       await tester.pumpAndSettle();
 

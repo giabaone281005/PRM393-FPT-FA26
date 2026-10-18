@@ -1,6 +1,7 @@
 import { json, required, rest } from '../_shared/http.ts';
 Deno.serve(async (req) => {
-  if (req.method !== 'POST' || req.headers.get('x-job-key') !== required('COMMERCE_JOB_KEY')) return json({ error: 'Unauthorized' }, 401);
+  const jobKey = Deno.env.get('COMMERCE_JOB_KEY');
+  if (req.method !== 'POST' || !jobKey || req.headers.get('x-job-key') !== jobKey) return json({ error: 'Unauthorized' }, 401);
   try {
     const service = required('SUPABASE_SERVICE_ROLE_KEY');
     const rows = await rest('rpc/pending_reconciliation', service, {}, true);

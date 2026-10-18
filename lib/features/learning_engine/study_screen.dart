@@ -9,6 +9,8 @@ import '../../data/models/study_session.dart';
 import '../../data/models/question.dart';
 import '../../data/models/wrong_answer_record.dart';
 import '../../data/providers/app_state_provider.dart';
+import '../../data/providers/study_heartbeat_queue.dart';
+import '../../core/services/app_route_observer.dart';
 import '../../data/repositories/learning_statistics_repository.dart';
 import '../../data/repositories/study_repository.dart';
 import '../../data/repositories/wrong_answer_repository.dart';
@@ -36,9 +38,13 @@ class StudyScreen extends StatefulWidget {
   State<StudyScreen> createState() => _StudyScreenState();
 }
 
-class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
+class _StudyScreenState extends State<StudyScreen>
+    with WidgetsBindingObserver, RouteAware {
   StudySession? _session;
-  bool _busy = true, _heartbeatBusy = false, _foreground = true;
+  bool _busy = true, _foreground = true, _routeVisible = true, _onBreak = false;
+  ModalRoute<dynamic>? _route;
+  final _heartbeats = StudyHeartbeatQueue();
+  bool get _isStudyActive => _foreground && _routeVisible && !_onBreak;
   String? _error, _feedback;
   String _tab = 'theory';
   String _startRequest = StudyRepository.requestId();
@@ -54,7 +60,7 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _start();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!_foreground ||
+      if (!_isStudyActive ||
           _session == null ||
           _session!.completed ||
           ModalRoute.of(context)?.isCurrent != true) {
@@ -65,6 +71,29 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
       if (_activeSeconds % 20 == 0) _heartbeat(true);
       if (_activeSeconds == 600) _break();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (_route != route && route != null) {
+      appRouteObserver.unsubscribe(this);
+      _route = route;
+      appRouteObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void didPushNext() {
+    _routeVisible = false;
+    _heartbeat(false);
+  }
+
+  @override
+  void didPopNext() {
+    _routeVisible = true;
+    _heartbeat(_isStudyActive);
   }
 
   Future<void> _start() async {
@@ -80,7 +109,12 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
         widget.kind,
         _startRequest,
       );
-      if (!mounted) return;
+      if (!mounted) {
+        if (!session.completed) {
+          await _heartbeats.send(session.id, false, session.viewState);
+        }
+        return;
+      }
       _apply(session);
       final view = session.viewState;
       _tab =
@@ -88,6 +122,7 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
           (session.theory.isNotEmpty ? 'theory' : 'quiz');
       _solution.text = view['essay_solution']?.toString() ?? '';
       _result.text = view['essay_result']?.toString() ?? '';
+      if (!_isStudyActive) await _heartbeat(false);
     } catch (e) {
       if (mounted) _error = _message(e);
     } finally {
@@ -117,13 +152,16 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
     'essay_result': _result.text,
   };
   Future<void> _heartbeat(bool active) async {
-    if (_session == null || _session!.completed || _heartbeatBusy || _busy) {
+    if (_session == null || _session!.completed) {
       return;
     }
-    _heartbeatBusy = true;
     try {
       final current = _session!;
-      final fresh = await StudyRepository.heartbeat(current.id, active, _view);
+      final fresh = await _heartbeats.send(
+        current.id,
+        active && _isStudyActive,
+        _view,
+      );
       if (mounted && _session?.id == current.id) _apply(fresh);
     } catch (_) {
       if (mounted) {
@@ -131,28 +169,23 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
           () => _feedback = 'Mất kết nối. Chọn thử lại trước khi tiếp tục.',
         );
       }
-    } finally {
-      _heartbeatBusy = false;
     }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _foreground = state == AppLifecycleState.resumed;
-    _heartbeat(_foreground);
+    _heartbeat(_isStudyActive);
   }
 
   @override
   void dispose() {
     _timer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
+    appRouteObserver.unsubscribe(this);
     final current = _session;
     if (current != null && !current.completed) {
-      StudyRepository.heartbeat(
-        current.id,
-        false,
-        _view,
-      ).catchError((_) => current);
+      _heartbeats.send(current.id, false, _view).catchError((_) => current);
     }
     _solution.dispose();
     _result.dispose();
@@ -160,9 +193,9 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _break() async {
+    _onBreak = true;
     await _heartbeat(false);
     if (!mounted) return;
-    _foreground = false;
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -180,8 +213,8 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
       ),
     );
     _activeSeconds = 0;
-    _foreground = true;
-    await _heartbeat(true);
+    _onBreak = false;
+    await _heartbeat(_isStudyActive);
   }
 
   Future<void> _answer(dynamic value) async {
@@ -228,7 +261,8 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
           : 'Chưa đúng. Em thử xem gợi ý rồi tính lại nhé.';
 
       // Record answer in learning statistics and daily streak
-      final eventId = '${_session!.id}:${currentQ?.id ?? ""}:$submittedRequestId';
+      final eventId =
+          '${_session!.id}:${currentQ?.id ?? ""}:$submittedRequestId';
       try {
         final appState = context.read<AppStateProvider>();
         await appState.recordPracticeAnswer(
@@ -443,7 +477,8 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
                     MaterialPageRoute(
                       builder: (_) => ReviewWrongAnswersScreen(
                         kidId: kId,
-                        lessonId: widget.lessonId ?? s.data['lesson_id']?.toString(),
+                        lessonId:
+                            widget.lessonId ?? s.data['lesson_id']?.toString(),
                       ),
                     ),
                   );

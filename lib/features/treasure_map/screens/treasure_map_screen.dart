@@ -468,7 +468,9 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                 child: CustomPaint(
                   painter: _MapCurvedRoadPainter(
                     positions: positions,
-                    activeLessonIndex: activeLesson.lessonNumber - 1,
+                    activeLessonIndex: lessons.indexWhere(
+                      (lesson) => lesson.id == activeLesson.id,
+                    ),
                   ),
                 ),
               ),
@@ -501,7 +503,7 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                   child: _buildStationNode(
                     context,
                     lessons[i],
-                    activeLesson.lessonNumber == lessons[i].lessonNumber,
+                    activeLesson.id == lessons[i].id,
                   ),
                 ),
             ],

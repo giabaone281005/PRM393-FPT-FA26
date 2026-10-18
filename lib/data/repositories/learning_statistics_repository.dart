@@ -1,11 +1,14 @@
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/services/streak_calculator.dart';
+import '../../core/supabase/supabase_service.dart';
 import '../models/learning_statistics.dart';
 
-/// Repository for retrieving and persisting learning statistics using [SharedPreferences].
+/// Signed-in progress comes from server-graded attempts and server streaks.
+/// Local practice statistics use [SharedPreferences] independently.
 ///
 /// Ground truth counts (`correctAnswers` and `incorrectAnswers`) are persisted.
 /// Derived metrics such as `totalAnswered` and `accuracyPercentage` are computed
@@ -20,12 +23,35 @@ class LearningStatisticsRepository {
     return 'learning_statistics';
   }
 
-  /// Retrieves current learning statistics from storage.
-  /// Returns [LearningStatistics.empty] if empty, corrupted, or parsing fails.
+  /// Reads verified server counts when signed in and surfaces server errors.
+  /// Local practice returns empty statistics for missing or corrupt storage.
   static Future<LearningStatistics> getStatistics({
     String? kidId,
     SharedPreferences? prefs,
+    SupabaseClient? client,
   }) async {
+    final cloud = client ?? (prefs == null ? SupabaseService.client : null);
+    if (cloud != null &&
+        (client != null || cloud.auth.currentSession != null) &&
+        kidId != null &&
+        kidId.trim().isNotEmpty) {
+      Future<int> count(bool correct) async {
+        final response = await cloud
+            .from('question_attempts')
+            .select('id,study_sessions!inner(kid_id)')
+            .eq('study_sessions.kid_id', kidId.trim())
+            .eq('is_correct', correct)
+            .limit(0)
+            .count(CountOption.exact);
+        return response.count;
+      }
+
+      final counts = await Future.wait([count(true), count(false)]);
+      return LearningStatistics(
+        correctAnswers: counts[0],
+        incorrectAnswers: counts[1],
+      );
+    }
     try {
       final p = prefs ?? await SharedPreferences.getInstance();
       final raw = p.getString(storageKey(kidId));
@@ -131,12 +157,41 @@ class LearningStatisticsRepository {
     } catch (_) {}
   }
 
-  /// Calculates the current learning streak from recorded activity dates.
+  /// Reads the server streak when signed in; otherwise calculates local practice.
   static Future<LearningStreak> getStreak({
     String? kidId,
     DateTime? referenceDate,
     SharedPreferences? prefs,
+    SupabaseClient? client,
   }) async {
+    final cloud = client ?? (prefs == null ? SupabaseService.client : null);
+    if (cloud != null &&
+        (client != null || cloud.auth.currentSession != null) &&
+        kidId != null &&
+        kidId.trim().isNotEmpty) {
+      final row = await cloud
+          .from('kid_streaks')
+          .select('streak_count,last_activity_date')
+          .eq('kid_id', kidId.trim())
+          .maybeSingle();
+      final count = (row?['streak_count'] as num?)?.toInt() ?? 0;
+      final last = DateTime.tryParse(
+        row?['last_activity_date']?.toString() ?? '',
+      );
+      final today = (referenceDate ?? DateTime.now()).toUtc().add(
+        const Duration(hours: 7),
+      );
+      return LearningStreak(
+        currentStreak: count,
+        longestStreak: count,
+        lastLearningDate: last,
+        hasStudiedToday:
+            last != null &&
+            last.year == today.year &&
+            last.month == today.month &&
+            last.day == today.day,
+      );
+    }
     try {
       final p = prefs ?? await SharedPreferences.getInstance();
       final dates = await getActivityDates(kidId: kidId, prefs: p);

@@ -33,6 +33,7 @@ class ParentDashboardView extends StatefulWidget {
     required this.onSupport,
     required this.onSound,
     required this.onTheme,
+    this.syncedAt,
   });
   final Map<String, dynamic> report;
   final Map<String, int> limits;
@@ -40,6 +41,7 @@ class ParentDashboardView extends StatefulWidget {
   final int maxKids;
   final String email;
   final String? error;
+  final DateTime? syncedAt;
   final Future<void> Function() onRefresh;
   final VoidCallback onNotifications,
       onExit,
@@ -103,6 +105,18 @@ class _ParentDashboardViewState extends State<ParentDashboardView> {
       value is num ? NumberFormat.decimalPattern('vi').format(value) : '—';
   String _minutes(dynamic value) =>
       value is num ? (value > 0 && value < 60 ? '<1' : '${value ~/ 60}') : '—';
+  String _sessionStatus(Map last) {
+    if (last['status'] == 'completed') return 'Đã hoàn thành';
+    final heartbeat = DateTime.tryParse('${last['last_heartbeat_at']}');
+    final age = heartbeat == null ? null : DateTime.now().difference(heartbeat);
+    return last['status'] == 'active' &&
+            last['last_active'] == true &&
+            age != null &&
+            !age.isNegative &&
+            age <= const Duration(seconds: 45)
+        ? 'Đang học'
+        : 'Đang tạm dừng';
+  }
 
   Widget _panel(
     Widget child, {
@@ -478,11 +492,20 @@ class _ParentDashboardViewState extends State<ParentDashboardView> {
     final k = _kid;
     if (k == null) return _empty();
     final seconds = k['today_seconds'] as num?;
-    final limit = widget.limits[k['id']];
+    final limit =
+        (k['screen_time_limit_minutes'] as num?)?.toInt() ??
+        widget.limits[k['id']];
     final last = k['last_session'] as Map?;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (widget.syncedAt != null) ...[
+          Text(
+            'Cập nhật lúc ${DateFormat('HH:mm:ss').format(widget.syncedAt!.toLocal())}',
+            style: TextStyle(color: _muted, fontSize: 11),
+          ),
+          const SizedBox(height: 12),
+        ],
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -573,7 +596,8 @@ class _ParentDashboardViewState extends State<ParentDashboardView> {
             _heading(
               'Bài học gần nhất',
               subtitle:
-                  '${last['title'] ?? 'Phiên học'} · ${last['status'] == 'completed' ? 'Đã hoàn thành' : 'Đang dở'}',
+                  '${last['title'] ?? 'Phiên học'} · ${_sessionStatus(last)}'
+                  '${last['duration_seconds'] is num ? '\nThời lượng đã xác nhận: ${(last['duration_seconds'] as num).toInt() ~/ 60} phút ${(last['duration_seconds'] as num).toInt() % 60} giây' : ''}',
               trailing: Icon(Icons.bookmark_outline, color: _muted),
             ),
           ),

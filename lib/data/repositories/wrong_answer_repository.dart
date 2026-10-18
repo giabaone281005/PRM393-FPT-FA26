@@ -3,8 +3,12 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/wrong_answer_record.dart';
+import '../../core/supabase/supabase_service.dart';
+import 'wrong_answer_cloud_repository.dart';
 
 class WrongAnswerRepository {
+  static bool _cloud(SharedPreferences? prefs) =>
+      prefs == null && SupabaseService.isLoggedIn;
   static String storageKey(String kidId) => 'wrong_answers:$kidId';
 
   static Future<List<WrongAnswerRecord>> getWrongAnswers(
@@ -14,6 +18,17 @@ class WrongAnswerRepository {
     SharedPreferences? prefs,
   }) async {
     if (kidId.trim().isEmpty) return [];
+    if (_cloud(prefs)) {
+      final records = await WrongAnswerCloudRepository.fetch(
+        kidId,
+        lessonId: lessonId,
+      );
+      return includeResolved == null
+          ? records
+          : records
+                .where((record) => record.isResolved == includeResolved)
+                .toList();
+    }
     try {
       final p = prefs ?? await SharedPreferences.getInstance();
       final raw = p.getString(storageKey(kidId));
@@ -58,6 +73,8 @@ class WrongAnswerRepository {
     SharedPreferences? prefs,
   }) async {
     if (kidId.trim().isEmpty || record.questionId.trim().isEmpty) return;
+    // Signed-in attempts already exist on the server; never upload client grades.
+    if (_cloud(prefs)) return;
     try {
       final p = prefs ?? await SharedPreferences.getInstance();
       final current = await getWrongAnswers(
@@ -91,6 +108,14 @@ class WrongAnswerRepository {
     SharedPreferences? prefs,
   }) async {
     if (kidId.trim().isEmpty || questionId.trim().isEmpty) return false;
+    if (_cloud(prefs)) {
+      return await WrongAnswerCloudRepository.update(
+            kidId,
+            'resolve',
+            question: questionId,
+          ) >
+          0;
+    }
     try {
       final p = prefs ?? await SharedPreferences.getInstance();
       final current = await getWrongAnswers(
@@ -119,6 +144,14 @@ class WrongAnswerRepository {
     SharedPreferences? prefs,
   }) async {
     if (kidId.trim().isEmpty) return;
+    if (_cloud(prefs)) {
+      await WrongAnswerCloudRepository.update(
+        kidId,
+        'hide_all',
+        lessonId: lessonId,
+      );
+      return;
+    }
     try {
       final p = prefs ?? await SharedPreferences.getInstance();
       if (lessonId == null) {
@@ -148,6 +181,14 @@ class WrongAnswerRepository {
     SharedPreferences? prefs,
   }) async {
     if (kidId.trim().isEmpty) return;
+    if (_cloud(prefs)) {
+      await WrongAnswerCloudRepository.update(
+        kidId,
+        'hide_resolved',
+        lessonId: lessonId,
+      );
+      return;
+    }
     try {
       final p = prefs ?? await SharedPreferences.getInstance();
       final current = await getWrongAnswers(
@@ -206,6 +247,14 @@ class WrongAnswerRepository {
     SharedPreferences? prefs,
   }) async {
     if (kidId.trim().isEmpty || questionId.trim().isEmpty) return false;
+    if (_cloud(prefs)) {
+      return await WrongAnswerCloudRepository.update(
+            kidId,
+            'hide',
+            question: questionId,
+          ) >
+          0;
+    }
     try {
       final p = prefs ?? await SharedPreferences.getInstance();
       final current = await getWrongAnswers(
@@ -237,6 +286,13 @@ class WrongAnswerRepository {
     SharedPreferences? prefs,
   }) async {
     if (kidId.trim().isEmpty) return 0;
+    if (_cloud(prefs)) {
+      return WrongAnswerCloudRepository.update(
+        kidId,
+        'resolve_all',
+        lessonId: lessonId,
+      );
+    }
     try {
       final p = prefs ?? await SharedPreferences.getInstance();
       final current = await getWrongAnswers(
@@ -272,6 +328,14 @@ class WrongAnswerRepository {
     SharedPreferences? prefs,
   }) async {
     if (kidId.trim().isEmpty || questionId.trim().isEmpty) return false;
+    if (_cloud(prefs)) {
+      return await WrongAnswerCloudRepository.update(
+            kidId,
+            isCorrect ? 'resolve' : 'reopen',
+            question: questionId,
+          ) >
+          0;
+    }
     try {
       final p = prefs ?? await SharedPreferences.getInstance();
       final current = await getWrongAnswers(

@@ -503,6 +503,7 @@ void main() {
 
       expect(find.text('Xem lại câu trả lời sai'), findsOneWidget);
 
+      await tester.ensureVisible(find.text('Xem lại câu trả lời sai'));
       await tester.tap(find.text('Xem lại câu trả lời sai'));
       await tester.pumpAndSettle();
 

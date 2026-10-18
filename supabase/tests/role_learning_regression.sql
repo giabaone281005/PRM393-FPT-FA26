@@ -62,6 +62,7 @@ SELECT public.answer_learning_session((SELECT (v->>'id')::uuid FROM test_context
 SELECT public.answer_learning_session((SELECT (v->>'id')::uuid FROM test_context WHERE k='session'),'33333333-aaaa-4333-8333-333333333333','99','55555555-aaaa-4555-8555-555555555555',0);
 SELECT pg_temp.assert_true((SELECT current_hearts=4 FROM public.kid_profiles WHERE id='e5555555-5555-4555-8555-555555555555'),'retry loses exactly one heart');
 SELECT public.answer_learning_session((SELECT (v->>'id')::uuid FROM test_context WHERE k='session'),'33333333-aaaa-4333-8333-333333333333','5','66666666-aaaa-4666-8666-666666666666',1);
+SELECT pg_temp.assert_true((SELECT count(*) FILTER (WHERE a.is_correct)=1 AND count(*) FILTER (WHERE NOT a.is_correct)=1 FROM public.question_attempts a JOIN public.study_sessions s ON s.id=a.session_id WHERE s.kid_id='e5555555-5555-4555-8555-555555555555'),'progress reads exact server-graded attempt counts');
 SELECT public.finish_learning_session((SELECT (v->>'id')::uuid FROM test_context WHERE k='session'));
 SELECT public.finish_learning_session((SELECT (v->>'id')::uuid FROM test_context WHERE k='session'));
 SELECT pg_temp.assert_true((SELECT energy_stars=3 FROM public.kid_profiles WHERE id='e5555555-5555-4555-8555-555555555555'),'duplicate finish rewards only once');
@@ -86,6 +87,7 @@ SELECT public.finish_learning_session((SELECT (v->>'id')::uuid FROM test_context
 SELECT pg_temp.assert_true((SELECT current_hearts=5 AND energy_stars=3 FROM public.kid_profiles WHERE id='e5555555-5555-4555-8555-555555555555'),'practice restores hearts without farmed stars');
 SELECT pg_temp.assert_true((SELECT count(*)=1 FROM public.practice_garden_logs WHERE session_id=(SELECT (v->>'id')::uuid FROM test_context WHERE k='practice')),'one recovery log per session');
 SELECT set_config('request.jwt.claim.sub','b2222222-2222-4222-8222-222222222222',true);
+SELECT pg_temp.assert_true((SELECT count(*)=0 FROM public.question_attempts a JOIN public.study_sessions s ON s.id=a.session_id WHERE s.kid_id='e5555555-5555-4555-8555-555555555555'),'progress query cannot read another family attempts');
 SELECT pg_temp.expect_error($q$SELECT public.heartbeat_learning_session((SELECT (v->>'id')::uuid FROM test_context WHERE k='practice'),true,'{}')$q$,'Không có quyền');
 SELECT set_config('request.jwt.claim.sub','d4444444-4444-4444-8444-444444444444',true);
 SELECT pg_temp.assert_true(public.is_staff() AND NOT public.is_admin(),'moderator has content role only');
