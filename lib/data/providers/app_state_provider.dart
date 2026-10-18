@@ -12,6 +12,7 @@ import '../models/learning_summary.dart';
 import '../repositories/kid_repository.dart';
 import '../repositories/mascot_repository.dart';
 import '../repositories/lesson_repository.dart';
+import '../repositories/learning_statistics_repository.dart';
 import '../repositories/subscription_repository.dart';
 import '../repositories/study_repository.dart';
 
@@ -24,7 +25,8 @@ class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
     'signed_out',
   );
   StreamSubscription<dynamic>? _authListener;
-  int _revision = 0, _selected = 0, _nav = 0;
+  int _revision = 0, _selected = 0, _nav = 0, _statsRevision = 0;
+  int get statsRevision => _statsRevision;
   String? _account, _error, _parentToken;
   DateTime? _unlockUntil;
   String _hat = 'Mũ Thám Tử', _glasses = 'Kính Tri Thức';
@@ -431,5 +433,43 @@ class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
     } catch (_) {
       return false;
     }
+  }
+
+  /// Records practice answer in learning statistics and updates kid streak.
+  Future<void> recordPracticeAnswer({
+    required bool isCorrect,
+    String? kidId,
+    String? eventId,
+    DateTime? timestamp,
+  }) async {
+    final effectiveKidId = kidId ?? (hasKids ? currentKid.id : null);
+    await LearningStatisticsRepository.recordAnswer(
+      isCorrect: isCorrect,
+      kidId: effectiveKidId,
+      eventId: eventId,
+      timestamp: timestamp,
+    );
+    if (effectiveKidId != null) {
+      await refreshStreakForKid(effectiveKidId);
+    }
+    _statsRevision++;
+    notifyListeners();
+  }
+
+  /// Refreshes the streak count for a specific kid from local learning activity records.
+  Future<void> refreshStreakForKid(String kidId) async {
+    try {
+      final streak = await LearningStatisticsRepository.getStreak(kidId: kidId);
+      final idx = _kids.indexWhere((k) => k.id == kidId);
+      if (idx != -1) {
+        _kids[idx].streakCount = streak.currentStreak;
+      }
+    } catch (_) {}
+  }
+
+  /// Notifies listeners that learning statistics were updated.
+  void notifyStatsChanged() {
+    _statsRevision++;
+    notifyListeners();
   }
 }
