@@ -48,6 +48,13 @@ class SubscriptionModel {
       !isExpired;
 
   int get effectiveMaxKids => isPlusActive ? maxKids.clamp(1, 3) : 1;
+  static const trialMarker = 'TRIAL_7D';
+
+  bool get isTrialActive => isPlusActive && notes == trialMarker;
+
+  int get trialDaysLeft => isTrialActive
+      ? (expiresAt!.difference(DateTime.now()).inHours / 24).ceil().clamp(0, 7)
+      : 0;
 
   factory SubscriptionModel.fromMap(Map<String, dynamic> map) {
     final tierStr = (map['tier'] as String?)?.toLowerCase() ?? 'basic';
