@@ -58,6 +58,9 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
       _error = null;
     });
     try {
+      try {
+        await CommerceRepository.purgeUnpaid(); // xóa đơn chưa thanh toán đã quá cũ
+      } catch (_) {}
       final prices = await CommerceRepository.fetchPrices();
       final orders = await CommerceRepository.fetchOrders(page: _page);
       final plans = await WalletRepository.fetchPlans();
@@ -91,6 +94,10 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
       if (mounted) setState(() => _loading = false);
     }
   }
+
+  /// Lịch sử chỉ hiện đơn đã thanh toán hoặc đã hoàn tiền (đơn chờ thanh toán không lưu)
+  List<LearningOrder> get _visibleOrders =>
+      _orders.where((o) => o.status == 'paid' || o.status == 'refunded').toList();
 
   // ---- Giá, giảm giá, cộng dồn ----
   List<PlanPrice> get _sortedPrices =>
@@ -247,6 +254,13 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
           builder: (_) => PaymentWaitingScreen(session: session),
         ),
       );
+      if (paid != true) {
+        // Thoát giữa chừng mà chưa trả tiền: xóa luôn đơn, không lưu vào lịch sử
+        // (server chỉ xóa nếu đơn vẫn chưa thanh toán)
+        try {
+          await CommerceRepository.discardOrder(session.orderId);
+        } catch (_) {}
+      }
       if (paid == true && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -558,14 +572,14 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
             const SizedBox(height: 20),
             Text('Lịch sử mua', style: Theme.of(context).textTheme.titleLarge),
             const Text(
-              'Sau khi trở lại từ VNPay, chọn kiểm tra trạng thái. Không thanh toán lại nếu tài khoản đã bị trừ tiền.',
+              'Chỉ hiển thị các đơn đã thanh toán. Đơn chưa thanh toán xong sẽ tự bị hủy.',
             ),
-            if (!_loading && _error == null && _orders.isEmpty)
+            if (!_loading && _error == null && _visibleOrders.isEmpty)
               const Padding(
                 padding: EdgeInsets.all(16),
                 child: Text('Chưa có đơn hàng trên trang này.'),
               ),
-            ..._orders.map(
+            ..._visibleOrders.map(
                   (o) => Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
