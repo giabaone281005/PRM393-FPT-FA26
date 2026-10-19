@@ -37,14 +37,15 @@ class LessonRepository {
       if (!DateTime.parse(cached['expires']).isAfter(DateTime.now())) rethrow;
       rows = cached['rows'];
     }
-    // Một số curriculum có thể trả về bản ghi trùng lesson_number (ví dụ
-    // khi dữ liệu được ghép từ nhiều topic). Bản đồ hiển thị chỉ có một node
-    // cho mỗi số bài, nên loại trùng trước khi chuyển sang Lesson.
-    final uniqueRows = <int, Map<String, dynamic>>{};
-    for (final raw in rows as List) {
+    return lessonsFromRows(rows as List, grade);
+  }
+
+  static List<Lesson> lessonsFromRows(List rows, int grade) {
+    // Lesson numbers can repeat; progress and study sessions use the lesson ID.
+    final uniqueRows = <String, Map<String, dynamic>>{};
+    for (final raw in rows) {
       final row = Map<String, dynamic>.from(raw as Map);
-      final lessonNumber = (row['lesson_number'] as num).toInt();
-      uniqueRows.putIfAbsent(lessonNumber, () => row);
+      uniqueRows.putIfAbsent(row['id'].toString(), () => row);
     }
 
     return uniqueRows.values.map((row) {

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'core/theme/app_theme.dart';
+import 'core/services/app_route_observer.dart';
 import 'core/supabase/supabase_service.dart';
 import 'data/providers/app_state_provider.dart';
 import 'features/main/main_screen.dart';
@@ -99,6 +100,7 @@ class _MathLingoAppState extends State<MathLingoApp> {
       builder: (context, appState, child) {
         return MaterialApp(
           navigatorKey: _navigator,
+          navigatorObservers: [appRouteObserver],
           title: 'MathLingo - Học Toán Vui Cùng Cú',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,

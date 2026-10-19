@@ -1,4 +1,8 @@
-# Kết quả kiểm tra — 16/10/2026
+# Kết quả kiểm tra — 18/10/2026
+
+Kết quả mới nhất: analyze đạt; **212 Flutter tests**, **22 backend tests** và **25 file SQL** đạt kiểm tra cấu trúc. Năm bộ SQL hiện có (commerce, role/learning, session time, content/payment và legacy compatibility) đã chạy lại trên Cloud, đạt và rollback fixture. Phiên QA online ghi thêm 122 giây, khớp session và usage. APK debug mới build/cài/khởi động trên Pixel 9 thành công. Migration `20261024000000_cloud_wrong_answer_reviews.sql` đã áp dụng; runtime regression mới đạt/rollback, HTTP QA Basic/Plus đọc đúng 6/0 câu sai và từ chối gia đình khác. Idempotency RPC đạt; lần thử apply lại DDL bị lỗi requestState, chưa được coi là đạt. Sau xác nhận riêng, cả ba Edge Functions đã deploy ACTIVE: ai-tutor v1, vnpay-refund v1, commerce-reconcile v2. Smoke HTTP đạt: refund từ chối phụ huynh 403, job thiếu/sai khóa 401, AI chưa cấu hình trả 503. AI vẫn tắt, chưa có cron hoặc yêu cầu AI/hoàn tiền. Release vẫn thiếu cấu hình ký; SMTP/deep link, merchant/AI thật và iOS chưa nghiệm thu. Xem [bằng chứng và giới hạn đầy đủ](supabase/AUDIT_20261018.md).
+
+## Kết quả lịch sử — 16/10/2026
 
 | Kiểm tra đã chạy tại workspace | Kết quả |
 |---|---|

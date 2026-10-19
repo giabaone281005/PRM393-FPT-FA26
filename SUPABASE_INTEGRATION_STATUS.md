@@ -1,5 +1,7 @@
 # Báo Cáo Hiện Trạng Tích Hợp API Supabase vs Mock Data (MathLingo)
 
+> **Cập nhật 18/10/2026:** Kết quả kiểm tra mã, Cloud và sửa lỗi mới nhất nằm trong [audit đã thực thi](supabase/AUDIT_20261018.md). Nội dung bên dưới là khảo sát lịch sử, không còn phản ánh runtime hiện tại: giáo trình dùng RPC thật, AI/refund/đối soát đã deploy (AI vẫn tắt, chưa bật lịch tự động), lịch sử câu sai được lưu Cloud, và tiến độ/streak của tài khoản đăng nhập đã chuyển sang dữ liệu server. Chưa nghiệm thu provider AI/thanh toán thật. Không dùng các nhận định “100%” bên dưới làm bằng chứng nghiệm thu.
+
 > **Dự án**: PRM393 - MathLingo (Flutter + Supabase)  
 > **Thời gian kiểm tra**: 10/2026  
 > **Mục đích**: Xác định rõ ràng các API đã nối với dữ liệu Supabase Cloud thật và các phần hiện vẫn đang sử dụng Mock/Local Data.

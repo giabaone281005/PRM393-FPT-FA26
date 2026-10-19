@@ -44,8 +44,13 @@ dependencies:
   url_launcher: ^6.3.2
   image_picker: ^1.2.4
   crypto: ^3.0.7
+<<<<<<< HEAD
   qr_flutter: ^4.1.0
   speech_to_text: ^7.5.0
+=======
+  speech_to_text: ^7.5.0
+  qr_flutter: ^4.1.0
+>>>>>>> 4ba590b18358d063c98390d3344ead5f83814d96
 
 dev_dependencies:
   flutter_test:

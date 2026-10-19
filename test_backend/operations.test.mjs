@@ -74,6 +74,18 @@ test('maintenance job refuses an absent or wrong job key',async()=>{
   globalThis.fetch=()=>assert.fail('must not access database');
   assert.equal((await job(request({}))).status,401);
 });
+test('maintenance job without configured key fails closed before database access',async()=>{
+  const configured=env.get('COMMERCE_JOB_KEY');
+  globalThis.fetch=()=>assert.fail('must not access database or provider');
+  try {
+    for(const value of [undefined,'']) {
+      if(value===undefined)env.delete('COMMERCE_JOB_KEY');else env.set('COMMERCE_JOB_KEY',value);
+      for(const headers of [{},{'x-job-key':'invalid-qa-key'}]) {
+        assert.equal((await job(new Request('https://handler.invalid',{method:'POST',headers,body:'{}'}))).status,401);
+      }
+    }
+  } finally { env.set('COMMERCE_JOB_KEY',configured); }
+});
 test('signed refund query resolves uncertainty without issuing a second refund',async()=>{
   let settled=false;globalThis.fetch=async(url,opt)=>{
     if(url.includes('/auth/'))return json({id});if(url.includes('/learning_orders?'))return json([order]);if(url.includes('/refund_requests?'))return json([{id}]);

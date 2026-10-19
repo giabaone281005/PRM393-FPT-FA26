@@ -40,6 +40,15 @@ void main() {
   };
   setUp(() => SharedPreferences.setMockInitialValues({}));
   test('temporary failures preserve retry while revoked rights cannot use fallback', () {
+    expect(StudyRepository.isTransient(StateError('signed out')), isFalse);
+    expect(
+      StudyRepository.isTransient(const FormatException('bad response')),
+      isFalse,
+    );
+    expect(
+      StudyRepository.isTransient(const AuthException('session expired')),
+      isFalse,
+    );
     expect(
       StudyRepository.isTransient(
         const PostgrestException(message: 'revoked', code: 'P0001'),

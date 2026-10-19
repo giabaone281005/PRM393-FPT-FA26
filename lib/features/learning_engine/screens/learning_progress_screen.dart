@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/services/streak_calculator.dart';
+import '../../../core/supabase/supabase_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../data/models/learning_statistics.dart';
@@ -101,8 +102,10 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
 
       int streak = widget.streakCount ?? 0;
       if (widget.streakCount == null) {
-        final streakRecord = await LearningStatisticsRepository.getStreak(kidId: kidId);
-        if (streakRecord.currentStreak > 0) {
+        final streakRecord = await LearningStatisticsRepository.getStreak(
+          kidId: kidId,
+        );
+        if (SupabaseService.isLoggedIn || streakRecord.currentStreak > 0) {
           streak = streakRecord.currentStreak;
         } else if (appState != null &&
             appState.hasKids &&
@@ -110,10 +113,14 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
           streak = appState.currentKid.streakCount;
         }
 
-        if (streak == 0 && kidId.isNotEmpty) {
-          final wrongAnswers = await WrongAnswerRepository.getWrongAnswers(kidId);
+        if (!SupabaseService.isLoggedIn && streak == 0 && kidId.isNotEmpty) {
+          final wrongAnswers = await WrongAnswerRepository.getWrongAnswers(
+            kidId,
+          );
           if (wrongAnswers.isNotEmpty) {
-            final calculated = StreakCalculator.fromWrongAnswerRecords(wrongAnswers);
+            final calculated = StreakCalculator.fromWrongAnswerRecords(
+              wrongAnswers,
+            );
             streak = calculated.currentStreak;
           }
         }

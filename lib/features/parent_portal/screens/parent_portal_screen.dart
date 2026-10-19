@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../data/providers/app_state_provider.dart';
+import '../../../core/services/app_route_observer.dart';
 import '../../kid_profile/popups/add_kid_dialog.dart';
 import '../../kid_profile/popups/edit_kid_dialog.dart';
 import '../../../data/models/kid_profile.dart';
@@ -23,28 +24,63 @@ class ParentPortalScreen extends StatefulWidget {
   State<ParentPortalScreen> createState() => _ParentPortalScreenState();
 }
 
-class _ParentPortalScreenState extends State<ParentPortalScreen> {
+class _ParentPortalScreenState extends State<ParentPortalScreen>
+    with WidgetsBindingObserver, RouteAware {
   Timer? _timer;
   AppStateProvider? _state;
+  ModalRoute<dynamic>? _route;
+  bool _foreground = true;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _state = context.read<AppStateProvider>();
+    final route = ModalRoute.of(context);
+    if (_route != route && route != null) {
+      appRouteObserver.unsubscribe(this);
+      _route = route;
+      appRouteObserver.subscribe(this, route);
+    }
   }
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _refresh());
     _timer = Timer.periodic(const Duration(seconds: 30), (_) {
-      if (mounted) setState(() {});
+      if (mounted) {
+        setState(() {});
+        _refresh();
+      }
     });
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    appRouteObserver.unsubscribe(this);
     scheduleMicrotask(() => _state?.lockParentPortal());
     super.dispose();
+  }
+
+  Future<void> _refresh() async {
+    if (!mounted ||
+        !_foreground ||
+        _route?.isCurrent == false ||
+        _state?.isParentUnlocked != true) {
+      return;
+    }
+    await _state?.refreshFamilyReport();
+  }
+
+  @override
+  void didPopNext() => _refresh();
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _foreground = state == AppLifecycleState.resumed;
+    if (_foreground) _refresh();
   }
 
   Future<void> _action(Future<void> Function() action) async {
@@ -72,7 +108,10 @@ class _ParentPortalScreenState extends State<ParentPortalScreen> {
     if (!state.isParentUnlocked) {
       return ParentAreaLocked(
         onUnlocked: () {
-          if (mounted) setState(() {});
+          if (mounted) {
+            setState(() {});
+            _refresh();
+          }
         },
       );
     }
@@ -83,12 +122,13 @@ class _ParentPortalScreenState extends State<ParentPortalScreen> {
       },
       plus: state.isPlusActive,
       maxKids: state.maxAllowedKids,
-      loading: state.isLoadingFromCloud,
-      error: state.syncError,
+      loading: state.isLoadingFromCloud || state.isLoadingFamilyReport,
+      error: state.familyReportError ?? state.syncError,
+      syncedAt: state.familyReportSyncedAt,
       email: SupabaseService.currentUser?.email ?? '',
       sound: state.soundEnabled,
       dark: state.isDarkMode,
-      onRefresh: state.refreshFromCloud,
+      onRefresh: state.refreshFamilyReport,
       onNotifications: () => _open(const NotificationsScreen()),
       onExit: () {
         state.lockParentPortal();

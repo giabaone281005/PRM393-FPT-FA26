@@ -7,11 +7,14 @@ import 'study_cache.dart';
 
 class StudyRepository {
   static bool isTransient(Object error) =>
-      error is! PostgrestException ||
-      error.code == null ||
-      ['40001', '40P01', '57014'].contains(error.code) ||
-      ((int.tryParse(error.code ?? '') ?? 0) >= 500 &&
-          (int.tryParse(error.code ?? '') ?? 0) < 600);
+      error is! AuthException &&
+      error is! Error &&
+      error is! FormatException &&
+      (error is! PostgrestException ||
+          error.code == null ||
+          ['40001', '40P01', '57014'].contains(error.code) ||
+          ((int.tryParse(error.code ?? '') ?? 0) >= 500 &&
+              (int.tryParse(error.code ?? '') ?? 0) < 600));
   static Future<dynamic> rpc(
     String name, [
     Map<String, dynamic> params = const {},
