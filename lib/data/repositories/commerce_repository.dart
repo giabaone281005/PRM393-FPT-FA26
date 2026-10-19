@@ -12,6 +12,7 @@ class PaymentSession {
   final String? deeplink; // chỉ MoMo
   final String? qrData; // MoMo hoặc demo
   final int? amountVnd;
+  final String? gatewayOrderId; // mã đơn kiểu MoMo/VNPay (chỉ demo)
   const PaymentSession({
     required this.orderId,
     required this.provider,
@@ -19,6 +20,7 @@ class PaymentSession {
     this.deeplink,
     this.qrData,
     this.amountVnd,
+    this.gatewayOrderId,
   });
 }
 
@@ -112,6 +114,7 @@ class CommerceRepository {
         'priceId': ?priceId,
         'requestId': ?requestId,
         if (provider == 'vnpay' && qr) 'method': 'qr',
+        if (provider.startsWith('demo')) 'style': provider.substring(5),
       },
     );
     final data = Map<String, dynamic>.from(response.data as Map);
@@ -144,6 +147,7 @@ class CommerceRepository {
       deeplink: data['deeplink'] as String?,
       qrData: (data['qrCodeUrl'] ?? data['qrCode']) as String?,
       amountVnd: ((data['order'] as Map?)?['amount_vnd'] as num?)?.toInt(),
+      gatewayOrderId: data['gatewayOrderId'] as String?,
     );
   }
 
@@ -157,9 +161,11 @@ class CommerceRepository {
   }
 
   /// Chỉ cho thanh toán demo: mô phỏng việc đã quét QR xong
-  static Future<void> simulateScan({
+  /// Trả về mã giao dịch (transId) kiểu MoMo/VNPay do server sinh ra.
+  static Future<String?> simulateScan({
     required String orderId,
     required String parentToken,
+    String style = 'momo', // 'momo' hoặc 'vnpay'
   }) async {
     final response = await _client.functions.invoke(
       'demo-pay',
@@ -167,11 +173,28 @@ class CommerceRepository {
         'action': 'simulate',
         'orderId': orderId,
         'parentToken': parentToken,
+        'style': style,
       },
     );
     if (response.status != 200) {
       throw StateError('Chưa mô phỏng được thanh toán.');
     }
+    final data = response.data;
+    return data is Map ? data['transId']?.toString() : null;
+  }
+
+  /// Xóa đơn chưa thanh toán của chính mình (đơn đã trả tiền thì giữ lại).
+  static Future<bool> discardOrder(String orderId) async {
+    final res = await _client.rpc(
+      'discard_unpaid_order',
+      params: {'p_order': orderId},
+    );
+    return res == true;
+  }
+
+  /// Dọn các đơn chưa thanh toán đã quá cũ của chính mình.
+  static Future<void> purgeUnpaid() async {
+    await _client.rpc('purge_my_unpaid_orders');
   }
 
   static Future<void> reconcile(String orderId) async {
