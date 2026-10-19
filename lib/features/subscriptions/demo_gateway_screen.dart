@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/models/commerce_models.dart';
@@ -18,7 +19,8 @@ enum _Step { confirm, processing, done, error }
 
 class _DemoGatewayScreenState extends State<DemoGatewayScreen> {
   _Step _step = _Step.confirm;
-  String? _txn;
+  String? _txn; // mã giao dịch do server sinh (kiểu MoMo / VNPay)
+  DateTime? _paidAt;
 
   bool get _isMomo => widget.session.provider == 'demo-momo';
   Color get _color =>
@@ -27,22 +29,27 @@ class _DemoGatewayScreenState extends State<DemoGatewayScreen> {
   String get _amount => widget.session.amountVnd == null
       ? ''
       : formatVnd(widget.session.amountVnd!);
-  String get _shortId => widget.session.orderId.length >= 8
-      ? widget.session.orderId.substring(0, 8).toUpperCase()
-      : widget.session.orderId;
+  // Mã đơn hàng kiểu cổng thanh toán (MoMo: MOMO + timestamp). Không có thì dùng mã rút gọn.
+  String get _gatewayOrderId =>
+      widget.session.gatewayOrderId ??
+          (widget.session.orderId.length >= 8
+              ? widget.session.orderId.substring(0, 8).toUpperCase()
+              : widget.session.orderId);
 
   Future<void> _pay() async {
     setState(() => _step = _Step.processing);
     try {
       await Future.delayed(const Duration(milliseconds: 1500)); // giả lập đang xử lý
       if (!mounted) return;
-      await CommerceRepository.simulateScan(
+      final txn = await CommerceRepository.simulateScan(
         orderId: widget.session.orderId,
         parentToken: context.read<AppStateProvider>().parentToken!,
+        style: _isMomo ? 'momo' : 'vnpay',
       );
       if (!mounted) return;
       setState(() {
-        _txn = 'DEMO${DateTime.now().millisecondsSinceEpoch}';
+        _txn = txn ?? '';
+        _paidAt = DateTime.now();
         _step = _Step.done;
       });
     } catch (_) {
@@ -51,29 +58,31 @@ class _DemoGatewayScreenState extends State<DemoGatewayScreen> {
   }
 
   Widget _row(String label, String value, {bool bold = false}) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(label, style: const TextStyle(color: Colors.black54)),
-            Flexible(
-              child: Text(
-                value,
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  fontWeight: bold ? FontWeight.bold : FontWeight.w500,
-                  fontSize: bold ? 20 : 15,
-                ),
-              ),
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(color: Colors.black54)),
+        const SizedBox(width: 16),
+        Flexible(
+          child: SelectableText(
+            value,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              fontWeight: bold ? FontWeight.bold : FontWeight.w500,
+              fontSize: bold ? 20 : 15,
             ),
-          ],
+          ),
         ),
-      );
+      ],
+    ),
+  );
 
   ButtonStyle get _btnStyle => FilledButton.styleFrom(
-        backgroundColor: _color,
-        minimumSize: const Size.fromHeight(48),
-      );
+    backgroundColor: _color,
+    minimumSize: const Size.fromHeight(48),
+  );
 
   Widget _body() {
     switch (_step) {
@@ -94,8 +103,11 @@ class _DemoGatewayScreenState extends State<DemoGatewayScreen> {
                       style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     const Divider(height: 24),
-                    _row('Mã đơn', _shortId),
+                    _row('Nhà cung cấp', 'MathLingo'),
+                    _row('Mã đơn hàng', _gatewayOrderId),
+                    _row('Nội dung', 'Thanh toán gói Plus MathLingo'),
                     _row('Nguồn tiền', _isMomo ? 'Ví MoMo' : 'NCB •••• 1198'),
+                    const Divider(height: 24),
                     _row('Số tiền', _amount, bold: true),
                   ],
                 ),
@@ -131,32 +143,47 @@ class _DemoGatewayScreenState extends State<DemoGatewayScreen> {
           ),
         );
       case _Step.done:
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.check_circle, size: 96, color: Colors.green.shade600),
-                const SizedBox(height: 16),
-                Text(
-                  'Thanh toán thành công',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 8),
-                Text(_amount, style: const TextStyle(fontSize: 22)),
-                const SizedBox(height: 4),
-                Text('Mã giao dịch: ${_txn ?? ''}',
-                    style: const TextStyle(color: Colors.black54)),
-                const SizedBox(height: 24),
-                FilledButton(
-                  style: _btnStyle,
-                  onPressed: () => Navigator.pop(context, true),
-                  child: const Text('Về MathLingo'),
-                ),
-              ],
+        return ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            Icon(Icons.check_circle, size: 96, color: Colors.green.shade600),
+            const SizedBox(height: 16),
+            Text(
+              'Thanh toán thành công',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
-          ),
+            const SizedBox(height: 8),
+            Text(
+              _amount,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 24),
+            ),
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    _row('Mã giao dịch', _txn ?? ''),
+                    _row('Mã đơn hàng', _gatewayOrderId),
+                    _row('Nhà cung cấp', 'MathLingo'),
+                    _row(
+                      'Thời gian',
+                      DateFormat('dd/MM/yyyy HH:mm:ss')
+                          .format(_paidAt ?? DateTime.now()),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            FilledButton(
+              style: _btnStyle,
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Về MathLingo'),
+            ),
+          ],
         );
       case _Step.error:
         return Center(
