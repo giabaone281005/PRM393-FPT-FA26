@@ -22,7 +22,7 @@ export function checkSql(source,label='SQL') {
   }
   if(depth!==0)throw Error(`${label}: ${depth} unclosed parentheses`);
 }
-const files=[...readdirSync('supabase/migrations').filter(f=>/^202610(18|19|20|21)/.test(f)).map(f=>'supabase/migrations/'+f),...readdirSync('supabase/tests').filter(f=>f.endsWith('.sql')).map(f=>'supabase/tests/'+f),...readdirSync('supabase/operations').filter(f=>f.endsWith('.sql')).map(f=>'supabase/operations/'+f)];
+const files=[...readdirSync('supabase/migrations').filter(f=>f.endsWith('.sql')).map(f=>'supabase/migrations/'+f),...readdirSync('supabase/tests').filter(f=>f.endsWith('.sql')).map(f=>'supabase/tests/'+f),...readdirSync('supabase/operations').filter(f=>f.endsWith('.sql')).map(f=>'supabase/operations/'+f)];
 for(const file of files)checkSql(readFileSync(file,'utf8'),file);
 const signatures=new Set();
 const schemaSource=readdirSync('supabase/migrations').filter(f=>f.endsWith('.sql')).map(f=>readFileSync('supabase/migrations/'+f,'utf8')).join('\n');

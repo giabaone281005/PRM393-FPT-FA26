@@ -33,6 +33,7 @@ class ParentDashboardView extends StatefulWidget {
     required this.onSupport,
     required this.onSound,
     required this.onTheme,
+    this.syncedAt,
   });
   final Map<String, dynamic> report;
   final Map<String, int> limits;
@@ -40,6 +41,7 @@ class ParentDashboardView extends StatefulWidget {
   final int maxKids;
   final String email;
   final String? error;
+  final DateTime? syncedAt;
   final Future<void> Function() onRefresh;
   final VoidCallback onNotifications,
       onExit,
@@ -103,6 +105,18 @@ class _ParentDashboardViewState extends State<ParentDashboardView> {
       value is num ? NumberFormat.decimalPattern('vi').format(value) : '—';
   String _minutes(dynamic value) =>
       value is num ? (value > 0 && value < 60 ? '<1' : '${value ~/ 60}') : '—';
+  String _sessionStatus(Map last) {
+    if (last['status'] == 'completed') return 'Đã hoàn thành';
+    final heartbeat = DateTime.tryParse('${last['last_heartbeat_at']}');
+    final age = heartbeat == null ? null : DateTime.now().difference(heartbeat);
+    return last['status'] == 'active' &&
+            last['last_active'] == true &&
+            age != null &&
+            !age.isNegative &&
+            age <= const Duration(seconds: 45)
+        ? 'Đang học'
+        : 'Đang tạm dừng';
+  }
 
   Widget _panel(
     Widget child, {
@@ -478,11 +492,20 @@ class _ParentDashboardViewState extends State<ParentDashboardView> {
     final k = _kid;
     if (k == null) return _empty();
     final seconds = k['today_seconds'] as num?;
-    final limit = widget.limits[k['id']];
+    final limit =
+        (k['screen_time_limit_minutes'] as num?)?.toInt() ??
+        widget.limits[k['id']];
     final last = k['last_session'] as Map?;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (widget.syncedAt != null) ...[
+          Text(
+            'Cập nhật lúc ${DateFormat('HH:mm:ss').format(widget.syncedAt!.toLocal())}',
+            style: TextStyle(color: _muted, fontSize: 11),
+          ),
+          const SizedBox(height: 12),
+        ],
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -573,7 +596,8 @@ class _ParentDashboardViewState extends State<ParentDashboardView> {
             _heading(
               'Bài học gần nhất',
               subtitle:
-                  '${last['title'] ?? 'Phiên học'} · ${last['status'] == 'completed' ? 'Đã hoàn thành' : 'Đang dở'}',
+                  '${last['title'] ?? 'Phiên học'} · ${_sessionStatus(last)}'
+                  '${last['duration_seconds'] is num ? '\nThời lượng đã xác nhận: ${(last['duration_seconds'] as num).toInt() ~/ 60} phút ${(last['duration_seconds'] as num).toInt() % 60} giây' : ''}',
               trailing: Icon(Icons.bookmark_outline, color: _muted),
             ),
           ),
@@ -1109,3 +1133,171 @@ class _ParentDashboardViewState extends State<ParentDashboardView> {
     ),
   );
 }
+// Widget _metric(String label, String value, IconData icon, Color color) =>
+//     _panel(
+//       Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           Container(
+//             padding: const EdgeInsets.all(9),
+//             decoration: BoxDecoration(
+//               color: color.withValues(alpha: .1),
+//               borderRadius: BorderRadius.circular(10),
+//             ),
+//             child: Icon(icon, color: color, size: 21),
+//           ),
+//           const SizedBox(height: 17),
+//           Text(
+//             value,
+//             style: const TextStyle(
+//               fontSize: 29,
+//               fontWeight: FontWeight.w800,
+//               letterSpacing: -.8,
+//             ),
+//           ),
+//           const SizedBox(height: 6),
+//           Text(
+//             label,
+//             style: TextStyle(color: _muted, fontSize: 12, height: 1.5),
+//           ),
+//         ],
+//       ),
+//       padding: const EdgeInsets.all(18),
+//     );
+//
+// Widget _week(Map<String, dynamic> k) {
+//   final days = (k['days'] as List? ?? [])
+//       .map((e) => Map<String, dynamic>.from(e as Map))
+//       .toList();
+//   final maxSeconds = days.fold<double>(
+//     1,
+//         (value, d) =>
+//         math.max(value, (d['total_seconds'] as num? ?? 0).toDouble()),
+//   );
+//   return _panel(
+//     Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         _heading(
+//           '7 ngày gần đây',
+//           trailing: Text(
+//             'Phút học',
+//             style: TextStyle(fontSize: 11, color: _muted),
+//           ),
+//         ),
+//         const SizedBox(height: 22),
+//         if (days.isEmpty)
+//           Padding(
+//             padding: const EdgeInsets.symmetric(vertical: 20),
+//             child: Center(
+//               child: Text(
+//                 'Chưa có thời lượng học trong 7 ngày qua.',
+//                 textAlign: TextAlign.center,
+//                 style: TextStyle(fontSize: 12, color: _muted),
+//               ),
+//             ),
+//           )
+//         else
+//           Row(
+//             crossAxisAlignment: CrossAxisAlignment.end,
+//             children: [
+//               for (final d in days) Expanded(child: _day(d, maxSeconds)),
+//             ],
+//           ),
+//       ],
+//     ),
+//   );
+// }
+//
+// Widget _day(Map<String, dynamic> d, double maximum) {
+//   final date = DateTime.tryParse('${d['study_date']}');
+//   final seconds = (d['total_seconds'] as num? ?? 0).toDouble();
+//   final label = date == null ? '—' : DateFormat('dd/MM').format(date);
+//   return Semantics(
+//     label: '$label: ${_minutes(seconds)} phút học',
+//     child: ExcludeSemantics(
+//       child: Padding(
+//         padding: const EdgeInsets.symmetric(horizontal: 3),
+//         child: Column(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             Text(
+//               _minutes(seconds),
+//               style: TextStyle(fontSize: 11, color: _muted),
+//             ),
+//             const SizedBox(height: 8),
+//             SizedBox(
+//               height: 80,
+//               child: Align(
+//                 alignment: Alignment.bottomCenter,
+//                 child: Container(
+//                   width: 22,
+//                   height: math.max(3, seconds / maximum * 80),
+//                   decoration: BoxDecoration(
+//                     color: AppColors.primary.withValues(alpha: .65),
+//                     borderRadius: BorderRadius.circular(6),
+//                   ),
+//                 ),
+//               ),
+//             ),
+//             const SizedBox(height: 10),
+//             Text(label, style: TextStyle(fontSize: 10, color: _muted)),
+//           ],
+//         ),
+//       ),
+//     ),
+//   );
+// }
+//
+// Widget _shortcut(
+//     String title,
+//     String subtitle,
+//     IconData icon,
+//     VoidCallback? action,
+//     double width,
+//     ) => SizedBox(
+//   width: width,
+//   child: Material(
+//     color: Theme.of(context).colorScheme.surface,
+//     shape: RoundedRectangleBorder(
+//       borderRadius: BorderRadius.circular(16),
+//       side: BorderSide(color: _line),
+//     ),
+//     child: InkWell(
+//       onTap: action,
+//       borderRadius: BorderRadius.circular(16),
+//       child: Padding(
+//         padding: const EdgeInsets.all(17),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Row(
+//               children: [
+//                 Icon(
+//                   icon,
+//                   color: action == null ? _muted : AppColors.primary,
+//                   size: 24,
+//                 ),
+//                 const Spacer(),
+//                 Icon(Icons.arrow_outward_rounded, size: 14, color: _muted),
+//               ],
+//             ),
+//             const SizedBox(height: 18),
+//             Text(
+//               title,
+//               style: const TextStyle(
+//                 fontSize: 13,
+//                 fontWeight: FontWeight.w700,
+//               ),
+//             ),
+//             const SizedBox(height: 6),
+//             Text(
+//               subtitle,
+//               style: TextStyle(fontSize: 11, color: _muted, height: 1.5),
+//             ),
+//           ],
+//         ),
+//       ),
+//     ),
+//   ),
+// );

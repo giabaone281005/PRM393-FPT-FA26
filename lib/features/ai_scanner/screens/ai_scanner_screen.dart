@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -6,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../core/supabase/supabase_service.dart';
+import '../../../data/repositories/ai_tutor_repository.dart';
 import '../../../data/providers/app_state_provider.dart';
 import '../../../data/repositories/study_repository.dart';
 
@@ -23,8 +22,33 @@ class _AiScannerScreenState extends State<AiScannerScreen> {
   List<String> _hints = [];
   int _step = 0;
   bool _busy = false;
+  bool? _enabled;
   String? _error, _notice;
   String? _request, _phase;
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    try {
+      final enabled = await AiTutorRepository.isEnabled();
+      if (mounted) {
+        setState(() {
+          _enabled = enabled;
+          _error = null;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => _error = 'Chưa kiểm tra được trạng thái AI. Vui lòng thử lại.',
+        );
+      }
+    }
+  }
+
   @override
   void dispose() {
     _problem.dispose();
@@ -65,7 +89,7 @@ class _AiScannerScreenState extends State<AiScannerScreen> {
   }
 
   Future<void> _send(String phase) async {
-    if (_busy) return;
+    if (_busy || _enabled != true) return;
     final state = context.read<AppStateProvider>();
     if (!state.hasKids) return;
     if (phase == 'hint' && _problem.text.trim().length < 5) {
@@ -77,26 +101,29 @@ class _AiScannerScreenState extends State<AiScannerScreen> {
       _phase = phase;
     }
     _request ??= StudyRepository.requestId();
+    final kidId = state.currentKid.id;
     setState(() {
       _busy = true;
       _error = null;
     });
     try {
-      final response = await SupabaseService.client!.functions.invoke(
-        'ai-tutor',
-        body: {
-          'kidId': state.currentKid.id,
-          'requestId': _request,
-          'phase': phase,
-          if (phase == 'ocr') ...{
-            'image': base64Encode(_image!),
-            'mime': _mime,
-          } else
-            'problem': _problem.text.trim(),
-        },
+      final data = await AiTutorRepository.request(
+        kidId: kidId,
+        requestId: _request!,
+        phase: phase,
+        image: _image,
+        mime: _mime,
+        problem: _problem.text,
       );
-      final data = Map<String, dynamic>.from(response.data);
       if (!mounted) return;
+      if (!state.hasKids || state.currentKid.id != kidId) {
+        setState(() {
+          _hints = [];
+          _notice = null;
+          _request = null;
+        });
+        return;
+      }
       setState(() {
         _request = null;
         if (phase == 'ocr') {
@@ -112,7 +139,10 @@ class _AiScannerScreenState extends State<AiScannerScreen> {
       if (mounted) {
         setState(
           () => _error =
-              (e.details is Map ? e.details['error'] : null)?.toString() ??
+              (e.status == 404
+                  ? 'Dịch vụ AI chưa được triển khai. Em có thể tiếp tục học bài có sẵn.'
+                  : (e.details is Map ? e.details['error'] : null)
+                        ?.toString()) ??
               'AI tạm thời chưa sẵn sàng.',
         );
       }
@@ -133,6 +163,16 @@ class _AiScannerScreenState extends State<AiScannerScreen> {
     body: ListView(
       padding: const EdgeInsets.all(20),
       children: [
+        if (_enabled == null && _error == null) const LinearProgressIndicator(),
+        if (_enabled == false)
+          const Text(
+            'AI chưa được bật. Em vẫn có thể học các bài trong bản đồ.',
+          ),
+        if (_enabled != true)
+          TextButton(
+            onPressed: _loadSettings,
+            child: const Text('Kiểm tra lại trạng thái AI'),
+          ),
         const Text(
           'Ảnh sẽ được gửi tới dịch vụ AI để đọc đề, không lưu vào kho ảnh của ứng dụng. Chỉ chụp đề toán, tránh thông tin cá nhân.',
         ),
@@ -140,12 +180,16 @@ class _AiScannerScreenState extends State<AiScannerScreen> {
           spacing: 12,
           children: [
             OutlinedButton.icon(
-              onPressed: _busy ? null : () => _pick(ImageSource.camera),
+              onPressed: _busy || _enabled != true
+                  ? null
+                  : () => _pick(ImageSource.camera),
               icon: const Icon(Icons.camera_alt),
               label: const Text('Chụp đề'),
             ),
             OutlinedButton.icon(
-              onPressed: _busy ? null : () => _pick(ImageSource.gallery),
+              onPressed: _busy || _enabled != true
+                  ? null
+                  : () => _pick(ImageSource.gallery),
               icon: const Icon(Icons.photo_library),
               label: const Text('Chọn ảnh'),
             ),
@@ -170,11 +214,11 @@ class _AiScannerScreenState extends State<AiScannerScreen> {
         if (_notice?.isNotEmpty == true) Text(_notice!),
         if (_image != null)
           TextButton(
-            onPressed: _busy ? null : () => _send('ocr'),
+            onPressed: _busy || _enabled != true ? null : () => _send('ocr'),
             child: const Text('Đọc lại ảnh'),
           ),
         FilledButton(
-          onPressed: _busy ? null : () => _send('hint'),
+          onPressed: _busy || _enabled != true ? null : () => _send('hint'),
           child: const Text('Gợi ý cách suy nghĩ'),
         ),
         for (var i = 0; i < _hints.length && i < _step; i++)

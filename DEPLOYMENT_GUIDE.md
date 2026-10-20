@@ -1,6 +1,6 @@
 # Hướng dẫn triển khai MathLingo
 
-Mã đã được triển khai trên codebase hiện tại. **Chưa chạy migration, chưa deploy Edge Functions và chưa gọi thanh toán/AI thật.** Theo lựa chọn của bạn, repository chỉ cung cấp script SQL kiểm thử; không tải PostgreSQL nhúng.
+**Cập nhật 18/10/2026:** Cloud đã có các đối tượng từ migrations 18–23 và một số Edge Functions, nhưng lịch sử migration chưa đầy đủ. Không áp dụng lại nguyên các migration dưới đây lên project hiện tại trước khi đối chiếu định nghĩa. Xem [audit Cloud và kiểm thử mới nhất](supabase/AUDIT_20261018.md); hướng dẫn thứ tự bên dưới chỉ dùng sau khi xác định đúng trạng thái môi trường đích. Chưa nghiệm thu thanh toán/AI thật.
 
 ## 1. Phạm vi bản này
 

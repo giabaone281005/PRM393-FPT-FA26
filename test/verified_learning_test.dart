@@ -7,6 +7,9 @@ import 'package:mathlingo/data/models/study_session.dart';
 import 'package:mathlingo/data/repositories/study_cache.dart';
 import 'package:mathlingo/data/repositories/study_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:mathlingo/data/models/question.dart';
+import 'package:mathlingo/core/services/voice/speech_service.dart';
+import 'package:mathlingo/features/learning_engine/widgets/voice_answer_widget.dart';
 import 'package:mathlingo/features/learning_engine/widgets/multiplication_widget.dart';
 import 'package:mathlingo/features/auth/auth_screen.dart';
 import 'package:mathlingo/features/parent_portal/parent_area.dart';
@@ -37,6 +40,15 @@ void main() {
   };
   setUp(() => SharedPreferences.setMockInitialValues({}));
   test('temporary failures preserve retry while revoked rights cannot use fallback', () {
+    expect(StudyRepository.isTransient(StateError('signed out')), isFalse);
+    expect(
+      StudyRepository.isTransient(const FormatException('bad response')),
+      isFalse,
+    );
+    expect(
+      StudyRepository.isTransient(const AuthException('session expired')),
+      isFalse,
+    );
     expect(
       StudyRepository.isTransient(
         const PostgrestException(message: 'revoked', code: 'P0001'),
@@ -163,4 +175,39 @@ void main() {
     expect(find.text('Nhập PIN để tiếp tục'), findsOneWidget);
     expect(find.textContaining('VNPay'), findsNothing);
   });
+  testWidgets(
+    'voice answer submits candidate through question flow to grading',
+    (tester) async {
+      dynamic submitted;
+      final mockSpeech = MockSpeechService();
+      final question = Question(
+        id: 'q_test',
+        type: QuestionType.wordProblem,
+        prompt: '3 + 2 = ?',
+        data: const {
+          'options': ['3', '4', '5', '6'],
+        },
+        correctAnswer: '5',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: VoiceAnswerWidget(
+              question: question,
+              speechService: mockSpeech,
+              onAnswerConfirmed: (v) => submitted = v,
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byIcon(Icons.mic_rounded));
+      await tester.pump();
+      mockSpeech.simulateSpeech('bằng năm', isFinal: true);
+      await tester.pump();
+      expect(find.text('XÁC NHẬN GỬI'), findsOneWidget);
+      await tester.tap(find.text('XÁC NHẬN GỬI'));
+      await tester.pump();
+      expect(submitted, '5');
+    },
+  );
 }

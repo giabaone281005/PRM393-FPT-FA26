@@ -1,4 +1,4 @@
-name: mathlingo
+﻿name: mathlingo
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -44,6 +44,8 @@ dependencies:
   url_launcher: ^6.3.2
   image_picker: ^1.2.4
   crypto: ^3.0.7
+  qr_flutter: ^4.1.0
+  speech_to_text: ^7.5.0
 
 dev_dependencies:
   flutter_test:

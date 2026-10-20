@@ -12,19 +12,27 @@ import '../models/learning_summary.dart';
 import '../repositories/kid_repository.dart';
 import '../repositories/mascot_repository.dart';
 import '../repositories/lesson_repository.dart';
+import '../repositories/learning_statistics_repository.dart';
 import '../repositories/subscription_repository.dart';
 import '../repositories/study_repository.dart';
+import '../repositories/family_report_repository.dart';
 
 class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
   final List<KidProfile> _kids = [];
   List<Lesson> _lessons = [];
   Map<String, LearningSummary> _summaries = {};
   Map<String, dynamic> _report = {};
+  final Future<Map<String, dynamic>> Function() _familyReportLoader;
+  Future<void>? _reportRefresh;
+  bool _reportLoading = false, _disposed = false;
+  String? _reportError;
+  DateTime? _reportSyncedAt;
   SubscriptionModel _subscription = SubscriptionModel.defaultBasic(
     'signed_out',
   );
   StreamSubscription<dynamic>? _authListener;
-  int _revision = 0, _selected = 0, _nav = 0;
+  int _revision = 0, _selected = 0, _nav = 0, _statsRevision = 0;
+  int get statsRevision => _statsRevision;
   String? _account, _error, _parentToken;
   DateTime? _unlockUntil;
   String _hat = 'Mũ Thám Tử', _glasses = 'Kính Tri Thức';
@@ -34,7 +42,10 @@ class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
       _staff = false,
       _sound = true;
   ThemeMode _theme = ThemeMode.light;
-  AppStateProvider() {
+  AppStateProvider({
+    Future<Map<String, dynamic>> Function()? familyReportLoader,
+  }) : _familyReportLoader =
+           familyReportLoader ?? FamilyReportRepository.fetch {
     WidgetsBinding.instance.addObserver(this);
     _authListener = SupabaseService.client?.auth.onAuthStateChange.listen(
       (_) => refreshFromCloud(),
@@ -43,6 +54,7 @@ class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
   @override
   void dispose() {
+    _disposed = true;
     _revision++;
     WidgetsBinding.instance.removeObserver(this);
     _authListener?.cancel();
@@ -80,6 +92,10 @@ class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool get isDarkMode => _theme == ThemeMode.dark;
   bool get soundEnabled => _sound;
   Map<String, dynamic> get familyReport => _report;
+  String? get accountId => SupabaseService.currentUser?.id;
+  bool get isLoadingFamilyReport => _reportLoading;
+  String? get familyReportError => _reportError;
+  DateTime? get familyReportSyncedAt => _reportSyncedAt;
   LearningSummary summaryFor(String id) =>
       _summaries[id] ?? const LearningSummary();
   void setNavIndex(int index) {
@@ -108,6 +124,8 @@ class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
     _nav = 0;
     _summaries = {};
     _report = {};
+    _reportError = null;
+    _reportSyncedAt = null;
     _parentToken = null;
     _unlockUntil = null;
     _hasPin = false;
@@ -137,9 +155,7 @@ class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
       final household = await KidRepository.fetchKids();
       final subscription =
           await SubscriptionRepository.fetchCurrentSubscription();
-      final report = Map<String, dynamic>.from(
-        await StudyRepository.rpc('family_report') as Map,
-      );
+      final report = await _familyReportLoader();
       final entitlements = Map<String, dynamic>.from(
         report['entitlements'] as Map? ?? {},
       );
@@ -172,6 +188,8 @@ class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
       _staff = staff;
       _hasPin = hasPin;
       _report = report;
+      _reportSyncedAt = DateTime.now();
+      _reportError = null;
       _theme = prefs.getBool('pref:$uid:dark') == true
           ? ThemeMode.dark
           : ThemeMode.light;
@@ -283,6 +301,60 @@ class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> refreshSubscription() => refreshFromCloud();
+  Future<void> refreshFamilyReport() {
+    if (_disposed || _loading || !isParentUnlocked || accountId == null) {
+      return Future.value();
+    }
+    return _reportRefresh ??= _loadFamilyReport().whenComplete(() {
+      _reportRefresh = null;
+    });
+  }
+
+  Future<void> _loadFamilyReport() async {
+    final uid = accountId, version = _revision;
+    _reportLoading = true;
+    _reportError = null;
+    notifyListeners();
+    try {
+      final report = await _familyReportLoader();
+      if (_disposed ||
+          uid != accountId ||
+          version != _revision ||
+          !isParentUnlocked) {
+        return;
+      }
+      _report = report;
+      _reportSyncedAt = DateTime.now();
+      for (final raw in report['kids'] as List? ?? []) {
+        final kid = Map<String, dynamic>.from(raw as Map);
+        _summaries[kid['id'] as String] = LearningSummary(
+          completedLessons: (kid['completed'] as num?)?.toInt() ?? 0,
+          todayMinutes: ((kid['today_seconds'] as num?)?.toInt() ?? 0) ~/ 60,
+          weekMinutes:
+              (kid['days'] as List? ?? []).fold<int>(
+                0,
+                (sum, day) =>
+                    sum + ((day['total_seconds'] as num?)?.toInt() ?? 0),
+              ) ~/
+              60,
+        );
+      }
+      for (final kid in _kids) {
+        kid.usedScreenTimeMinutes = summaryFor(kid.id).todayMinutes;
+      }
+    } catch (_) {
+      if (!_disposed &&
+          uid == accountId &&
+          version == _revision &&
+          isParentUnlocked) {
+        _reportError = 'Chưa cập nhật được báo cáo. Dữ liệu đang hiển thị là lần đồng bộ trước.';
+      }
+    } finally {
+      _reportLoading = false;
+      if (!_disposed) notifyListeners();
+    }
+  }
+
   void switchKid(int index) {
     if (index < 0 || index >= _kids.length) return;
     _selected = index;
@@ -431,5 +503,45 @@ class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
     } catch (_) {
       return false;
     }
+  }
+
+  /// Records practice answer in learning statistics and updates kid streak.
+  Future<void> recordPracticeAnswer({
+    required bool isCorrect,
+    String? kidId,
+    String? eventId,
+    DateTime? timestamp,
+  }) async {
+    final effectiveKidId = kidId ?? (hasKids ? currentKid.id : null);
+    if (!SupabaseService.isLoggedIn) {
+      await LearningStatisticsRepository.recordAnswer(
+        isCorrect: isCorrect,
+        kidId: effectiveKidId,
+        eventId: eventId,
+        timestamp: timestamp,
+      );
+    }
+    if (effectiveKidId != null) {
+      await refreshStreakForKid(effectiveKidId);
+    }
+    _statsRevision++;
+    notifyListeners();
+  }
+
+  /// Uses server streaks when signed in; local practice cannot extend them.
+  Future<void> refreshStreakForKid(String kidId) async {
+    try {
+      final streak = await LearningStatisticsRepository.getStreak(kidId: kidId);
+      final idx = _kids.indexWhere((k) => k.id == kidId);
+      if (idx != -1) {
+        _kids[idx].streakCount = streak.currentStreak;
+      }
+    } catch (_) {}
+  }
+
+  /// Notifies listeners that learning statistics were updated.
+  void notifyStatsChanged() {
+    _statsRevision++;
+    notifyListeners();
   }
 }

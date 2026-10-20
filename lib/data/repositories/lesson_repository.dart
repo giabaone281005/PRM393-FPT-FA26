@@ -37,8 +37,18 @@ class LessonRepository {
       if (!DateTime.parse(cached['expires']).isAfter(DateTime.now())) rethrow;
       rows = cached['rows'];
     }
-    return (rows as List).map((raw) {
+    return lessonsFromRows(rows as List, grade);
+  }
+
+  static List<Lesson> lessonsFromRows(List rows, int grade) {
+    // Lesson numbers can repeat; progress and study sessions use the lesson ID.
+    final uniqueRows = <String, Map<String, dynamic>>{};
+    for (final raw in rows) {
       final row = Map<String, dynamic>.from(raw as Map);
+      uniqueRows.putIfAbsent(row['id'].toString(), () => row);
+    }
+
+    return uniqueRows.values.map((row) {
       final completed = row['is_completed'] == true;
       final status = completed
           ? LessonStatus.completed

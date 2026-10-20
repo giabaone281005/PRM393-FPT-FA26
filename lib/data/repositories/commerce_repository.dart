@@ -5,6 +5,25 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase/supabase_service.dart';
 import '../models/commerce_models.dart';
 
+class PaymentSession {
+  final String orderId;
+  final String provider; // 'momo', 'vnpay', 'demo-momo' hoặc 'demo-vnpay'
+  final Uri payUrl;
+  final String? deeplink; // chỉ MoMo
+  final String? qrData; // MoMo hoặc demo
+  final int? amountVnd;
+  final String? gatewayOrderId; // mã đơn kiểu MoMo/VNPay (chỉ demo)
+  const PaymentSession({
+    required this.orderId,
+    required this.provider,
+    required this.payUrl,
+    this.deeplink,
+    this.qrData,
+    this.amountVnd,
+    this.gatewayOrderId,
+  });
+}
+
 class CommerceRepository {
   static SupabaseClient get _client {
     final client = SupabaseService.client;
@@ -30,7 +49,7 @@ class CommerceRepository {
     if (!admin) {
       query = query.eq('published', true).eq('learning_plans.published', true);
     }
-    final rows = await query.order('duration_months');
+    final rows = await query.order('duration_months', ascending: true);
     return rows.map(PlanPrice.fromMap).toList();
   }
 
@@ -75,6 +94,109 @@ class CommerceRepository {
     return uri;
   }
 
+  static Future<PaymentSession> startPayment({
+    required String provider, // 'momo', 'vnpay', 'demo-momo' hoặc 'demo-vnpay'
+    required String parentToken,
+    String? priceId,
+    String? requestId,
+    String? orderId,
+    bool qr = false, // chỉ VNPay: true = mở thẳng trang quét QR (VNPAYQR)
+  }) async {
+    final response = await _client.functions.invoke(
+      provider == 'momo'
+          ? 'momo-checkout'
+          : provider.startsWith('demo')
+          ? 'demo-pay'
+          : 'vnpay-checkout',
+      body: {
+        'parentToken': parentToken,
+        'orderId': ?orderId,
+        'priceId': ?priceId,
+        'requestId': ?requestId,
+        if (provider == 'vnpay' && qr) 'method': 'qr',
+        if (provider.startsWith('demo')) 'style': provider.substring(5),
+      },
+    );
+    final data = Map<String, dynamic>.from(response.data as Map);
+    final id = (data['order'] as Map?)?['id']?.toString();
+    final url = (provider == 'momo' || provider.startsWith('demo')
+        ? data['payUrl']
+        : data['checkoutUrl']) as String?;
+    if (response.status != 200 || id == null || url == null) {
+      throw StateError(
+        data['error']?.toString() ?? 'Không thể tạo thanh toán.',
+      );
+    }
+    final uri = Uri.parse(url);
+    const allowedHosts = [
+      'sandbox.vnpayment.vn',
+      'pay.vnpay.vn',
+      'test-payment.momo.vn',
+      'payment.momo.vn',
+    ];
+    // Thanh toán demo: link nằm trên chính Supabase của bạn
+    final hostOk = allowedHosts.contains(uri.host) ||
+        (provider.startsWith('demo') && uri.host.endsWith('.supabase.co'));
+    if (uri.scheme != 'https' || !hostOk) {
+      throw StateError('Địa chỉ thanh toán không hợp lệ.');
+    }
+    return PaymentSession(
+      orderId: id,
+      provider: provider,
+      payUrl: uri,
+      deeplink: data['deeplink'] as String?,
+      qrData: (data['qrCodeUrl'] ?? data['qrCode']) as String?,
+      amountVnd: ((data['order'] as Map?)?['amount_vnd'] as num?)?.toInt(),
+      gatewayOrderId: data['gatewayOrderId'] as String?,
+    );
+  }
+
+  static Future<String> fetchOrderStatus(String orderId) async {
+    final row = await _client
+        .from('learning_orders')
+        .select('status')
+        .eq('id', orderId)
+        .single();
+    return row['status'] as String;
+  }
+
+  /// Chỉ cho thanh toán demo: mô phỏng việc đã quét QR xong
+  /// Trả về mã giao dịch (transId) kiểu MoMo/VNPay do server sinh ra.
+  static Future<String?> simulateScan({
+    required String orderId,
+    required String parentToken,
+    String style = 'momo', // 'momo' hoặc 'vnpay'
+  }) async {
+    final response = await _client.functions.invoke(
+      'demo-pay',
+      body: {
+        'action': 'simulate',
+        'orderId': orderId,
+        'parentToken': parentToken,
+        'style': style,
+      },
+    );
+    if (response.status != 200) {
+      throw StateError('Chưa mô phỏng được thanh toán.');
+    }
+    final data = response.data;
+    return data is Map ? data['transId']?.toString() : null;
+  }
+
+  /// Xóa đơn chưa thanh toán của chính mình (đơn đã trả tiền thì giữ lại).
+  static Future<bool> discardOrder(String orderId) async {
+    final res = await _client.rpc(
+      'discard_unpaid_order',
+      params: {'p_order': orderId},
+    );
+    return res == true;
+  }
+
+  /// Dọn các đơn chưa thanh toán đã quá cũ của chính mình.
+  static Future<void> purgeUnpaid() async {
+    await _client.rpc('purge_my_unpaid_orders');
+  }
+
   static Future<void> reconcile(String orderId) async {
     final res = await _client.functions.invoke(
       'vnpay-query',
@@ -84,12 +206,12 @@ class CommerceRepository {
   }
 
   static Future<void> savePrice(
-    PlanPrice price, {
-    required String label,
-    required int amount,
-    required bool published,
-    required bool newVersion,
-  }) async {
+      PlanPrice price, {
+        required String label,
+        required int amount,
+        required bool published,
+        required bool newVersion,
+      }) async {
     final values = {
       'plan_id': price.planId,
       'label': label,

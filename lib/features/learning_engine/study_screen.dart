@@ -7,26 +7,44 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/models/study_session.dart';
 import '../../data/models/question.dart';
+import '../../data/models/wrong_answer_record.dart';
 import '../../data/providers/app_state_provider.dart';
+import '../../data/providers/study_heartbeat_queue.dart';
+import '../../core/services/app_route_observer.dart';
+import '../../data/repositories/learning_statistics_repository.dart';
 import '../../data/repositories/study_repository.dart';
+import '../../data/repositories/wrong_answer_repository.dart';
 import 'widgets/drag_counters_widget.dart';
 import 'widgets/clock_rotation_widget.dart';
 import 'widgets/multiplication_widget.dart';
 import 'widgets/area_grid_widget.dart';
 import 'widgets/word_problem_widget.dart';
+import 'widgets/voice_answer_widget.dart';
+import '../../core/services/voice/speech_service.dart';
+import 'screens/review_wrong_answers_screen.dart';
 import '../parent_portal/popups/parent_gate_dialog.dart';
 
 class StudyScreen extends StatefulWidget {
   final String? lessonId;
   final String kind;
-  const StudyScreen({super.key, this.lessonId, this.kind = 'lesson'});
+  final SpeechService? speechService;
+  const StudyScreen({
+    super.key,
+    this.lessonId,
+    this.kind = 'lesson',
+    this.speechService,
+  });
   @override
   State<StudyScreen> createState() => _StudyScreenState();
 }
 
-class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
+class _StudyScreenState extends State<StudyScreen>
+    with WidgetsBindingObserver, RouteAware {
   StudySession? _session;
-  bool _busy = true, _heartbeatBusy = false, _foreground = true;
+  bool _busy = true, _foreground = true, _routeVisible = true, _onBreak = false;
+  ModalRoute<dynamic>? _route;
+  final _heartbeats = StudyHeartbeatQueue();
+  bool get _isStudyActive => _foreground && _routeVisible && !_onBreak;
   String? _error, _feedback;
   String _tab = 'theory';
   String _startRequest = StudyRepository.requestId();
@@ -42,7 +60,7 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _start();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!_foreground ||
+      if (!_isStudyActive ||
           _session == null ||
           _session!.completed ||
           ModalRoute.of(context)?.isCurrent != true) {
@@ -53,6 +71,29 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
       if (_activeSeconds % 20 == 0) _heartbeat(true);
       if (_activeSeconds == 600) _break();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (_route != route && route != null) {
+      appRouteObserver.unsubscribe(this);
+      _route = route;
+      appRouteObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void didPushNext() {
+    _routeVisible = false;
+    _heartbeat(false);
+  }
+
+  @override
+  void didPopNext() {
+    _routeVisible = true;
+    _heartbeat(_isStudyActive);
   }
 
   Future<void> _start() async {
@@ -68,7 +109,12 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
         widget.kind,
         _startRequest,
       );
-      if (!mounted) return;
+      if (!mounted) {
+        if (!session.completed) {
+          await _heartbeats.send(session.id, false, session.viewState);
+        }
+        return;
+      }
       _apply(session);
       final view = session.viewState;
       _tab =
@@ -76,6 +122,7 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
           (session.theory.isNotEmpty ? 'theory' : 'quiz');
       _solution.text = view['essay_solution']?.toString() ?? '';
       _result.text = view['essay_result']?.toString() ?? '';
+      if (!_isStudyActive) await _heartbeat(false);
     } catch (e) {
       if (mounted) _error = _message(e);
     } finally {
@@ -105,13 +152,16 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
     'essay_result': _result.text,
   };
   Future<void> _heartbeat(bool active) async {
-    if (_session == null || _session!.completed || _heartbeatBusy || _busy) {
+    if (_session == null || _session!.completed) {
       return;
     }
-    _heartbeatBusy = true;
     try {
       final current = _session!;
-      final fresh = await StudyRepository.heartbeat(current.id, active, _view);
+      final fresh = await _heartbeats.send(
+        current.id,
+        active && _isStudyActive,
+        _view,
+      );
       if (mounted && _session?.id == current.id) _apply(fresh);
     } catch (_) {
       if (mounted) {
@@ -119,28 +169,23 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
           () => _feedback = 'Mất kết nối. Chọn thử lại trước khi tiếp tục.',
         );
       }
-    } finally {
-      _heartbeatBusy = false;
     }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _foreground = state == AppLifecycleState.resumed;
-    _heartbeat(_foreground);
+    _heartbeat(_isStudyActive);
   }
 
   @override
   void dispose() {
     _timer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
+    appRouteObserver.unsubscribe(this);
     final current = _session;
     if (current != null && !current.completed) {
-      StudyRepository.heartbeat(
-        current.id,
-        false,
-        _view,
-      ).catchError((_) => current);
+      _heartbeats.send(current.id, false, _view).catchError((_) => current);
     }
     _solution.dispose();
     _result.dispose();
@@ -148,9 +193,9 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _break() async {
+    _onBreak = true;
     await _heartbeat(false);
     if (!mounted) return;
-    _foreground = false;
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -168,14 +213,23 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
       ),
     );
     _activeSeconds = 0;
-    _foreground = true;
-    await _heartbeat(true);
+    _onBreak = false;
+    await _heartbeat(_isStudyActive);
   }
 
   Future<void> _answer(dynamic value) async {
     if (_busy || _session == null) return;
     _answerRequest ??= StudyRepository.requestId();
     _pendingAnswer ??= value;
+    final currentQ = _session!.currentQuestion;
+    final attemptedAnswer = _pendingAnswer;
+    final submittedRequestId = _answerRequest;
+    final kidId = _session!.kidId.isNotEmpty
+        ? _session!.kidId
+        : (context.read<AppStateProvider>().hasKids
+              ? context.read<AppStateProvider>().currentKid.id
+              : '');
+    final lessonId = widget.lessonId ?? _session!.data['lesson_id']?.toString();
     setState(() {
       _busy = true;
       _error = null;
@@ -201,9 +255,49 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
       if (context.read<AppStateProvider>().soundEnabled) {
         SystemSound.play(SystemSoundType.click);
       }
-      _feedback = updated.data['correct'] == true
+      final isCorrect = updated.data['correct'] == true;
+      _feedback = isCorrect
           ? 'Chính xác! Em làm tốt lắm.'
           : 'Chưa đúng. Em thử xem gợi ý rồi tính lại nhé.';
+
+      // Record answer in learning statistics and daily streak
+      final eventId =
+          '${_session!.id}:${currentQ?.id ?? ""}:$submittedRequestId';
+      try {
+        final appState = context.read<AppStateProvider>();
+        await appState.recordPracticeAnswer(
+          isCorrect: isCorrect,
+          kidId: kidId.trim().isNotEmpty ? kidId : null,
+          eventId: eventId,
+        );
+      } catch (_) {
+        try {
+          await LearningStatisticsRepository.recordAnswer(
+            isCorrect: isCorrect,
+            kidId: kidId.trim().isNotEmpty ? kidId : null,
+            eventId: eventId,
+          );
+        } catch (_) {}
+      }
+      if (updated.data['correct'] == false &&
+          currentQ != null &&
+          kidId.trim().isNotEmpty) {
+        try {
+          final record = WrongAnswerRecord(
+            questionId: currentQ.id,
+            prompt: currentQ.prompt,
+            questionType: currentQ.type,
+            userAnswer: attemptedAnswer,
+            lessonId: lessonId,
+            timestamp: DateTime.now(),
+            isResolved: false,
+            questionData: currentQ.data,
+          );
+          await WrongAnswerRepository.saveWrongAnswer(kidId, record);
+        } catch (_) {
+          // Never disrupt grading, progression, or completion on local storage error
+        }
+      }
       if (updated.data['out_of_hearts'] == true) {
         _feedback = 'Hết tim rồi. Vào vườn luyện tập miễn phí để hồi tim nhé.';
       }
@@ -370,6 +464,28 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
                 onPressed: () => Navigator.pop(context),
                 child: const Text('Tiếp tục hành trình'),
               ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () {
+                  final kId = s.kidId.isNotEmpty
+                      ? s.kidId
+                      : (context.read<AppStateProvider>().hasKids
+                            ? context.read<AppStateProvider>().currentKid.id
+                            : '');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ReviewWrongAnswersScreen(
+                        kidId: kId,
+                        lessonId:
+                            widget.lessonId ?? s.data['lesson_id']?.toString(),
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.history_edu_rounded),
+                label: const Text('Xem lại câu trả lời sai'),
+              ),
             ] else if (s != null) ...[
               LinearProgressIndicator(
                 value: s.questions.isEmpty ? 0 : s.index / s.questions.length,
@@ -446,6 +562,15 @@ class _StudyScreenState extends State<StudyScreen> with WidgetsBindingObserver {
                       s.currentQuestion!.prompt,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
+                    const SizedBox(height: 8),
+                    VoiceAnswerWidget(
+                      key: ValueKey('voice_${s.currentQuestion!.id}'),
+                      question: s.currentQuestion!,
+                      speechService: widget.speechService,
+                      isBusy: _busy,
+                      onAnswerConfirmed: _answer,
+                    ),
+                    const SizedBox(height: 12),
                     AbsorbPointer(
                       absorbing: _busy,
                       child: _question(s.currentQuestion!),
