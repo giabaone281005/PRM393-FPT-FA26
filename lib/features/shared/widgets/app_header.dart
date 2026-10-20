@@ -11,11 +11,18 @@ import '../popups/streak_info_sheet.dart';
 
 class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onHeartTap;
+  final bool compact;
 
-  const AppHeader({super.key, this.onHeartTap});
+  const AppHeader({super.key, this.onHeartTap, this.compact = false});
+
+  factory AppHeader.adaptive(BuildContext context) => AppHeader(
+    compact:
+        MediaQuery.sizeOf(context).width < 400 ||
+        MediaQuery.textScalerOf(context).scale(14) > 18,
+  );
 
   @override
-  Size get preferredSize => const Size.fromHeight(68.0);
+  Size get preferredSize => Size.fromHeight(compact ? 132 : 68);
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +36,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
       child: SafeArea(
         bottom: false,
         child: Container(
-          height: 60,
+          height: compact ? 124 : 60,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             border: Border(
@@ -41,7 +48,8 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
           ),
-          child: Row(
+          child: Flex(
+            direction: compact ? Axis.vertical : Axis.horizontal,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Logo + Grade + Kid Switcher
@@ -143,6 +151,8 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
 
               // Status Pills: Streak & Hearts & Parent Portal
               Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   // Streak Pill (Tap to view streak details BR-02)
                   GestureDetector(

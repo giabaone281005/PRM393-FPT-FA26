@@ -29,11 +29,15 @@ class PlanPrice {
 }
 
 class LearningOrder {
+  final bool isDemo;
+  final String? transactionId;
   final String requestId;
   final String id, parentId, status, label;
   final int amountVnd;
   final DateTime createdAt, expiresAt;
   const LearningOrder({
+    this.isDemo = false,
+    this.transactionId,
     this.requestId = '',
     required this.id,
     required this.parentId,
@@ -44,6 +48,8 @@ class LearningOrder {
     required this.expiresAt,
   });
   factory LearningOrder.fromMap(Map<String, dynamic> m) => LearningOrder(
+    isDemo: (m['snapshot'] as Map?)?['is_demo'] == true,
+    transactionId: m['external_transaction_id'] as String?,
     requestId: m['idempotency_key']?.toString() ?? '',
     id: m['id'] as String,
     parentId: m['parent_id'] as String,
@@ -56,7 +62,10 @@ class LearningOrder {
   bool get canResume =>
       status == 'pending' && expiresAt.isAfter(DateTime.now());
   String get displayStatus => switch (status) {
-    'paid' => 'Đã thanh toán · Đã cấp quyền',
+    'paid' =>
+      isDemo
+          ? 'Đã thanh toán mô phỏng · Đã cấp quyền demo'
+          : 'Đã thanh toán · Đã cấp quyền',
     'refunded' => 'Đã hoàn tiền · Đã thu hồi kỳ Plus',
     'failed' => 'Thanh toán không thành công',
     'expired' => 'Đơn đã hết hạn',

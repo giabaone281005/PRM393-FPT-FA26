@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase/supabase_service.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/study_repository.dart';
+import '../../data/repositories/account_live_sync.dart';
 import '../auth/auth_screen.dart';
 import 'admin_commerce_screen.dart';
 import 'admin_dashboard_view.dart';
@@ -26,15 +27,29 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   bool _busy = true;
   String? _error;
   Timer? _debounce;
+  StreamSubscription<Set<String>>? _live;
   @override
   void initState() {
     super.initState();
     _load();
+    _live = AccountLiveSync.watch(
+      {
+        'kid_profiles',
+        'subscriptions',
+        'support_requests',
+        'learning_orders',
+        'demo_payment_transactions',
+      },
+      () {
+        if (!_busy) _load();
+      },
+    );
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
+    _live?.cancel();
     _revision++;
     super.dispose();
   }

@@ -19,12 +19,14 @@ class LearningProgressScreen extends StatefulWidget {
   final String? kidId;
   final LearningStatistics? statistics;
   final int? streakCount;
+  final Future<LearningStatistics> Function(String kidId)? statisticsLoader;
 
   const LearningProgressScreen({
     super.key,
     this.kidId,
     this.statistics,
     this.streakCount,
+    this.statisticsLoader,
   });
 
   @override
@@ -37,26 +39,34 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
   LearningStatistics _statistics = const LearningStatistics.empty();
   int _streakCount = 0;
   int? _lastStatsRevision;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadData();
-  }
+  String? _loadedKidId;
+  int _loadGeneration = 0;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     try {
       final appState = Provider.of<AppStateProvider>(context);
-      if (_lastStatsRevision != null &&
+      if (_loadedKidId != _resolveKidId() ||
           _lastStatsRevision != appState.statsRevision) {
         _lastStatsRevision = appState.statsRevision;
         _loadData();
       } else {
         _lastStatsRevision = appState.statsRevision;
       }
-    } catch (_) {}
+    } catch (_) {
+      if (_loadedKidId == null) _loadData();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant LearningProgressScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.kidId != widget.kidId ||
+        oldWidget.statistics != widget.statistics ||
+        oldWidget.streakCount != widget.streakCount) {
+      _loadData();
+    }
   }
 
   String _resolveKidId() {
@@ -75,9 +85,14 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
   }
 
   Future<void> _loadData() async {
+    final generation = ++_loadGeneration;
+    final kidId = _resolveKidId();
+    _loadedKidId = kidId;
     setState(() {
       _loading = true;
       _error = null;
+      _statistics = const LearningStatistics.empty();
+      _streakCount = 0;
     });
 
     try {
@@ -90,15 +105,14 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
         return;
       }
 
-      final kidId = _resolveKidId();
       AppStateProvider? appState;
       try {
         appState = context.read<AppStateProvider>();
       } catch (_) {}
 
-      final stats = await LearningStatisticsRepository.getStatistics(
-        kidId: kidId,
-      );
+      final stats = widget.statisticsLoader != null
+          ? await widget.statisticsLoader!(kidId)
+          : await LearningStatisticsRepository.getStatistics(kidId: kidId);
 
       int streak = widget.streakCount ?? 0;
       if (widget.streakCount == null) {
@@ -126,7 +140,7 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
         }
       }
 
-      if (mounted) {
+      if (mounted && generation == _loadGeneration) {
         setState(() {
           _statistics = stats;
           _streakCount = streak;
@@ -134,7 +148,7 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
         });
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted && generation == _loadGeneration) {
         setState(() {
           _error = 'Không thể tải dữ liệu tiến độ. Vui lòng thử lại.';
           _loading = false;
@@ -197,7 +211,10 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
               Text(
                 _error!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16, color: AppColors.textPrimary),
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: AppColors.textPrimary,
+                ),
               ),
               const SizedBox(height: 20),
               FilledButton.icon(
@@ -344,10 +361,16 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
 
     if (isWide) {
       return Row(
-        children: cards.map((c) => Expanded(child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          child: c,
-        ))).toList(),
+        children: cards
+            .map(
+              (c) => Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: c,
+                ),
+              ),
+            )
+            .toList(),
       );
     }
 
@@ -661,9 +684,7 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
           ),
           onPressed: () => Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) => const PracticeGardenScreen(),
-            ),
+            MaterialPageRoute(builder: (_) => const PracticeGardenScreen()),
           ),
         ),
         const SizedBox(height: 10),

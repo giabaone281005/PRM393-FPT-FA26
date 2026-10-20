@@ -22,7 +22,10 @@ class _MascotWardrobeScreenState extends State<MascotWardrobeScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
     try {
       final id = context.read<AppStateProvider>().currentKid.id;
       final data = Map<String, dynamic>.from(

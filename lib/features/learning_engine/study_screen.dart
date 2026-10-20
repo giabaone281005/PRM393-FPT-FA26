@@ -28,11 +28,13 @@ class StudyScreen extends StatefulWidget {
   final String? lessonId;
   final String kind;
   final SpeechService? speechService;
+  final String? sessionId;
   const StudyScreen({
     super.key,
     this.lessonId,
     this.kind = 'lesson',
     this.speechService,
+    this.sessionId,
   });
   @override
   State<StudyScreen> createState() => _StudyScreenState();
@@ -103,12 +105,14 @@ class _StudyScreenState extends State<StudyScreen>
     });
     try {
       final state = context.read<AppStateProvider>();
-      final session = await StudyRepository.start(
-        state.currentKid.id,
-        widget.lessonId,
-        widget.kind,
-        _startRequest,
-      );
+      final session = widget.sessionId != null
+          ? await StudyRepository.resume(widget.sessionId!)
+          : await StudyRepository.start(
+              state.currentKid.id,
+              widget.lessonId,
+              widget.kind,
+              _startRequest,
+            );
       if (!mounted) {
         if (!session.completed) {
           await _heartbeats.send(session.id, false, session.viewState);
@@ -135,6 +139,21 @@ class _StudyScreenState extends State<StudyScreen>
       : 'Chưa kết nối được máy chủ. Bài đang dở được giữ lại để tiếp tục.';
   void _apply(StudySession session) {
     if (!mounted) return;
+    // A background sync can grade the queued answer before another tap.
+    // Clear only the request the server acknowledged, including wrong answers
+    // where the question index stays unchanged.
+    final acknowledged =
+        _answerRequest != null &&
+        session.data['acknowledged_answer_request'] == _answerRequest;
+    if (_session?.id != session.id || acknowledged) {
+      _answerRequest = null;
+      _pendingAnswer = null;
+      _hints = 0;
+      if (acknowledged) {
+        _feedback = 'Đã đồng bộ câu trả lời.';
+        _error = null;
+      }
+    }
     if (_session?.id == session.id &&
         DateTime.parse(session.data['updated_at'])
             .isBefore(DateTime.parse(_session!.data['updated_at']))) {
@@ -248,9 +267,11 @@ class _StudyScreenState extends State<StudyScreen>
         _feedback = 'Đã giữ câu trả lời trên máy. Cú sẽ kiểm tra khi có mạng; em có thể xem lại lý thuyết và gợi ý.';
         return;
       }
-      _answerRequest = null;
-      _pendingAnswer = null;
-      _hints = 0;
+      if (_answerRequest == submittedRequestId) {
+        _answerRequest = null;
+        _pendingAnswer = null;
+        _hints = 0;
+      }
       _apply(updated);
       if (context.read<AppStateProvider>().soundEnabled) {
         SystemSound.play(SystemSoundType.click);
@@ -307,6 +328,11 @@ class _StudyScreenState extends State<StudyScreen>
             : 'finish';
       }
     } catch (e) {
+      if (!StudyRepository.isTransient(e) &&
+          _answerRequest == submittedRequestId) {
+        _answerRequest = null;
+        _pendingAnswer = null;
+      }
       if (mounted) _error = _message(e);
     } finally {
       if (mounted) setState(() => _busy = false);

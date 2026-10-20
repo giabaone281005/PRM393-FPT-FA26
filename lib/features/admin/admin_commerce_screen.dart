@@ -1,9 +1,14 @@
 import '../shared/widgets/role_ui.dart';
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../data/models/commerce_models.dart';
 import '../../data/repositories/commerce_repository.dart';
+import '../../data/repositories/demo_payment_repository.dart';
+import '../../data/repositories/account_live_sync.dart';
+import '../subscriptions/widgets/demo_transaction_card.dart';
 import '../../core/supabase/supabase_service.dart';
 
 class AdminCommerceScreen extends StatefulWidget {
@@ -15,6 +20,8 @@ class AdminCommerceScreen extends StatefulWidget {
 class _AdminCommerceScreenState extends State<AdminCommerceScreen> {
   List<PlanPrice> _prices = [];
   List<LearningOrder> _orders = [];
+  List<LearningOrder> _demoOrders = [];
+  StreamSubscription<Set<String>>? _live;
   bool _loading = true;
   String? _error;
   int _page = 0;
@@ -79,6 +86,15 @@ class _AdminCommerceScreenState extends State<AdminCommerceScreen> {
   void initState() {
     super.initState();
     _load();
+    _live = AccountLiveSync.watch(AccountLiveSync.commerceTables, () {
+      if (!_loading) _load();
+    });
+  }
+
+  @override
+  void dispose() {
+    _live?.cancel();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -97,11 +113,13 @@ class _AdminCommerceScreenState extends State<AdminCommerceScreen> {
         admin: true,
         page: _page,
       );
+      final demoOrders = await DemoPaymentRepository().history(page: _page);
       if (mounted) {
         setState(() {
           _refunds = refunds;
           _prices = prices;
           _orders = orders;
+          _demoOrders = demoOrders;
         });
       }
     } catch (_) {
@@ -328,7 +346,8 @@ class _AdminCommerceScreenState extends State<AdminCommerceScreen> {
             ),
             Text('Trang ${_page + 1}'),
             TextButton(
-              onPressed: _loading || _orders.length < 20
+              onPressed:
+                  _loading || (_orders.length < 20 && _demoOrders.length < 20)
                   ? null
                   : () {
                       _page++;
@@ -338,6 +357,16 @@ class _AdminCommerceScreenState extends State<AdminCommerceScreen> {
             ),
           ],
         ),
+        const SizedBox(height: 24),
+        Text(
+          'Lịch sử thanh toán mô phỏng',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const Text(
+          'DEMO — không thu tiền và không tính vào doanh thu merchant. Không gửi hoàn tiền qua VNPay.',
+        ),
+        for (final demo in _demoOrders)
+          DemoTransactionCard(order: demo, showParent: true),
       ],
     ),
   );

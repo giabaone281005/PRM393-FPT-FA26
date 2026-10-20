@@ -7,6 +7,8 @@ class Lesson {
   final int grade;
   final int lessonNumber;
   final String title;
+  final String topicId;
+  final String topicTitle;
   final String subtitle;
   final int estimatedMinutes;
   final int xpReward;
@@ -25,6 +27,8 @@ class Lesson {
     required this.grade,
     required this.lessonNumber,
     required this.title,
+    this.topicId = '',
+    this.topicTitle = 'Bài học',
     required this.subtitle,
     this.estimatedMinutes = 3,
     this.xpReward = 30,

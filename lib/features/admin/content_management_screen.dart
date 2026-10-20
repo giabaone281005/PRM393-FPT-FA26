@@ -1,12 +1,14 @@
 import '../shared/widgets/role_ui.dart';
 
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/models/question.dart';
 import '../../data/repositories/study_repository.dart';
+import '../../data/repositories/account_live_sync.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../auth/auth_screen.dart';
 import '../learning_engine/widgets/area_grid_widget.dart';
@@ -27,14 +29,27 @@ class _ContentManagementScreenState extends State<ContentManagementScreen> {
   Map<String, dynamic> _data = {};
   String? _error;
   bool _busy = true;
+  StreamSubscription<Set<String>>? _live;
   @override
   void initState() {
     super.initState();
     _load();
+    _live = AccountLiveSync.watch({'lessons'}, () {
+      if (!_busy) _load();
+    });
+  }
+
+  @override
+  void dispose() {
+    _live?.cancel();
+    super.dispose();
   }
 
   Future<void> _load() async {
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
     try {
       final data = await StudyRepository.rpc('staff_curriculum', {
         'p_grade': _grade,

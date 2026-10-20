@@ -16,6 +16,7 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze --no-pub
       - run: flutter test --no-pub
+      - run: flutter test --no-pub test/study_offline_sync_test.dart --dart-define=SUPABASE_URL=http://127.0.0.1:49477 --dart-define=SUPABASE_ANON_KEY=audit-local-key
       - run: node --test test_backend/*.test.mjs
       - run: node scripts/check-sql.mjs
       - run: flutter build apk --debug --no-pub

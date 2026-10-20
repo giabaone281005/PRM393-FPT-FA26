@@ -5,11 +5,10 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 
 import '../../../data/models/lesson.dart';
+import '../../../data/models/learning_overview.dart';
 import '../../../data/providers/app_state_provider.dart';
 import '../../ai_scanner/ai_scanner_screen.dart';
-import '../../learning_engine/screens/learning_screen.dart';
-import '../../parent_portal/popups/parent_gate_dialog.dart';
-import '../popups/lesson_intro_sheet.dart';
+import '../../learning_engine/lesson_navigation.dart';
 
 class TreasureMapScreen extends StatefulWidget {
   const TreasureMapScreen({super.key});
@@ -20,6 +19,7 @@ class TreasureMapScreen extends StatefulWidget {
 
 class _TreasureMapScreenState extends State<TreasureMapScreen> {
   final ScrollController _scrollController = ScrollController();
+  String? _topicId;
 
   @override
   void initState() {
@@ -53,7 +53,11 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
   Widget build(BuildContext context) {
     final state = context.watch<AppStateProvider>();
     final kid = state.currentKid;
-    final lessons = state.currentLessons;
+    final topics = TopicProgress.group(state.currentLessons);
+    final selectedTopic = topics.any((t) => t.id == _topicId) ? _topicId : null;
+    final lessons = state.currentLessons
+        .where((l) => selectedTopic == null || l.topicId == selectedTopic)
+        .toList();
     if (lessons.isEmpty) {
       return Scaffold(
         body: Center(
@@ -95,6 +99,27 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
           children: [
             // 1. TOP HEADER (Chuẩn thanh chỉ số như ảnh 2)
             _buildTopStatsBar(context, state, kid),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: DropdownButtonFormField<String>(
+                key: ValueKey('${kid.id}:$selectedTopic'),
+                initialValue: selectedTopic ?? '__all__',
+                isExpanded: true,
+                decoration: const InputDecoration(labelText: 'Chủ đề học tập'),
+                items: [
+                  const DropdownMenuItem(
+                    value: '__all__',
+                    child: Text('Tất cả chủ đề'),
+                  ),
+                  for (final topic in topics)
+                    DropdownMenuItem(value: topic.id, child: Text(topic.title)),
+                ],
+                onChanged: (value) {
+                  setState(() => _topicId = value == '__all__' ? null : value);
+                  if (_scrollController.hasClients) _scrollController.jumpTo(0);
+                },
+              ),
+            ),
 
             // 2. MAIN SCROLLABLE MAP & BOTTOM SHEET
             Expanded(
@@ -151,7 +176,10 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
           bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1.5),
         ),
       ),
-      child: Row(
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           // Logo Cú MathLingo
           Container(
@@ -189,7 +217,9 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
                 children: [
                   const Text(
                     'MathLingo',
@@ -234,7 +264,6 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
               ),
             ],
           ),
-          const Spacer(),
 
           // Chip Chuỗi Streak
           Container(
@@ -245,6 +274,7 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
               border: Border.all(color: const Color(0xFFFDE68A)),
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const Text('🔥', style: TextStyle(fontSize: 13)),
                 const SizedBox(width: 3),
@@ -270,6 +300,7 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
               border: Border.all(color: const Color(0xFFFECDD3)),
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(
                   Icons.favorite_rounded,
@@ -335,7 +366,9 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -362,7 +395,6 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -371,6 +403,7 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                   border: Border.all(color: const Color(0xFFFDE68A)),
                 ),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(
                       Icons.stars_rounded,
@@ -403,8 +436,9 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
             children: [
               const Text(
                 'Tiến độ lộ trình',
@@ -771,7 +805,10 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Tiêu đề & Tag Thưởng
-          Row(
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Container(
                 width: 8,
@@ -791,7 +828,6 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                   letterSpacing: 0.5,
                 ),
               ),
-              const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
@@ -851,7 +887,8 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                 child: GestureDetector(
                   onTap: () => _openLesson(context, activeLesson),
                   child: Container(
-                    height: 48,
+                    constraints: const BoxConstraints(minHeight: 48),
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
                         colors: [Color(0xFFFFA500), Color(0xFFFF7A00)],
@@ -870,13 +907,16 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: const [
-                        Text(
-                          'BẮT ĐẦU BÀI HỌC',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: 0.5,
+                        Flexible(
+                          child: Text(
+                            'BẮT ĐẦU BÀI HỌC',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         ),
                         SizedBox(width: 6),
@@ -901,8 +941,11 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
                   );
                 },
                 child: Container(
-                  height: 48,
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  constraints: const BoxConstraints(minHeight: 48),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFF7ED),
                     borderRadius: BorderRadius.circular(16),
@@ -938,29 +981,8 @@ class _TreasureMapScreenState extends State<TreasureMapScreen> {
     );
   }
 
-  Future<void> _openLesson(BuildContext context, Lesson lesson) async {
-    final action = await showModalBottomSheet<LessonIntroAction>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => LessonIntroSheet(lesson: lesson),
-    );
-    if (!context.mounted) return;
-
-    switch (action) {
-      case LessonIntroAction.startLesson:
-        await Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => LearningScreen(lesson: lesson)),
-        );
-      case LessonIntroAction.unlockForParent:
-        await showDialog(
-          context: context,
-          builder: (_) => const ParentGateDialog(),
-        );
-      case null:
-        break;
-    }
-  }
+  Future<void> _openLesson(BuildContext context, Lesson lesson) =>
+      openLearningLesson(context, lesson);
 }
 
 /// CustomPainter vẽ đường cong mềm mại nối các Node trên bản đồ

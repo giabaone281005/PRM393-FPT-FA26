@@ -48,6 +48,8 @@ dependencies:
   speech_to_text: ^7.5.0
 
 dev_dependencies:
+  integration_test:
+    sdk: flutter
   flutter_test:
     sdk: flutter
 

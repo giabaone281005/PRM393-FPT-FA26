@@ -47,6 +47,10 @@ Deno.serve(async (req) => {
     if (!['https://sandbox.vnpayment.vn/paymentv2/vpcpay.html', 'https://pay.vnpay.vn/vpcpay.html'].includes(endpoint)) {
       throw new Error('Invalid payment endpoint');
     }
+    await rest('rpc/reserve_learning_checkout', required('SUPABASE_SERVICE_ROLE_KEY'), {
+      p_order: order.id, p_parent: user.id, p_provider: 'vnpay',
+      p_environment: endpoint.includes('sandbox.') ? 'sandbox' : 'live',
+    }, true);
     return json({ order, checkoutUrl: `${endpoint}?${canonicalQuery(params)}&vnp_SecureHash=${signature(params, secret)}` });
   } catch (error) {
     console.error('Checkout failed', error instanceof Error ? error.message : 'unknown');

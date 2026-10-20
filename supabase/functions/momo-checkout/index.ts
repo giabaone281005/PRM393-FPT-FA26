@@ -51,10 +51,16 @@ Deno.serve(async (req) => {
         const amount = Number(order.amount_vnd);
         if (!Number.isSafeInteger(amount) || amount <= 0) throw new Error('Invalid amount');
 
-        // MoMo yêu cầu orderId KHÔNG trùng giữa các lần tạo, nên gắn hậu tố.
-        // IPN sẽ cắt lấy 32 ký tự đầu để ra lại id đơn.
+        const attempt = await rest('rpc/reserve_learning_checkout', required('SUPABASE_SERVICE_ROLE_KEY'), {
+            p_order: order.id, p_parent: user.id, p_provider: 'momo',
+            p_environment: endpoint === ENDPOINTS[0] ? 'sandbox' : 'live',
+        }, true);
+        if (attempt.checkout_response) return json({ order, ...attempt.checkout_response });
+
+        // Retry the same provider operation, including after a timeout.
+        // requestId is MoMo's idempotency key; never create a timestamp suffix.
         const ref = order.id.replaceAll('-', '');
-        const orderId = `${ref}_${Date.now().toString(36)}`;
+        const orderId = attempt.gateway_order_id;
         const requestId = orderId;
         const orderInfo = `MathLingo order ${ref}`;
         const extraData = '';
@@ -74,14 +80,23 @@ Deno.serve(async (req) => {
                 lang: 'vi', requestType, autoCapture: true, extraData,
                 signature: momoSign(raw, secretKey),
             }),
-            signal: AbortSignal.timeout(15000),
+            signal: AbortSignal.timeout(30000),
         });
         const data = await res.json();
-        if (data.resultCode !== 0 || !data.payUrl) {
+        if ([40, 41, 43].includes(data.resultCode)) {
+            return json({ error: 'Lượt thanh toán đã tồn tại hoặc đang xử lý. Kiểm tra đơn hiện tại; không thanh toán lại.' }, 409);
+        }
+        if (!res.ok || data.resultCode !== 0 || !data.payUrl) {
             console.error('MoMo create failed', data.resultCode, data.message);
             throw new Error('MoMo error');
         }
-        return json({ order, payUrl: data.payUrl, deeplink: data.deeplink ?? null, qrCodeUrl: data.qrCodeUrl ?? null });
+        const payUrl = new URL(data.payUrl);
+        if (payUrl.protocol !== 'https:' || !['test-payment.momo.vn', 'payment.momo.vn'].includes(payUrl.hostname)) throw new Error('Invalid payment URL');
+        const saved = await rest('rpc/save_learning_checkout', required('SUPABASE_SERVICE_ROLE_KEY'), {
+            p_order: order.id, p_gateway: orderId,
+            p_response: { payUrl: data.payUrl, deeplink: data.deeplink ?? null, qrCodeUrl: data.qrCodeUrl ?? null },
+        }, true);
+        return json({ order, ...saved });
     } catch (e) {
         console.error('MoMo checkout failed', e instanceof Error ? e.message : 'unknown');
         return json({ error: 'Chưa thể tạo thanh toán MoMo. Vui lòng thử lại.' }, 503);

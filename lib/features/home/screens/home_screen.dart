@@ -6,12 +6,12 @@ import '../../../core/theme/app_typography.dart';
 import '../../../data/models/lesson.dart';
 import '../../../data/providers/app_state_provider.dart';
 import '../../shared/widgets/app_header.dart';
-import '../../treasure_map/popups/lesson_intro_sheet.dart';
+import '../../learning_engine/lesson_navigation.dart';
+import '../../learning_engine/widgets/student_learning_overview.dart';
 import '../../treasure_map/screens/treasure_map_screen.dart';
 import '../../practice_garden/screens/practice_garden_screen.dart';
 import '../../arena/screens/arena_screen.dart';
 import '../../mascot_wardrobe/screens/mascot_wardrobe_screen.dart';
-import '../../shared/popups/streak_info_sheet.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -23,7 +23,7 @@ class HomeScreen extends StatelessWidget {
     final lessons = state.currentLessons;
     if (lessons.isEmpty) {
       return Scaffold(
-        appBar: const AppHeader(),
+        appBar: AppHeader.adaptive(context),
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -49,7 +49,7 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const AppHeader(),
+      appBar: AppHeader.adaptive(context),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -144,14 +144,7 @@ class HomeScreen extends StatelessWidget {
 
               // Thẻ Bài Học Trọng Tâm Hôm Nay (Theo Stitch)
               GestureDetector(
-                onTap: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (_) => LessonIntroSheet(lesson: activeLesson),
-                  );
-                },
+                onTap: () => openLearningLesson(context, activeLesson),
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -176,7 +169,9 @@ class HomeScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 6,
                                   children: [
                                     Container(
                                       padding: const EdgeInsets.symmetric(
@@ -196,8 +191,8 @@ class HomeScreen extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
                                     Row(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
                                         const Icon(
                                           Icons.bolt_rounded,
@@ -260,24 +255,20 @@ class HomeScreen extends StatelessWidget {
                           elevation: 4,
                           shadowColor: AppColors.primary.withAlpha(100),
                         ),
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                            builder: (_) =>
-                                LessonIntroSheet(lesson: activeLesson),
-                          );
-                        },
+                        onPressed: () =>
+                            openLearningLesson(context, activeLesson),
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              'TIẾP TỤC HỌC NGAY',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 15,
-                                letterSpacing: 0.5,
+                            Flexible(
+                              child: Text(
+                                'TIẾP TỤC HỌC NGAY',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 15,
+                                  letterSpacing: 0.5,
+                                ),
                               ),
                             ),
                             SizedBox(width: 8),
@@ -291,107 +282,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Chuỗi Chuyên Cần 7 Ngày (Streak Week)
-              GestureDetector(
-                onTap: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (_) => StreakInfoSheet(kid: kid),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.borderSubtle),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.local_fire_department_rounded,
-                                color: AppColors.streakFire,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Chuỗi Rèn Luyện (${kid.streakCount} Ngày)',
-                                style: AppTypography.titleMedium.copyWith(
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Text(
-                            'Chốt lúc 21:00 (BR-02)',
-                            style: AppTypography.labelSmall.copyWith(
-                              color: AppColors.primaryHover,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
-                            .asMap()
-                            .entries
-                            .map((entry) {
-                              final isDone =
-                                  entry.key <
-                                  (kid.streakCount % 7 == 0
-                                      ? 7
-                                      : kid.streakCount % 7);
-                              return Column(
-                                children: [
-                                  Container(
-                                    width: 34,
-                                    height: 34,
-                                    decoration: BoxDecoration(
-                                      color: isDone
-                                          ? AppColors.accentGoldLight
-                                          : AppColors.surfaceSubtle,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: isDone
-                                            ? AppColors.accentGold
-                                            : AppColors.borderSubtle,
-                                      ),
-                                    ),
-                                    child: Center(
-                                      child: Icon(
-                                        Icons.check_rounded,
-                                        size: 18,
-                                        color: isDone
-                                            ? const Color(0xFFB45309)
-                                            : Colors.transparent,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    entry.value,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              );
-                            })
-                            .toList(),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              const CurrentLearningOverview(),
               const SizedBox(height: 20),
 
               // Các Lối Tắt Tính Năng (Quick Actions)
@@ -405,7 +296,7 @@ class HomeScreen extends StatelessWidget {
                       context,
                       icon: '🗺️',
                       title: 'Bản Đồ Bài Học',
-                      subtitle: 'Lộ trình 5 bài',
+                      subtitle: '${lessons.length} bài trong lộ trình',
                       color: const Color(0xFFE0F2FE),
                       onTap: () {
                         Navigator.push(

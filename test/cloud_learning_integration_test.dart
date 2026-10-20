@@ -7,6 +7,7 @@ import 'package:mathlingo/data/repositories/learning_statistics_repository.dart'
 import 'package:mathlingo/data/repositories/lesson_repository.dart';
 import 'package:mathlingo/data/repositories/family_report_repository.dart';
 import 'package:mathlingo/data/repositories/ai_tutor_repository.dart';
+import 'package:mathlingo/data/repositories/commerce_repository.dart';
 import 'package:mathlingo/data/repositories/wrong_answer_cloud_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -59,6 +60,36 @@ void main() {
       await server.close(force: true);
       HttpOverrides.global = overrides;
     });
+
+    test(
+      'demo cannot invoke settlement even when the old gateway is available',
+      () async {
+        var calls = 0;
+        respond = (request) async {
+          calls++;
+          request.response.write('{"transId":"fake","status":"paid"}');
+          await request.response.close();
+        };
+        await expectLater(
+          CommerceRepository.simulateScan(
+            orderId: 'order-a',
+            parentToken: 'parent-proof',
+            client: client,
+          ),
+          throwsStateError,
+        );
+        expect(calls, 0);
+        await expectLater(
+          CommerceRepository.startPayment(
+            provider: 'demo-momo',
+            parentToken: 'parent-proof',
+            orderId: 'order-a',
+          ),
+          throwsStateError,
+        );
+        expect(calls, 0);
+      },
+    );
 
     test(
       'wrong answers page through server history and retain review state',

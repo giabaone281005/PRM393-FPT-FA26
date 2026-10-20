@@ -16,6 +16,7 @@ import '../repositories/learning_statistics_repository.dart';
 import '../repositories/subscription_repository.dart';
 import '../repositories/study_repository.dart';
 import '../repositories/family_report_repository.dart';
+import '../repositories/account_live_sync.dart';
 
 class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
   final List<KidProfile> _kids = [];
@@ -31,6 +32,7 @@ class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
     'signed_out',
   );
   StreamSubscription<dynamic>? _authListener;
+  StreamSubscription<Set<String>>? _liveListener;
   int _revision = 0, _selected = 0, _nav = 0, _statsRevision = 0;
   int get statsRevision => _statsRevision;
   String? _account, _error, _parentToken;
@@ -41,6 +43,8 @@ class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
       _admin = false,
       _staff = false,
       _sound = true;
+  Future<void>? _cloudRefresh;
+  bool _refreshAgain = false;
   ThemeMode _theme = ThemeMode.light;
   AppStateProvider({
     Future<Map<String, dynamic>> Function()? familyReportLoader,
@@ -50,6 +54,9 @@ class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
     _authListener = SupabaseService.client?.auth.onAuthStateChange.listen(
       (_) => refreshFromCloud(),
     );
+    _liveListener = AccountLiveSync.watch(AccountLiveSync.familyTables, () {
+      if (!_disposed && !_loading && accountId != null) refreshFromCloud();
+    });
     refreshFromCloud();
   }
   @override
@@ -58,11 +65,14 @@ class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
     _revision++;
     WidgetsBinding.instance.removeObserver(this);
     _authListener?.cancel();
+    _liveListener?.cancel();
+    AccountLiveSync.bind(null);
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    AccountLiveSync.foreground(state == AppLifecycleState.resumed);
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
       lockParentPortal();
@@ -136,12 +146,42 @@ class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
     _glasses = 'Kính Tri Thức';
   }
 
-  Future<void> refreshFromCloud() async {
+  Future<void> refreshFromCloud() {
+    if (_disposed) return Future.value();
+    final uid = SupabaseService.currentUser?.id;
+    if (_account != uid) {
+      // Clear the old family immediately, even while its request is in flight.
+      _revision++;
+      _reset();
+      _account = uid;
+      notifyListeners();
+    }
+    if (_cloudRefresh != null) {
+      _refreshAgain = true;
+      return _cloudRefresh!;
+    }
+    late final Future<void> task;
+    task = _refreshCloudQueue().whenComplete(() {
+      if (identical(_cloudRefresh, task)) _cloudRefresh = null;
+    });
+    _cloudRefresh = task;
+    return task;
+  }
+
+  Future<void> _refreshCloudQueue() async {
+    do {
+      _refreshAgain = false;
+      await _refreshCloudOnce();
+    } while (_refreshAgain && !_disposed);
+  }
+
+  Future<void> _refreshCloudOnce() async {
     final version = ++_revision, uid = SupabaseService.currentUser?.id;
     if (_account != uid) {
       _reset();
       _account = uid;
     }
+    AccountLiveSync.bind(uid);
     if (uid == null) {
       _loading = false;
       notifyListeners();
@@ -190,6 +230,7 @@ class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
       _report = report;
       _reportSyncedAt = DateTime.now();
       _reportError = null;
+      _statsRevision++;
       _theme = prefs.getBool('pref:$uid:dark') == true
           ? ThemeMode.dark
           : ThemeMode.light;
@@ -293,7 +334,7 @@ class AppStateProvider extends ChangeNotifier with WidgetsBindingObserver {
         }
       }
     } finally {
-      if (version == _revision) {
+      if (version == _revision && !_disposed) {
         _loading = false;
         notifyListeners();
       }

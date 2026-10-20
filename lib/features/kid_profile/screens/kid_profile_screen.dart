@@ -12,6 +12,8 @@ import '../popups/edit_kid_dialog.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../auth/widgets/mascot_owl_3d.dart';
 import '../../auth/auth_screen.dart';
+import '../../learning_engine/screens/learning_history_screen.dart';
+import '../../learning_engine/widgets/student_learning_overview.dart';
 
 class KidProfileScreen extends StatelessWidget {
   const KidProfileScreen({super.key});
@@ -202,40 +204,27 @@ class KidProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // Progress section
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.borderSubtle),
+            Card(
+              child: ListTile(
+                leading: const Icon(
+                  Icons.history_edu_rounded,
+                  color: AppColors.primary,
+                ),
+                title: const Text('Lịch sử học tập'),
+                subtitle: const Text(
+                  'Xem từng lần làm bài và tiếp tục bài đang học',
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => LearningHistoryScreen(kidId: kid.id),
+                  ),
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('📊 Tiến Độ Học Tập', style: AppTypography.titleMedium),
-                  const SizedBox(height: 16),
-                  _buildProgressBar(
-                    'Phép cộng & trừ',
-                    0.9,
-                    AppColors.accentGreen,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildProgressBar(
-                    'Bảng cửu chương',
-                    0.72,
-                    AppColors.accentGold,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildProgressBar(
-                    'Bài toán có lời văn',
-                    0.55,
-                    AppColors.accentRed,
-                  ),
-                ],
-              ),
-            ).animate().fadeIn(delay: 400.ms),
+            ),
 
+            const CurrentLearningOverview(),
             const SizedBox(height: 16),
 
             // Quick actions: Trang phục Cú & Đổi Hồ Sơ
@@ -467,43 +456,6 @@ class KidProfileScreen extends StatelessWidget {
           ],
         ),
       ).animate().fadeIn(delay: delay.ms).scale(curve: Curves.easeOut),
-    );
-  }
-
-  Widget _buildProgressBar(String label, double value, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: AppTypography.bodyMedium.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            Text(
-              '${(value * 100).round()}%',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: color,
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: LinearProgressIndicator(
-            value: value,
-            backgroundColor: AppColors.surfaceSubtle,
-            valueColor: AlwaysStoppedAnimation<Color>(color),
-            minHeight: 8,
-          ),
-        ),
-      ],
     );
   }
 

@@ -1,11 +1,14 @@
 import '../shared/widgets/role_ui.dart';
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 
 import '../../data/models/commerce_models.dart';
+import '../../data/models/purchase_guidance.dart';
 import '../parent_portal/popups/parent_gate_dialog.dart';
 import '../parent_portal/parent_area.dart';
 import '../parent_portal/screens/support_screen.dart';
@@ -13,9 +16,13 @@ import '../../core/supabase/supabase_service.dart';
 import '../../data/providers/app_state_provider.dart';
 import '../../data/repositories/commerce_repository.dart';
 import '../../data/repositories/wallet_repository.dart';
+import '../../data/repositories/demo_payment_repository.dart';
+import '../../data/repositories/account_live_sync.dart';
+import 'demo_payment_screen.dart';
+import 'widgets/demo_transaction_card.dart';
 import 'payment_waiting_screen.dart';
 
-enum PayMethod { momoDemo, vnpayDemo, momo, vnpayQr, vnpay }
+enum PayMethod { momo, vnpayQr, vnpay }
 
 class LearningPackagesScreen extends StatefulWidget {
   const LearningPackagesScreen({super.key});
@@ -30,6 +37,12 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
   LinkedWallet? _wallet;
   bool _trialUsed = false;
   List<LearningOrder> _orders = [];
+  List<LearningOrder> _demoOrders = [];
+  final _demoRepository = DemoPaymentRepository();
+  final Map<String, String> _demoRequestIds = {};
+  bool _demoAvailable = false;
+  StreamSubscription<Set<String>>? _live;
+  LearningOrder? _pendingOrder;
   final Map<String, String> _requestIds = {};
   bool _loading = true, _buying = false;
   String? _error;
@@ -39,11 +52,15 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _load();
+    _live = AccountLiveSync.watch(AccountLiveSync.commerceTables, () {
+      if (!_loading && !_buying) _load();
+    });
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _live?.cancel();
     super.dispose();
   }
 
@@ -58,18 +75,18 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
       _error = null;
     });
     try {
-      try {
-        await CommerceRepository.purgeUnpaid(); // xóa đơn chưa thanh toán đã quá cũ
-      } catch (_) {}
       final prices = await CommerceRepository.fetchPrices();
       final orders = await CommerceRepository.fetchOrders(page: _page);
+      final pendingOrder = await CommerceRepository.fetchPendingOrder();
       final plans = await WalletRepository.fetchPlans();
       final wallet = await WalletRepository.fetchLinked();
       final used = await WalletRepository.hasUsedTrial();
+      final demoAvailable = await _demoRepository.available();
+      final demoOrders = await _demoRepository.history(page: _page);
       _requestIds.removeWhere(
-            (_, requestId) => orders.any(
-              (order) =>
-          order.requestId == requestId &&
+        (_, requestId) => orders.any(
+          (order) =>
+              order.requestId == requestId &&
               (order.status != 'pending' || !order.canResume),
         ),
       );
@@ -79,15 +96,18 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
       setState(() {
         _prices = prices;
         _orders = orders;
+        _pendingOrder = pendingOrder;
         _trial = plans.where((p) => p.code == 'basic_trial').firstOrNull;
         _wallet = wallet;
         _trialUsed = used;
+        _demoAvailable = demoAvailable;
+        _demoOrders = demoOrders;
       });
     } catch (_) {
       if (mounted) {
         setState(
-              () => _error =
-          'Chưa tải được gói hoặc lịch sử. Kiểm tra kết nối và thử lại.',
+          () => _error =
+              'Chưa tải được gói hoặc lịch sử. Kiểm tra kết nối và thử lại.',
         );
       }
     } finally {
@@ -95,13 +115,56 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
     }
   }
 
-  /// Lịch sử chỉ hiện đơn đã thanh toán hoặc đã hoàn tiền (đơn chờ thanh toán không lưu)
-  List<LearningOrder> get _visibleOrders =>
-      _orders.where((o) => o.status == 'paid' || o.status == 'refunded').toList();
-
   // ---- Giá, giảm giá, cộng dồn ----
+  Future<void> _demoPay({PlanPrice? price, LearningOrder? order}) async {
+    if (_buying) return;
+    final state = context.read<AppStateProvider>();
+    if (!state.isParentUnlocked) {
+      await showDialog(
+        context: context,
+        builder: (_) => ParentGateDialog(onUnlocked: () {}),
+      );
+      if (!mounted || !state.isParentUnlocked) return;
+    }
+    setState(() => _buying = true);
+    try {
+      final demo =
+          order ??
+          await _demoRepository.create(
+            priceId: price!.id,
+            requestId: _demoRequestIds.putIfAbsent(
+              price.id,
+              CommerceRepository.newRequestId,
+            ),
+            parentToken: state.parentToken!,
+          );
+      if (!mounted) return;
+      final paid = await Navigator.push<bool>(
+        context,
+        MaterialPageRoute(builder: (_) => DemoPaymentScreen(order: demo)),
+      );
+      if (paid == true && price != null) _demoRequestIds.remove(price.id);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Chưa mở được demo. Kiểm tra kết nối, PIN và lịch sử demo.',
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _buying = false);
+        await _load();
+      }
+    }
+  }
+
   List<PlanPrice> get _sortedPrices =>
-      [..._prices]..sort((a, b) => a.durationMonths.compareTo(b.durationMonths));
+      [..._prices]
+        ..sort((a, b) => a.durationMonths.compareTo(b.durationMonths));
 
   PlanPrice? get _monthlyPrice {
     for (final p in _sortedPrices) {
@@ -111,7 +174,8 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
   }
 
   /// Giá mua lẻ từng tháng cho cùng số tháng (để tính % giảm)
-  int _fullPrice(PlanPrice p) => (_monthlyPrice?.amountVnd ?? 0) * p.durationMonths;
+  int _fullPrice(PlanPrice p) =>
+      (_monthlyPrice?.amountVnd ?? 0) * p.durationMonths;
 
   int _discountPercent(PlanPrice p) {
     final full = _fullPrice(p);
@@ -141,31 +205,18 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile(
-            leading: const Icon(Icons.qr_code_scanner),
-            title: const Text('MoMo – quét QR (mô phỏng)'),
-            subtitle: const Text('Demo: không trừ tiền'),
-            onTap: () => Navigator.pop(ctx, PayMethod.momoDemo),
-          ),
-          ListTile(
-            leading: const Icon(Icons.qr_code_2),
-            title: const Text('VNPay – quét QR (mô phỏng)'),
-            subtitle: const Text('Demo: không trừ tiền'),
-            onTap: () => Navigator.pop(ctx, PayMethod.vnpayDemo),
-          ),
-          const Divider(),
-          ListTile(
             leading: const Icon(Icons.account_balance_wallet),
-            title: const Text('Sandbox – Ví MoMo (QR / mở app)'),
+            title: const Text('Ví MoMo (QR / mở app)'),
             onTap: () => Navigator.pop(ctx, PayMethod.momo),
           ),
           ListTile(
             leading: const Icon(Icons.qr_code_2),
-            title: const Text('Sandbox – VNPay QR'),
+            title: const Text('VNPay QR'),
             onTap: () => Navigator.pop(ctx, PayMethod.vnpayQr),
           ),
           ListTile(
             leading: const Icon(Icons.credit_card),
-            title: const Text('Sandbox – VNPay (thẻ ATM)'),
+            title: const Text('VNPay (thẻ ATM)'),
             onTap: () => Navigator.pop(ctx, PayMethod.vnpay),
           ),
         ],
@@ -200,7 +251,9 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('${formatVnd(price.amountVnd)} cho ${price.durationMonths} tháng'),
+              Text(
+                '${formatVnd(price.amountVnd)} cho ${price.durationMonths} tháng',
+              ),
               if (pct > 0) Text('Giảm $pct% so với mua từng tháng'),
               const SizedBox(height: 8),
               if (current != null) Text('Hạn hiện tại: ${fmt.format(current)}'),
@@ -225,14 +278,60 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
       );
       if (confirmed != true || !mounted) return;
     }
-    final method = await _pickMethod();
+    PayMethod? method;
+    try {
+      if (price != null) {
+        final pending = await CommerceRepository.fetchPendingOrder();
+        if (!mounted) return;
+        if (pending != null) {
+          final resume = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Gia đình có đơn đang chờ'),
+              content: Text(
+                'Đơn ${pending.id} chưa có kết quả cuối. Kiểm tra đơn này trước để tránh thanh toán hai lần.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('Đóng'),
+                ),
+                if (pending.canResume)
+                  FilledButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: const Text('Tiếp tục đơn cũ'),
+                  ),
+              ],
+            ),
+          );
+          if (resume == true && mounted) await _pay(order: pending);
+          return;
+        }
+      }
+      final provider = order == null
+          ? null
+          : await CommerceRepository.checkoutProvider(order.id);
+      if (!mounted) return;
+      method = switch (provider) {
+        'momo' => PayMethod.momo,
+        'vnpay' => PayMethod.vnpay,
+        _ => await _pickMethod(),
+      };
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Chưa kiểm tra được đơn đang chờ. Vui lòng thử lại.'),
+          ),
+        );
+      }
+      return;
+    }
     if (method == null || !mounted) return;
     setState(() => _buying = true);
     try {
       final session = await CommerceRepository.startPayment(
         provider: switch (method) {
-          PayMethod.momoDemo => 'demo-momo',
-          PayMethod.vnpayDemo => 'demo-vnpay',
           PayMethod.momo => 'momo',
           _ => 'vnpay',
         },
@@ -243,9 +342,9 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
         requestId: price == null
             ? null
             : _requestIds.putIfAbsent(
-          price.id,
-          CommerceRepository.newRequestId,
-        ),
+                price.id,
+                CommerceRepository.newRequestId,
+              ),
       );
       if (!mounted) return;
       final paid = await Navigator.push<bool>(
@@ -254,17 +353,12 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
           builder: (_) => PaymentWaitingScreen(session: session),
         ),
       );
-      if (paid != true) {
-        // Thoát giữa chừng mà chưa trả tiền: xóa luôn đơn, không lưu vào lịch sử
-        // (server chỉ xóa nếu đơn vẫn chưa thanh toán)
-        try {
-          await CommerceRepository.discardOrder(session.orderId);
-        } catch (_) {}
-      }
       if (paid == true && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Thanh toán thành công! Gói Plus đã được kích hoạt.'),
+            content: Text(
+              'Đã ghi nhận thanh toán. Kiểm tra kỳ gói trong lịch sử.',
+            ),
           ),
         );
       }
@@ -297,6 +391,9 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              const Text(
+                'Chỉ lưu thông tin ví bạn nhập, chưa xác minh sở hữu với nhà cung cấp và không cho phép tự động trừ tiền.',
+              ),
               SegmentedButton<String>(
                 segments: const [
                   ButtonSegment(value: 'momo', label: Text('MoMo')),
@@ -326,7 +423,8 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
               child: const Text('Hủy'),
             ),
             FilledButton(
-              onPressed: () => Navigator.pop(ctx, (provider, phone.text.trim())),
+              onPressed: () =>
+                  Navigator.pop(ctx, (provider, phone.text.trim())),
               child: const Text('Gắn ví'),
             ),
           ],
@@ -393,6 +491,12 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
       return const ParentAreaLocked();
     }
     final subscription = state.subscription;
+    final guidance = PurchaseGuidance.forAccount(
+      subscription: subscription,
+      pendingOrder: _pendingOrder,
+      trialAvailable: _trial != null,
+      trialUsed: _trialUsed,
+    );
     return RoleScaffold(
       appBar: RoleAppBar(
         title: const Text('Gói học tập'),
@@ -435,12 +539,19 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
               ),
             ),
             const SizedBox(height: 12),
+            if (!_loading && _error == null)
+              Card(
+                child: ListTile(
+                  title: Text(guidance.title),
+                  subtitle: Text(guidance.message),
+                ),
+              ),
             const Text(
               'Basic: 1 bé. Plus: tối đa 3 bé và lộ trình toán lớp 1–5. Vườn luyện tập hồi tim luôn miễn phí.',
             ),
             const SizedBox(height: 4),
             const Text(
-              'Mua càng lâu càng rẻ. Bạn có thể mua nhiều lần: thời gian được cộng dồn vào hạn hiện tại (kể cả khi đang dùng thử).',
+              'So sánh tổng giá và thời hạn từng gói trước khi chọn. Nếu mua thêm, thời gian được cộng dồn vào hạn hiện tại (kể cả khi đang dùng thử).',
             ),
             const SizedBox(height: 8),
             const Text(
@@ -475,19 +586,23 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
                       const SizedBox(height: 8),
                       ..._trial!.features.map((f) => Text('• $f')),
                       const SizedBox(height: 8),
-                      if (_wallet != null) Text('Ví đã gắn: ${_wallet!.label}'),
+                      if (_wallet != null)
+                        Text(
+                          'Thông tin ví đã lưu: ${_wallet!.label} (chưa xác minh sở hữu)',
+                        ),
                       FilledButton(
-                        onPressed: _buying ||
-                            _loading ||
-                            _trialUsed ||
-                            subscription.isPlusActive
+                        onPressed:
+                            _buying ||
+                                _loading ||
+                                _trialUsed ||
+                                subscription.isPlusActive
                             ? null
                             : _startTrial,
                         child: Text(
                           _trialUsed
                               ? (subscription.isTrialActive
-                              ? 'Đang dùng thử'
-                              : 'Đã dùng thử')
+                                    ? 'Đang dùng thử'
+                                    : 'Đã dùng thử')
                               : _wallet == null
                               ? 'Gắn ví & dùng thử 7 ngày'
                               : 'Bắt đầu dùng thử 7 ngày',
@@ -546,24 +661,38 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
                           'Tiết kiệm ${formatVnd(saved)} so với mua từng tháng',
                           style: TextStyle(color: Colors.green.shade800),
                         ),
-                      const Text('Không tự gia hạn · Mua nhiều lần được cộng dồn'),
+                      const Text(
+                        'Không tự gia hạn · Mua nhiều lần được cộng dồn',
+                      ),
                       FilledButton(
                         onPressed:
-                        _buying ||
-                            _loading ||
-                            (subscription.isPlusActive &&
-                                subscription.expiresAt == null)
+                            _buying ||
+                                _loading ||
+                                (subscription.isPlusActive &&
+                                    subscription.expiresAt == null)
                             ? null
                             : () => _pay(price: p),
                         child: Text(
                           _buying
                               ? 'Đang xử lý…'
                               : subscription.isPlusActive &&
-                              !subscription.isTrialActive
+                                    !subscription.isTrialActive
                               ? 'Mua thêm thời gian'
                               : 'Chọn gói',
                         ),
                       ),
+                      if (_demoAvailable)
+                        OutlinedButton.icon(
+                          onPressed:
+                              _buying ||
+                                  _loading ||
+                                  (subscription.isPlusActive &&
+                                      subscription.expiresAt == null)
+                              ? null
+                              : () => _demoPay(price: p),
+                          icon: const Icon(Icons.science_outlined),
+                          label: const Text('Thanh toán demo · không thu tiền'),
+                        ),
                     ],
                   ),
                 ),
@@ -572,15 +701,15 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
             const SizedBox(height: 20),
             Text('Lịch sử mua', style: Theme.of(context).textTheme.titleLarge),
             const Text(
-              'Chỉ hiển thị các đơn đã thanh toán. Đơn chưa thanh toán xong sẽ tự bị hủy.',
+              'Đơn đang chờ xác minh được giữ trong lịch sử. Nếu đã bị trừ tiền, hãy kiểm tra đơn trước khi thanh toán lại.',
             ),
-            if (!_loading && _error == null && _visibleOrders.isEmpty)
+            if (!_loading && _error == null && _orders.isEmpty)
               const Padding(
                 padding: EdgeInsets.all(16),
                 child: Text('Chưa có đơn hàng trên trang này.'),
               ),
-            ..._visibleOrders.map(
-                  (o) => Card(
+            ..._orders.map(
+              (o) => Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -614,33 +743,33 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
                           onPressed: _buying ? null : () => _pay(order: o),
                           child: const Text('Tiếp tục đơn này'),
                         ),
-                      if (o.status != 'paid')
+                      if (['pending', 'failed', 'expired'].contains(o.status))
                         TextButton(
                           onPressed: _buying || _loading
                               ? null
                               : () async {
-                            setState(() => _buying = true);
-                            try {
-                              await CommerceRepository.reconcile(o.id);
-                            } catch (_) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Chưa kiểm tra được VNPay. Không thanh toán lại nếu đã trừ tiền.',
-                                    ),
-                                  ),
-                                );
-                              }
-                            } finally {
-                              if (mounted) {
-                                setState(() => _buying = false);
-                                await _load();
-                              }
-                            }
-                          },
-                          child: const Text('Kiểm tra với VNPay'),
+                                  setState(() => _buying = true);
+                                  try {
+                                    await CommerceRepository.reconcile(o.id);
+                                  } catch (_) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'Chưa kiểm tra được cổng thanh toán. Không thanh toán lại nếu đã trừ tiền.',
+                                              ),
+                                            ),
+                                          );
+                                    }
+                                  } finally {
+                                    if (mounted) {
+                                      setState(() => _buying = false);
+                                      await _load();
+                                    }
+                                  }
+                                },
+                          child: const Text('Kiểm tra thanh toán'),
                         ),
                     ],
                   ),
@@ -654,23 +783,42 @@ class _LearningPackagesScreenState extends State<LearningPackagesScreen>
                   onPressed: _loading || _page == 0
                       ? null
                       : () {
-                    _page--;
-                    _load();
-                  },
+                          _page--;
+                          _load();
+                        },
                   child: const Text('Trang trước'),
                 ),
                 Text('Trang ${_page + 1}'),
                 TextButton(
-                  onPressed: _loading || _orders.length < 20
+                  onPressed:
+                      _loading ||
+                          (_orders.length < 20 && _demoOrders.length < 20)
                       ? null
                       : () {
-                    _page++;
-                    _load();
-                  },
+                          _page++;
+                          _load();
+                        },
                   child: const Text('Trang sau'),
                 ),
               ],
             ),
+            const SizedBox(height: 20),
+            Text(
+              'Lịch sử thanh toán mô phỏng',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const Text(
+              'Giao dịch DEMO được lưu riêng, không tính vào doanh thu thanh toán thật.',
+            ),
+            if (!_loading && _demoOrders.isEmpty)
+              const Text('Chưa có giao dịch demo trên trang này.'),
+            for (final demo in _demoOrders)
+              DemoTransactionCard(
+                order: demo,
+                onResume: _buying || !_demoAvailable
+                    ? null
+                    : () => _demoPay(order: demo),
+              ),
           ],
         ),
       ),

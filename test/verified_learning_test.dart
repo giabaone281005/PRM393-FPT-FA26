@@ -92,6 +92,39 @@ void main() {
     },
   );
   test(
+    'saving offline heartbeats does not deduct elapsed time twice',
+    () async {
+      final data = session();
+      data['updated_at'] = DateTime.now()
+          .subtract(const Duration(seconds: 30))
+          .toUtc()
+          .toIso8601String();
+      data['remaining_seconds'] = 90;
+      await StudyCache.save(StudySession(data));
+      final first = (await StudyCache.read('session'))!;
+      expect(first.remainingSeconds, inInclusiveRange(59, 60));
+      for (var i = 0; i < 3; i++) {
+        await StudyCache.save((await StudyCache.read('session'))!);
+      }
+      final restored = (await StudyCache.read('session'))!;
+      expect(restored.remainingSeconds, inInclusiveRange(58, 60));
+      expect(restored.data['updated_at'], data['updated_at']);
+      expect(restored.data['offline_until'], data['offline_until']);
+    },
+  );
+  test(
+    'malformed cache cannot prevent an online session from starting',
+    () async {
+      for (final raw in ['broken json', '[]', '{"remaining_seconds":"bad"}']) {
+        SharedPreferences.setMockInitialValues({
+          'study:signed_out:session:session': raw,
+          'study:signed_out:last:kid:lesson:': 'session',
+        });
+        expect(await StudyCache.last('kid', 'lesson', null), isNull);
+      }
+    },
+  );
+  test(
     'answer outbox persists until acknowledgement, independently of grade',
     () async {
       await StudyCache.enqueue('session', {

@@ -25,13 +25,39 @@ class StudyCache {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString('${_prefix}session:$id');
     if (raw == null) return null;
-    final data = Map<String, dynamic>.from(jsonDecode(raw));
+    Map<String, dynamic> data;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map<String, dynamic>) return null;
+      data = decoded;
+    } on FormatException {
+      return null;
+    }
+    final now = DateTime.now();
     final expires = DateTime.tryParse(data['offline_until']?.toString() ?? '');
-    if (expires == null || !expires.isAfter(DateTime.now())) return null;
-    final deadline = DateTime.parse(data['updated_at'])
-        .add(Duration(seconds: (data['remaining_seconds'] as num).toInt()));
-    final left = deadline.difference(DateTime.now()).inSeconds.clamp(0, 86400);
-    return StudySession({...data, 'remaining_seconds': left, 'offline': true});
+    final updatedAt = DateTime.tryParse(data['updated_at']?.toString() ?? '');
+    final remaining = data['remaining_seconds'];
+    if (expires == null ||
+        !expires.isAfter(now) ||
+        updatedAt == null ||
+        remaining is! num) {
+      return null;
+    }
+    // Keep one deadline across offline saves instead of subtracting elapsed
+    // time repeatedly from an already reduced budget. Server TTL stays intact.
+    final deadline =
+        DateTime.tryParse(data['offline_budget_deadline']?.toString() ?? '') ??
+        updatedAt.add(Duration(seconds: remaining.toInt()));
+    final left = deadline
+        .difference(now)
+        .inSeconds
+        .clamp(0, remaining.toInt().clamp(0, 86400));
+    return StudySession({
+      ...data,
+      'remaining_seconds': left,
+      'offline_budget_deadline': deadline.toIso8601String(),
+      'offline': true,
+    });
   }
 
   static Future<StudySession?> last(

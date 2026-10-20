@@ -9,11 +9,21 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../data/providers/app_state_provider.dart';
 import '../../data/repositories/commerce_repository.dart';
 import 'demo_gateway_screen.dart';
+import '../shared/widgets/role_ui.dart';
 
 /// Pop(true) khi đã thanh toán thành công.
 class PaymentWaitingScreen extends StatefulWidget {
   final PaymentSession session;
-  const PaymentWaitingScreen({super.key, required this.session});
+  final Future<String> Function(String)? statusLoader;
+  final Future<void> Function()? refreshEntitlements;
+  final Duration waitTimeout;
+  const PaymentWaitingScreen({
+    super.key,
+    required this.session,
+    this.statusLoader,
+    this.refreshEntitlements,
+    this.waitTimeout = const Duration(minutes: 15),
+  });
   @override
   State<PaymentWaitingScreen> createState() => _PaymentWaitingScreenState();
 }
@@ -23,8 +33,10 @@ class _PaymentWaitingScreenState extends State<PaymentWaitingScreen>
   Timer? _timer;
   bool _checking = false;
   bool _closed = false;
+  bool _timedOut = false;
+  String? _error;
   String _status = 'pending';
-  final _deadline = DateTime.now().add(const Duration(minutes: 15));
+  late final _deadline = DateTime.now().add(widget.waitTimeout);
 
   bool get _isMomo => widget.session.provider == 'momo';
   bool get _isDemo => widget.session.provider.startsWith('demo');
@@ -34,7 +46,7 @@ class _PaymentWaitingScreenState extends State<PaymentWaitingScreen>
       : _isMomo
       ? 'Thanh toán MoMo'
       : 'Thanh toán VNPay';
-  bool get _ended => _status != 'pending' || DateTime.now().isAfter(_deadline);
+  bool get _ended => _status != 'pending' || _timedOut;
 
   @override
   void initState() {
@@ -53,7 +65,9 @@ class _PaymentWaitingScreenState extends State<PaymentWaitingScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState s) {
-    if (s == AppLifecycleState.resumed) _poll(); // quay lại từ app ngân hàng/MoMo
+    if (s == AppLifecycleState.resumed) {
+      _poll(); // quay lại từ app ngân hàng/MoMo
+    }
   }
 
   void _close() {
@@ -64,30 +78,61 @@ class _PaymentWaitingScreenState extends State<PaymentWaitingScreen>
 
   Future<void> _poll() async {
     if (_checking || !mounted || _status == 'paid') return;
-    _checking = true;
+    setState(() => _checking = true);
     try {
-      final s = await CommerceRepository.fetchOrderStatus(widget.session.orderId);
+      final s =
+          await (widget.statusLoader ?? CommerceRepository.fetchOrderStatus)(
+            widget.session.orderId,
+          ).timeout(const Duration(seconds: 20));
       if (!mounted) return;
       if (s == 'paid') {
         _timer?.cancel();
-        await context.read<AppStateProvider>().refreshSubscription();
+        setState(() {
+          _status = 'paid';
+          _error = null;
+        }); // hiện màn hình "Thanh toán thành công"
+        try {
+          await (widget.refreshEntitlements ??
+                  context.read<AppStateProvider>().refreshSubscription)()
+              .timeout(const Duration(seconds: 15));
+        } catch (_) {
+          // Payment remains confirmed even when entitlement refresh is offline.
+        }
         if (!mounted) return;
-        setState(() => _status = 'paid'); // hiện màn hình "Thanh toán thành công"
         await Future.delayed(const Duration(milliseconds: 2500));
         _close();
         return;
       }
-      if (s != 'pending' || DateTime.now().isAfter(_deadline)) _timer?.cancel();
-      setState(() => _status = s);
+      if (!['pending', 'failed', 'expired', 'refunded'].contains(s)) {
+        throw const FormatException('Unknown order status');
+      }
+      final timedOut = DateTime.now().isAfter(_deadline);
+      if (s != 'pending' || timedOut) _timer?.cancel();
+      setState(() {
+        _status = s;
+        _timedOut = timedOut;
+        _error = null;
+      });
     } catch (_) {
-      // lỗi mạng tạm thời: bỏ qua, lần sau thử lại
+      if (!mounted) return;
+      final timedOut = DateTime.now().isAfter(_deadline);
+      if (timedOut) _timer?.cancel();
+      setState(() {
+        _timedOut = timedOut;
+        _error = 'Chưa kiểm tra được thanh toán. Nếu đã bị trừ tiền, đừng thanh toán lại.';
+      });
     } finally {
-      _checking = false;
+      if (mounted) setState(() => _checking = false);
     }
   }
 
   Future<void> _open(Uri uri) async {
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication) && mounted) {
+    try {
+      if (await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
+    } catch (_) {
+      // Missing platform handlers and rejected launches share the retry notice.
+    }
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Không mở được ứng dụng thanh toán.')),
       );
@@ -98,7 +143,10 @@ class _PaymentWaitingScreenState extends State<PaymentWaitingScreen>
     final dl = widget.session.deeplink;
     if (dl != null) {
       try {
-        if (await launchUrl(Uri.parse(dl), mode: LaunchMode.externalApplication)) {
+        if (await launchUrl(
+          Uri.parse(dl),
+          mode: LaunchMode.externalApplication,
+        )) {
           return;
         }
       } catch (_) {}
@@ -115,11 +163,15 @@ class _PaymentWaitingScreenState extends State<PaymentWaitingScreen>
       ),
     );
     if (!mounted) return;
-    if (done == true) await _poll(); // thấy đơn đã paid thì hiện "Thanh toán thành công"
+    if (done == true) {
+      await _poll(); // thấy đơn đã paid thì hiện "Thanh toán thành công"
+    }
   }
 
   Future<void> _copyLink() async {
-    await Clipboard.setData(ClipboardData(text: widget.session.payUrl.toString()));
+    await Clipboard.setData(
+      ClipboardData(text: widget.session.payUrl.toString()),
+    );
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Đã sao chép liên kết thanh toán.')),
@@ -145,8 +197,7 @@ class _PaymentWaitingScreenState extends State<PaymentWaitingScreen>
     } else {
       data = s.payUrl.toString();
       size = 300;
-      caption =
-      'Quét mã bằng camera hoặc app ngân hàng để mở trang thanh toán VNPay trên điện thoại. Hoặc bấm nút bên dưới.';
+      caption = 'Quét mã bằng camera hoặc app ngân hàng để mở trang thanh toán VNPay trên điện thoại. Hoặc bấm nút bên dưới.';
     }
     return Column(
       children: [
@@ -158,8 +209,9 @@ class _PaymentWaitingScreenState extends State<PaymentWaitingScreen>
               data: data,
               size: size,
               // Link VNPay rất dài: mức sửa lỗi thấp để QR thưa, dễ quét hơn
-              errorCorrectionLevel:
-              (_isDemo || _isMomo) ? QrErrorCorrectLevel.M : QrErrorCorrectLevel.L,
+              errorCorrectionLevel: (_isDemo || _isMomo)
+                  ? QrErrorCorrectLevel.M
+                  : QrErrorCorrectLevel.L,
             ),
           ),
         ),
@@ -171,8 +223,8 @@ class _PaymentWaitingScreenState extends State<PaymentWaitingScreen>
   }
 
   Widget _successView() {
-    return Scaffold(
-      appBar: AppBar(title: Text(_title), automaticallyImplyLeading: false),
+    return RoleScaffold(
+      appBar: RoleAppBar(title: Text(_title)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -187,7 +239,9 @@ class _PaymentWaitingScreenState extends State<PaymentWaitingScreen>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
-              const Text('Gói Plus đã được kích hoạt.'),
+              const Text(
+                'Đã ghi nhận thanh toán. Quyền học được cập nhật theo kỳ gói trên máy chủ.',
+              ),
               const SizedBox(height: 24),
               FilledButton(onPressed: _close, child: const Text('Xong')),
             ],
@@ -201,11 +255,16 @@ class _PaymentWaitingScreenState extends State<PaymentWaitingScreen>
   Widget build(BuildContext context) {
     if (_status == 'paid') return _successView();
     final s = widget.session;
-    return Scaffold(
-      appBar: AppBar(title: Text(_title)),
+    return RoleScaffold(
+      appBar: RoleAppBar(title: Text(_title)),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
+          if (_error != null)
+            Semantics(
+              liveRegion: true,
+              child: Text(_error!, textAlign: TextAlign.center),
+            ),
           if (!_ended) _qrBlock(),
           if (!_ended && _isDemo)
             FilledButton.icon(
@@ -230,23 +289,23 @@ class _PaymentWaitingScreenState extends State<PaymentWaitingScreen>
           const SizedBox(height: 24),
           Center(
             child: _ended
-                ? Text(
-              _status == 'failed'
-                  ? 'Thanh toán không thành công.'
-                  : 'Đơn đã hết thời gian chờ. Nếu đã bị trừ tiền, hãy kiểm tra lịch sử đơn, đừng thanh toán lại.',
-              textAlign: TextAlign.center,
-            )
+                ? Text(switch (_status) {
+                    'failed' => 'Thanh toán không thành công.',
+                    'refunded' => 'Giao dịch đã được hoàn tiền. Kiểm tra lịch sử đơn để xem kỳ gói.',
+                    'expired' => 'Đơn đã hết hạn. Nếu đã bị trừ tiền, hãy kiểm tra lịch sử đơn, đừng thanh toán lại.',
+                    _ => 'Đã hết thời gian chờ xác nhận. Nếu đã bị trừ tiền, hãy kiểm tra lịch sử đơn, đừng thanh toán lại.',
+                  }, textAlign: TextAlign.center)
                 : Column(
-              children: [
-                const CircularProgressIndicator(),
-                const SizedBox(height: 12),
-                const Text('Đang chờ xác nhận thanh toán…'),
-                TextButton(
-                  onPressed: _poll,
-                  child: const Text('Kiểm tra lại'),
-                ),
-              ],
-            ),
+                    children: [
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 12),
+                      const Text('Đang chờ xác nhận thanh toán…'),
+                    ],
+                  ),
+          ),
+          TextButton(
+            onPressed: _checking ? null : _poll,
+            child: const Text('Kiểm tra lại'),
           ),
           if (_ended) ...[
             const SizedBox(height: 16),

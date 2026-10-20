@@ -6,6 +6,25 @@ import 'commerce_repository.dart';
 import 'study_cache.dart';
 
 class StudyRepository {
+  static final _operations = <String, Future<void>>{};
+
+  // Heartbeats may flush the same answer a tap is retrying. Keep their cache
+  // writes ordered so an old acknowledgement cannot remove a newer answer.
+  static Future<T> _serial<T>(String id, Future<T> Function() action) async {
+    final previous = _operations[id] ?? Future<void>.value();
+    final result = previous.then((_) => action());
+    final done = result.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    _operations[id] = done;
+    try {
+      return await result;
+    } finally {
+      if (identical(_operations[id], done)) _operations.remove(id);
+    }
+  }
+
   static bool isTransient(Object error) =>
       error is! AuthException &&
       error is! Error &&
@@ -32,12 +51,13 @@ class StudyRepository {
     return s;
   }
 
-  static Future<void> _flush(String id) async {
+  static Future<String?> _flush(String id) async {
     final pending = await StudyCache.pending(id);
-    if (pending == null) return;
+    if (pending == null) return null;
     try {
       await _save(await rpc('answer_learning_session', pending));
       await StudyCache.acknowledge(id);
+      return pending['p_request'] as String?;
     } on PostgrestException catch (error) {
       if (!isTransient(error)) await StudyCache.acknowledge(id);
       rethrow;
@@ -76,20 +96,37 @@ class StudyRepository {
     }
   }
 
+  static Future<StudySession> resume(String sessionId) async {
+    await _flush(sessionId);
+    return _save(
+      await rpc('resume_learning_session', {'p_session': sessionId}),
+    );
+  }
+
   static Future<StudySession> heartbeat(
     String id,
     bool active,
     Map<String, dynamic> state,
+  ) => _serial(id, () => _heartbeat(id, active, state));
+
+  static Future<StudySession> _heartbeat(
+    String id,
+    bool active,
+    Map<String, dynamic> state,
   ) async {
+    String? acknowledgedRequest;
     try {
-      await _flush(id);
-      return await _save(
-        await rpc('heartbeat_learning_session', {
-          'p_session': id,
-          'p_active': active,
-          'p_state': state,
-        }),
-      );
+      acknowledgedRequest = await _flush(id);
+      return await _save({
+        ...Map<String, dynamic>.from(
+          await rpc('heartbeat_learning_session', {
+            'p_session': id,
+            'p_active': active,
+            'p_state': state,
+          }),
+        ),
+        'acknowledged_answer_request': ?acknowledgedRequest,
+      });
     } catch (error) {
       if (!isTransient(error)) rethrow;
       final cached = await StudyCache.read(id);
@@ -98,6 +135,7 @@ class StudyRepository {
         ...cached.data,
         'view_state': state,
         'offline': true,
+        'acknowledged_answer_request': ?acknowledgedRequest,
       });
       await StudyCache.save(saved);
       return saved;
@@ -105,6 +143,14 @@ class StudyRepository {
   }
 
   static Future<StudySession> answer(
+    String id,
+    String question,
+    dynamic value,
+    String request,
+    int hints,
+  ) => _serial(id, () => _answer(id, question, value, request, hints));
+
+  static Future<StudySession> _answer(
     String id,
     String question,
     dynamic value,

@@ -88,6 +88,8 @@ class LessonRepository {
         grade: grade,
         lessonNumber: row['lesson_number'] as int,
         title: row['title'] as String,
+        topicId: row['topic_id']?.toString() ?? '',
+        topicTitle: row['topic_title']?.toString() ?? 'Bài học',
         subtitle: row['subtitle']?.toString() ?? '',
         estimatedMinutes: row['estimated_minutes'] as int,
         xpReward: row['xp_reward'] as int,

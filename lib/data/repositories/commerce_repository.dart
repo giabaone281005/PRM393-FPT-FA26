@@ -95,33 +95,32 @@ class CommerceRepository {
   }
 
   static Future<PaymentSession> startPayment({
-    required String provider, // 'momo', 'vnpay', 'demo-momo' hoặc 'demo-vnpay'
+    required String provider, // 'momo' hoặc 'vnpay'
     required String parentToken,
     String? priceId,
     String? requestId,
     String? orderId,
     bool qr = false, // chỉ VNPay: true = mở thẳng trang quét QR (VNPAYQR)
   }) async {
+    if (!['momo', 'vnpay'].contains(provider)) {
+      throw StateError(
+        'Thanh toán mô phỏng đã tắt. Vui lòng chọn cổng thanh toán.',
+      );
+    }
     final response = await _client.functions.invoke(
-      provider == 'momo'
-          ? 'momo-checkout'
-          : provider.startsWith('demo')
-          ? 'demo-pay'
-          : 'vnpay-checkout',
+      provider == 'momo' ? 'momo-checkout' : 'vnpay-checkout',
       body: {
         'parentToken': parentToken,
         'orderId': ?orderId,
         'priceId': ?priceId,
         'requestId': ?requestId,
         if (provider == 'vnpay' && qr) 'method': 'qr',
-        if (provider.startsWith('demo')) 'style': provider.substring(5),
       },
     );
     final data = Map<String, dynamic>.from(response.data as Map);
     final id = (data['order'] as Map?)?['id']?.toString();
-    final url = (provider == 'momo' || provider.startsWith('demo')
-        ? data['payUrl']
-        : data['checkoutUrl']) as String?;
+    final url =
+        (provider == 'momo' ? data['payUrl'] : data['checkoutUrl']) as String?;
     if (response.status != 200 || id == null || url == null) {
       throw StateError(
         data['error']?.toString() ?? 'Không thể tạo thanh toán.',
@@ -134,9 +133,7 @@ class CommerceRepository {
       'test-payment.momo.vn',
       'payment.momo.vn',
     ];
-    // Thanh toán demo: link nằm trên chính Supabase của bạn
-    final hostOk = allowedHosts.contains(uri.host) ||
-        (provider.startsWith('demo') && uri.host.endsWith('.supabase.co'));
+    final hostOk = allowedHosts.contains(uri.host);
     if (uri.scheme != 'https' || !hostOk) {
       throw StateError('Địa chỉ thanh toán không hợp lệ.');
     }
@@ -151,8 +148,11 @@ class CommerceRepository {
     );
   }
 
-  static Future<String> fetchOrderStatus(String orderId) async {
-    final row = await _client
+  static Future<String> fetchOrderStatus(
+    String orderId, {
+    SupabaseClient? client,
+  }) async {
+    final row = await (client ?? _client)
         .from('learning_orders')
         .select('status')
         .eq('id', orderId)
@@ -166,24 +166,14 @@ class CommerceRepository {
     required String orderId,
     required String parentToken,
     String style = 'momo', // 'momo' hoặc 'vnpay'
+    SupabaseClient? client,
   }) async {
-    final response = await _client.functions.invoke(
-      'demo-pay',
-      body: {
-        'action': 'simulate',
-        'orderId': orderId,
-        'parentToken': parentToken,
-        'style': style,
-      },
+    throw StateError(
+      'Thanh toán mô phỏng đã tắt; không cấp gói từ giao dịch mô phỏng.',
     );
-    if (response.status != 200) {
-      throw StateError('Chưa mô phỏng được thanh toán.');
-    }
-    final data = response.data;
-    return data is Map ? data['transId']?.toString() : null;
   }
 
-  /// Xóa đơn chưa thanh toán của chính mình (đơn đã trả tiền thì giữ lại).
+  /// Kết thúc lượt chờ, giữ đơn và lịch sử để đối soát callback đến muộn.
   static Future<bool> discardOrder(String orderId) async {
     final res = await _client.rpc(
       'discard_unpaid_order',
@@ -198,20 +188,49 @@ class CommerceRepository {
   }
 
   static Future<void> reconcile(String orderId) async {
+    final provider = await checkoutProvider(orderId);
     final res = await _client.functions.invoke(
-      'vnpay-query',
+      provider == 'momo' ? 'momo-query' : 'vnpay-query',
       body: {'orderId': orderId},
     );
-    if (res.status != 200) throw StateError('Chưa đối soát được với VNPay.');
+    if (res.status != 200) {
+      throw StateError('Chưa đối soát được với cổng thanh toán.');
+    }
+  }
+
+  static Future<String?> checkoutProvider(String orderId) async {
+    try {
+      final attempt = await _client
+          .from('learning_checkout_attempts')
+          .select('provider')
+          .eq('order_id', orderId)
+          .maybeSingle();
+      return attempt?['provider'] as String?;
+    } on PostgrestException catch (e) {
+      if (['42P01', 'PGRST205'].contains(e.code)) return null;
+      rethrow;
+    }
+  }
+
+  static Future<LearningOrder?> fetchPendingOrder() async {
+    final row = await _client
+        .from('learning_orders')
+        .select()
+        .eq('parent_id', _client.auth.currentUser!.id)
+        .eq('status', 'pending')
+        .order('created_at', ascending: false)
+        .limit(1)
+        .maybeSingle();
+    return row == null ? null : LearningOrder.fromMap(row);
   }
 
   static Future<void> savePrice(
-      PlanPrice price, {
-        required String label,
-        required int amount,
-        required bool published,
-        required bool newVersion,
-      }) async {
+    PlanPrice price, {
+    required String label,
+    required int amount,
+    required bool published,
+    required bool newVersion,
+  }) async {
     final values = {
       'plan_id': price.planId,
       'label': label,

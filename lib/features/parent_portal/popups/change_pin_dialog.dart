@@ -101,7 +101,7 @@ class _ChangePinDialogState extends State<ChangePinDialog> {
               maxLength: 4,
               obscureText: true,
               decoration: InputDecoration(
-                labelText: 'Mã PIN hiện tại (Mặc định: 1234)',
+                labelText: 'Mã PIN hiện tại',
                 prefixIcon: const Icon(Icons.lock_clock_rounded),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),

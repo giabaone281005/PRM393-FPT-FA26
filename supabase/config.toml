@@ -1,5 +1,15 @@
 project_id = "mathlingo"
 
+# Local Auth must follow the same verified-email flow as the mobile app.
+# Hosted SMTP credentials are configured in Supabase Dashboard, never in Flutter.
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+
+[auth.email.template.confirmation]
+subject = "Xác minh email MathLingo"
+content_path = "./supabase/templates/confirmation.html"
+
 [functions.vnpay-checkout]
 verify_jwt = false
 # Checkout authenticates using Auth /user itself (supports JWT signing-key changes).
@@ -28,3 +38,7 @@ verify_jwt = false
 
 [functions.momo-ipn]
 verify_jwt = false
+
+[functions.demo-pay]
+# Legacy endpoint stays disabled; the separate demo ledger uses authenticated RPCs.
+verify_jwt = true
