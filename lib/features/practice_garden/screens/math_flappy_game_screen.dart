@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -20,7 +21,17 @@ class _MathFlappyGameScreenState extends State<MathFlappyGameScreen>
   double _birdY = .5, _speed = 0, _last = 0;
   int _lives = 3, _score = 0;
   bool _playing = false, _over = false;
+  String? _feedbackText;
+  bool _feedbackCorrect = false;
+  Timer? _feedbackTimer;
   _GameMode? _mode;
+
+  String get _modeLabel => switch (_mode) {
+    _GameMode.easy => 'Dễ',
+    _GameMode.medium => 'Vừa',
+    _GameMode.hard => 'Khó',
+    null => '',
+  };
 
   double get _scrollSpeed => switch (_mode) {
     _GameMode.easy => .20,
@@ -47,6 +58,7 @@ class _MathFlappyGameScreenState extends State<MathFlappyGameScreen>
 
   @override
   void dispose() {
+    _feedbackTimer?.cancel();
     _clock.dispose();
     super.dispose();
   }
@@ -59,6 +71,9 @@ class _MathFlappyGameScreenState extends State<MathFlappyGameScreen>
     _score = 0;
     _playing = false;
     _over = false;
+    _feedbackText = null;
+    _feedbackCorrect = false;
+    _feedbackTimer?.cancel();
     _last = 0;
     _gates
       ..clear()
@@ -127,14 +142,33 @@ class _MathFlappyGameScreenState extends State<MathFlappyGameScreen>
         g.hit = true;
         if (g.choices[slot] == g.answer) {
           _score++;
+          g.resultCorrect = true;
+          g.selectedSlot = slot;
+          _showFeedback('Đúng! +1 điểm', true);
         } else {
+          g.resultCorrect = false;
+          g.selectedSlot = slot;
+          _showFeedback('Sai rồi! Đáp án đúng là ${g.answer}', false);
           _lose();
         }
       } else if (_birdY < g.top || _birdY > g.top + answerArea) {
         g.hit = true;
+        _showFeedback('Hụt rồi! Hãy bay qua một ô đáp án.', false);
         _lose();
       }
     }
+  }
+
+  void _showFeedback(String text, bool correct) {
+    _feedbackTimer?.cancel();
+    _feedbackTimer = Timer(const Duration(milliseconds: 1100), () {
+      if (!mounted) return;
+      setState(() {
+        _feedbackText = null;
+      });
+    });
+    _feedbackText = text;
+    _feedbackCorrect = correct;
   }
 
   void _lose() {
@@ -229,26 +263,47 @@ class _MathFlappyGameScreenState extends State<MathFlappyGameScreen>
                 right: 16,
                 child: Row(
                   children: [
-                    const Text(
-                      'Tim: ',
-                      style: TextStyle(fontWeight: FontWeight.w800),
+                    _HudChip(
+                      icon: Icons.favorite_rounded,
+                      label: '$_lives/3',
+                      color: AppColors.heart,
                     ),
-                    ...List.generate(
-                      3,
-                      (i) => Icon(
-                        i < _lives ? Icons.favorite : Icons.favorite_border,
-                        color: AppColors.heart,
-                        size: 28,
-                      ),
+                    const SizedBox(width: 8),
+                    _HudChip(
+                      icon: Icons.speed_rounded,
+                      label: _modeLabel,
+                      color: AppColors.primary,
                     ),
                     const Spacer(),
-                    Text(
-                      '$_mode',
-                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    _HudChip(
+                      icon: Icons.star_rounded,
+                      label: '$_score',
+                      color: AppColors.accentGold,
                     ),
                   ],
                 ),
               ),
+              if (_feedbackText != null)
+                Positioned(
+                  top: 72,
+                  left: 16,
+                  right: 16,
+                  child: _FeedbackBanner(
+                    text: _feedbackText!,
+                    correct: _feedbackCorrect,
+                  ),
+                ),
+
+              if (_feedbackText != null)
+                Positioned(
+                  top: 72,
+                  left: 16,
+                  right: 16,
+                  child: _FeedbackBanner(
+                    text: _feedbackText!,
+                    correct: _feedbackCorrect,
+                  ),
+                ),
               if (!_playing && !_over)
                 const _Message(
                   'Math Flappy',
@@ -352,10 +407,88 @@ class _Gate {
   final int answer;
   final List<int> choices;
   bool hit = false;
+  bool? resultCorrect;
+  int? selectedSlot;
   double get top => .25;
   // Each answer is a narrow flight lane separated by a solid green bar.
   double get slot => .085;
   double get gap => .045;
+}
+
+class _HudChip extends StatelessWidget {
+  const _HudChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    decoration: BoxDecoration(
+      color: Colors.white.withAlpha(220),
+      borderRadius: BorderRadius.circular(999),
+      boxShadow: const [
+        BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+      ],
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 18, color: color),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w900)),
+      ],
+    ),
+  );
+}
+
+class _FeedbackBanner extends StatelessWidget {
+  const _FeedbackBanner({required this.text, required this.correct});
+
+  final String text;
+  final bool correct;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = correct ? AppColors.accentGreen : AppColors.accentRed;
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color, width: 2),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 8,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(correct ? Icons.check_circle : Icons.cancel, color: color),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                text,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: color, fontWeight: FontWeight.w900),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _Message extends StatelessWidget {
@@ -409,26 +542,30 @@ class _Painter extends CustomPainter {
       c.drawRect(Rect.fromLTWH(x - w / 2, 0, w, top), p);
       final answerArea = slot * 3 + gap * 2;
       c.drawRect(Rect.fromLTWH(x - w / 2, top + answerArea, w, s.height), p);
-      // Solid separators make the three answer lanes visually independent.
+      // Keep separators and answer boxes aligned with the obstacle columns.
       for (var i = 0; i < 2; i++) {
         c.drawRect(
-          Rect.fromLTWH(
-            x - w * .88,
-            top + slot * (i + 1) + gap * i,
-            w * 1.76,
-            gap,
-          ),
+          Rect.fromLTWH(x - w / 2, top + slot * (i + 1) + gap * i, w, gap),
           p,
         );
       }
       for (var i = 0; i < 3; i++) {
         final gapRect = Rect.fromLTWH(
-          x - w * .82,
+          x - w / 2,
           top + i * (slot + gap),
-          w * 1.64,
+          w,
           slot - 5,
         );
-        c.drawRect(gapRect, Paint()..color = const Color(0xFFBAE6FD));
+        final laneColor = g.resultCorrect == null
+            ? const Color(0xFFBAE6FD)
+            : g.resultCorrect! && g.selectedSlot == i
+            ? AppColors.accentGreenLight
+            : !g.resultCorrect! && g.selectedSlot == i
+            ? AppColors.accentRedLight
+            : !g.resultCorrect! && g.choices[i] == g.answer
+            ? AppColors.accentGreenLight
+            : const Color(0xFFBAE6FD);
+        c.drawRect(gapRect, Paint()..color = laneColor);
         final t = TextPainter(
           text: TextSpan(
             text: '${g.choices[i]}',
