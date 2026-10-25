@@ -1,0 +1,221 @@
+[
+  {
+    "file": "assets\\fonts\\CofoBrilliant-Bold.ttf",
+    "source": "docs\\evidence\\styles\\CofoBrilliant-Bold.woff2",
+    "sha256": "9cb7383a51848ba84b8844eaab97c35657270b409f4e838d59dd980f12cc42f3",
+    "names": {
+      "1": "CoFo Brilliant",
+      "2": "Bold",
+      "6": "CoFoBrilliant-Bold",
+      "13": null,
+      "14": null
+    },
+    "missing_vietnamese_sample": [
+      "ơ",
+      "ư",
+      "ả",
+      "ằ",
+      "ề",
+      "ệ",
+      "ọ",
+      "ố",
+      "ộ",
+      "ữ"
+    ]
+  },
+  {
+    "file": "assets\\fonts\\CofoBrilliant-BoldItalic.ttf",
+    "source": "docs\\evidence\\styles\\CofoBrilliant-BoldItalic.woff2",
+    "sha256": "8c820a3a23b6ac69d56ef10a3999b7c9c83f29773a9027cb8e20491a396561fa",
+    "names": {
+      "1": "CoFo Brilliant",
+      "2": "Bold Italic",
+      "6": "CoFoBrilliant-BoldItalic",
+      "13": null,
+      "14": null
+    },
+    "missing_vietnamese_sample": [
+      "ơ",
+      "ư",
+      "ả",
+      "ằ",
+      "ề",
+      "ệ",
+      "ọ",
+      "ố",
+      "ộ",
+      "ữ"
+    ]
+  },
+  {
+    "file": "assets\\fonts\\CofoBrilliant-Italic.ttf",
+    "source": "docs\\evidence\\styles\\CofoBrilliant-Italic.woff2",
+    "sha256": "6417b783212b36cebd62a91d61ae4fdc7729c21661c9e98e16b7b30f25cf21b4",
+    "names": {
+      "1": "CoFo Brilliant",
+      "2": "Italic",
+      "6": "CoFoBrilliant-Italic",
+      "13": null,
+      "14": null
+    },
+    "missing_vietnamese_sample": [
+      "ơ",
+      "ư",
+      "ả",
+      "ằ",
+      "ề",
+      "ệ",
+      "ọ",
+      "ố",
+      "ộ",
+      "ữ"
+    ]
+  },
+  {
+    "file": "assets\\fonts\\CofoBrilliant-Medium.ttf",
+    "source": "docs\\evidence\\styles\\CofoBrilliant-Medium.woff2",
+    "sha256": "038c18d09bcc98a29d3995b950a76ffea03fa6b1045c23b4bd2e7404d5b79d52",
+    "names": {
+      "1": "CoFo Brilliant Medium",
+      "2": "Regular",
+      "6": "CoFoBrilliant-Medium",
+      "13": null,
+      "14": null
+    },
+    "missing_vietnamese_sample": [
+      "ơ",
+      "ư",
+      "ả",
+      "ằ",
+      "ề",
+      "ệ",
+      "ọ",
+      "ố",
+      "ộ",
+      "ữ"
+    ]
+  },
+  {
+    "file": "assets\\fonts\\CofoBrilliant-Regular.ttf",
+    "source": "docs\\evidence\\styles\\CofoBrilliant-Regular.woff2",
+    "sha256": "31b7295c72e8120c433f99ffd243e615deb8ab8cf082dd5b4fecdc912bf4c6a3",
+    "names": {
+      "1": "CoFo Brilliant",
+      "2": "Regular",
+      "6": "CoFoBrilliant-Regular",
+      "13": null,
+      "14": null
+    },
+    "missing_vietnamese_sample": [
+      "ơ",
+      "ư",
+      "ả",
+      "ằ",
+      "ề",
+      "ệ",
+      "ọ",
+      "ố",
+      "ộ",
+      "ữ"
+    ]
+  },
+  {
+    "file": "assets\\fonts\\CofoRobert-Medium.ttf",
+    "source": "docs\\evidence\\styles\\CofoRobert-Medium.woff2",
+    "sha256": "8545476c1e95f5f714739cd5242944d041319fdab9be4b1833600cad9f6db972",
+    "names": {
+      "1": "CoFo Robert Medium",
+      "2": "Regular",
+      "6": "CoFoRobert-Medium",
+      "13": "The Contrast Foundry Font Software is protected under domestic and international trademark and copyright law.",
+      "14": "https://contrastfoundry.com/licensing"
+    },
+    "missing_vietnamese_sample": [
+      "ơ",
+      "ư",
+      "ả",
+      "ằ",
+      "ề",
+      "ệ",
+      "ọ",
+      "ố",
+      "ộ",
+      "ữ"
+    ]
+  },
+  {
+    "file": "assets\\fonts\\SourceCodePro-Regular.ttf",
+    "source": "docs\\evidence\\styles\\SourceCodePro-Regular.woff2",
+    "sha256": "4eeac8037efd18832c4839e3208f6c161c161bc4dd2cd42bf8a059336da8681d",
+    "names": {
+      "1": "Source Code Pro",
+      "2": "Regular",
+      "6": "SourceCodePro-Regular",
+      "13": null,
+      "14": "http://www.adobe.com/type/legal.html"
+    },
+    "missing_vietnamese_sample": [
+      "ă",
+      "Đ",
+      "đ",
+      "ơ",
+      "ư",
+      "ả",
+      "ằ",
+      "ề",
+      "ệ",
+      "ọ",
+      "ố",
+      "ộ",
+      "ữ"
+    ]
+  },
+  {
+    "file": "assets\\fonts\\NotoSans-Bold.ttf",
+    "source_url": "https://raw.githubusercontent.com/notofonts/noto-fonts/main/hinted/ttf/NotoSans/NotoSans-Bold.ttf",
+    "sha256": "c976e4b1b99edc88775377fcc21692ca4bfa46b6d6ca6522bfda505b28ff9d6a",
+    "names": {
+      "1": "Noto Sans",
+      "2": "Bold",
+      "6": "NotoSans-Bold",
+      "13": "This Font Software is licensed under the SIL Open Font License, Version 1.1. This Font Software is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the SIL Open Font License for the specific language, permissions and limitations governing your use of this Font Software.",
+      "14": "http://scripts.sil.org/OFL"
+    }
+  },
+  {
+    "file": "assets\\fonts\\NotoSans-Medium.ttf",
+    "source_url": "https://raw.githubusercontent.com/notofonts/noto-fonts/main/hinted/ttf/NotoSans/NotoSans-Medium.ttf",
+    "sha256": "7bbe267354704c6ad18bde24b1dbc756c8e4380ca1c3f3c25c45ec5c4471510b",
+    "names": {
+      "1": "Noto Sans Medium",
+      "2": "Regular",
+      "6": "NotoSans-Medium",
+      "13": "This Font Software is licensed under the SIL Open Font License, Version 1.1. This Font Software is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the SIL Open Font License for the specific language, permissions and limitations governing your use of this Font Software.",
+      "14": "http://scripts.sil.org/OFL"
+    }
+  },
+  {
+    "file": "assets\\fonts\\NotoSans-Regular.ttf",
+    "source_url": "https://raw.githubusercontent.com/notofonts/noto-fonts/main/hinted/ttf/NotoSans/NotoSans-Regular.ttf",
+    "sha256": "b85c38ecea8a7cfb39c24e395a4007474fa5a4fc864f6ee33309eb4948d232d5",
+    "names": {
+      "1": "Noto Sans",
+      "2": "Regular",
+      "6": "NotoSans-Regular",
+      "13": "This Font Software is licensed under the SIL Open Font License, Version 1.1. This Font Software is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the SIL Open Font License for the specific language, permissions and limitations governing your use of this Font Software.",
+      "14": "http://scripts.sil.org/OFL"
+    }
+  },
+  {
+    "file": "assets\\fonts\\NotoSerif-Medium.ttf",
+    "source_url": "https://raw.githubusercontent.com/notofonts/noto-fonts/main/hinted/ttf/NotoSerif/NotoSerif-Medium.ttf",
+    "sha256": "90eeb03ad7b03e67037091c061c13b12dba7d21e63f54d19d196f181c5958f86",
+    "names": {
+      "1": "Noto Serif Medium",
+      "2": "Regular",
+      "6": "NotoSerif-Medium",
+      "13": "This Font Software is licensed under the SIL Open Font License, Version 1.1. This Font Software is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the SIL Open Font License for the specific language, permissions and limitations governing your use of this Font Software.",
+      "14": "http://scripts.sil.org/OFL"
+    }
+  }
+]

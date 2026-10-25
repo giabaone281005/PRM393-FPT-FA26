@@ -1,0 +1,25 @@
+{
+  "evidence_id": "ev_1bf4066d26fbb0bb5598c2f85f0bbdb59f69f63be242a27ee21f6d20dad0f46b",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "steps": 50,
+  "all_steps_completed": true,
+  "page_errors": [],
+  "screenshots": {
+    "entry": "e3342b65d21d7f1df8d76510db466b3d6040e6f18f6286edeee7d2cfe4d1745f",
+    "interests": "5140d50cb71eeb6b3efdfa61208de18069c7026af4ae7b5a0d74255ad437478f",
+    "pace": "b28fc0db1796dfdf9690314497fd321292ed0605058d1d869250858c8da92348",
+    "home": "7ddd3f8f927fb001238d874e80f2ee9985d1910dbc6d04bca9edfeaf24ed5d60",
+    "topic": "374eec36ab50c77c8fafd7d85bf55065348b2573172f570aad08ae4305935f70",
+    "lesson": "d059ba5743033aed553f5c89c32f3670b76ad59c13a0b4b63d9bd16a3e8a81db",
+    "complete": "f99cbb72c8641f58fb80d927f8376af9a26d4fc9dd77011cb7f9541133a68205",
+    "library": "ffac572522de841604b44bac7f5fcfd7f91ff4eb7b21d7968549151a6998dae0",
+    "history": "eb2976a5e39614437aa49f958b1e859c6be2b1d5480dfd56771985ce71202109",
+    "profile": "8756a8200975dda94ce7dd47892a71b3318ce574dc9e5c0f2ffdee8038478d75",
+    "closed": "e322524458f4bf6815494950087fb4d9906b5c760a2c5ae7873288134a9acc74",
+    "restored": "609a9805cd769f77f4bed2e68c08a9c6504d5359914540a311ae330eaaaae0e3"
+  },
+  "apk_bytes": 173026124
+}

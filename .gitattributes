@@ -1,0 +1,3 @@
+# Retain original capture/archive bytes, including intentional whitespace.
+docs/evidence/** -whitespace
+docs/legacy/** -whitespace

@@ -1,0 +1,52 @@
+Resolving dependencies...
+Downloading packages...
+  cupertino_icons 1.0.9 (2.0.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  shared_preferences_android 2.5.2 (2.5.3 available)
+  shared_preferences_foundation 2.5.7 (2.6.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_math 2.4.2 (2.4.3 available)
+Got dependencies!
+7 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading D:/Brilliant Clone/brilliant_mobile/test/discovery_experiments_test.dart
+00:00 +0: D:/Brilliant Clone/brilliant_mobile/test/discovery_experiments_test.dart: Connect source to lamp and back, then reject source short
+00:00 +1: D:/Brilliant Clone/brilliant_mobile/test/discovery_experiments_test.dart: Connect source to lamp and back, then reject source short
+00:02 +2: D:/Brilliant Clone/brilliant_mobile/test/discovery_experiments_test.dart: Connect source to lamp and back, then reject source short
+00:02 +3: D:/Brilliant Clone/brilliant_mobile/test/discovery_experiments_test.dart: Connect source to lamp and back, then reject source short
+00:02 +4: D:/Brilliant Clone/brilliant_mobile/test/discovery_experiments_test.dart: Connect source to lamp and back, then reject source short
+00:02 +5: D:/Brilliant Clone/brilliant_mobile/test/discovery_experiments_test.dart: Connect source to lamp and back, then reject source short
+00:02 +6: D:/Brilliant Clone/brilliant_mobile/test/discovery_experiments_test.dart: Connect source to lamp and back, then reject source short
+00:02 +7: D:/Brilliant Clone/brilliant_mobile/test/discovery_experiments_test.dart: Connect source to lamp and back, then reject source short
+00:02 +8: D:/Brilliant Clone/brilliant_mobile/test/discovery_experiments_test.dart: Connect source to lamp and back, then reject source short
+00:03 +9: D:/Brilliant Clone/brilliant_mobile/test/entry_flow_test.dart: Entry validates a name and creates an explicit device profile at 320px
+00:03 +10: D:/Brilliant Clone/brilliant_mobile/test/entry_flow_test.dart: Entry validates a name and creates an explicit device profile at 320px
+00:03 +11: D:/Brilliant Clone/brilliant_mobile/test/entry_flow_test.dart: Entry validates a name and creates an explicit device profile at 320px
+00:03 +12: D:/Brilliant Clone/brilliant_mobile/test/entry_flow_test.dart: Entry validates a name and creates an explicit device profile at 320px
+00:04 +13: D:/Brilliant Clone/brilliant_mobile/test/math_experiments_test.dart: Every experiment fits a 240px surface and emits no state in build
+00:04 +14: D:/Brilliant Clone/brilliant_mobile/test/math_experiments_test.dart: Every experiment fits a 240px surface and emits no state in build
+00:04 +15: D:/Brilliant Clone/brilliant_mobile/test/math_experiments_test.dart: Every experiment fits a 240px surface and emits no state in build
+00:04 +16: D:/Brilliant Clone/brilliant_mobile/test/math_experiments_test.dart: Every experiment fits a 240px surface and emits no state in build
+00:04 +17: D:/Brilliant Clone/brilliant_mobile/test/math_experiments_test.dart: Every experiment fits a 240px surface and emits no state in build
+00:06 +18: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: Entry to onboarding to dashboard, logout and return
+00:06 +19: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: Entry to onboarding to dashboard, logout and return
+00:06 +20: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: Entry to onboarding to dashboard, logout and return
+00:07 +21: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: Entry to onboarding to dashboard, logout and return
+00:07 +22: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: Entry to onboarding to dashboard, logout and return
+00:07 +23: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: Entry to onboarding to dashboard, logout and return
+00:07 +24: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: Entry to onboarding to dashboard, logout and return
+00:07 +25: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: Entry to onboarding to dashboard, logout and return
+00:09 +26: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: logic: full lesson saves every step and completes with 30 XP
+00:10 +27: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: math: full lesson saves every step and completes with 30 XP
+00:11 +28: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: science: full lesson saves every step and completes with 30 XP
+00:14 +29: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: data: full lesson saves every step and completes with 30 XP
+00:15 +30: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: geometry: full lesson saves every step and completes with 30 XP
+00:17 +31: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: coding: full lesson saves every step and completes with 30 XP
+00:18 +32: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: circuits: full lesson saves every step and completes with 30 XP
+00:20 +33: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: probability: full lesson saves every step and completes with 30 XP
+00:21 +34: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: Actual gestures, wrong retry, lifecycle save and exact resume
+00:22 +35: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: All 24 lesson screens fit 320px, use interactive surfaces and no answer inputs
+00:25 +36: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: Saved checked state is revalidated and an untouched lesson cannot complete
+00:25 +37: D:/Brilliant Clone/brilliant_mobile/test/widget_test.dart: (tearDownAll)
+00:25 +37: All tests passed!

@@ -1,0 +1,23 @@
+{
+  "evidence_id": "ev_25d1ceb4769a1105075ee5d3a14cf2f309c81c46eae93cab40c91ade5fb05ea4",
+  "url": "https://brilliant.org/courses/",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "dom_sha256": "94b9a86ab277bd3b9a255373fc79f5c190ba5802f4ce915e2ebc1428f90a90bd",
+  "accessibility_sha256": "37566007033d7bb152001fad48c60a8b4b47974fa3cb20af0bb930c2d54cc020",
+  "observed_tokens": [
+    "panda-px_6",
+    "md:panda-px_8",
+    "panda-gap_8",
+    "panda-max-w_1216px"
+  ],
+  "completeness": {
+    "status": "complete",
+    "equality_eligible": true,
+    "missing_sections": [],
+    "truncated_sections": []
+  },
+  "scope": "Public mobile catalogue structure. Shared 720px content width, 24px gutters, 64px header and 320px CTAs are Matlingo design choices, not measurements asserted about Brilliant's signed-in app."
+}

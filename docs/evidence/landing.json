@@ -1,0 +1,106 @@
+{
+  "evidence_id": "ev_f1d686f6ef41f0f8e38d165dfd4a7a7ca3740e505bf612adb718ee5d13eaaaed",
+  "operation": "capture_browser_scenario",
+  "parameters": {
+    "browser": {
+      "mode": "launch",
+      "executable_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      "headless": true
+    },
+    "start_url": {
+      "url": "https://brilliant.org/",
+      "query": []
+    },
+    "environment": {
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "device_scale_factor": 1
+      },
+      "locale": "en-US",
+      "timezone": "UTC",
+      "color_scheme": "light",
+      "reduced_motion": "reduce",
+      "service_workers": "block"
+    },
+    "actions": [
+      {
+        "step_id": "ready",
+        "action": "wait_for_timeout",
+        "duration_ms": 3500
+      }
+    ],
+    "storage": {
+      "cookies": [],
+      "local_storage": [],
+      "session_storage": []
+    },
+    "secrets": [],
+    "capture": {
+      "after_each_step": [],
+      "at_end": [
+        "dom",
+        "accessibility",
+        "url"
+      ],
+      "events": [],
+      "network": {
+        "request_body": false,
+        "response_body": false,
+        "header_values": false
+      },
+      "limits": {
+        "max_events": 10000,
+        "max_event_allocation_bytes": 4194304,
+        "max_total_event_allocation_bytes": 16777216,
+        "max_network_transactions": 1024,
+        "max_network_body_bytes": 65536,
+        "max_network_body_allocation_bytes": 1048576,
+        "max_network_header_allocation_bytes": 1048576,
+        "max_network_metadata_allocation_bytes": 1048576
+      }
+    },
+    "scenario_sha256": "3cb303e5e90e6a6e5a53ab56fcc55727a6090db26d8984d7f5250ed6c624db74"
+  },
+  "browser": {
+    "mode": "launch",
+    "process_ownership": "provider-owned",
+    "cleanup": "terminated-owned-process",
+    "product": "Chromium",
+    "version": "155.0.8059.86"
+  },
+  "completeness": {
+    "status": "complete",
+    "equality_eligible": true,
+    "missing_sections": [],
+    "truncated_sections": []
+  },
+  "accessibility": {
+    "state": "captured",
+    "value": {
+      "sha256": "13ef0a58ae10d51e5f9d1ced6df1c0af95312fa75e8c3b593a2125d33a5cb5d0",
+      "bytes": 10972,
+      "text": "- document:\n  - navigation:\n    - link \"Brilliant home\":\n      - /url: /\n      - img\n    - button \"Sign in\"\n  - img \"Apple Editors’ Choice\"\n  - img \"Google Play Featured App\"\n  - heading \"Your personal tutor for math and coding\" [level=1]\n  - paragraph: A world-class tutor for every home. Built by top learning experts from MIT and Harvard.\n  - button \"I’m a learner\"\n  - button \"I’m a parent or teacher\"\n  - list:\n    - listitem:\n      - paragraph: Visual, interactive tutoring\n      - paragraph: Brilliant sees your work and notices when you’re off track. It asks guiding questions, patiently explains concepts with interactive diagrams, and sketches on your screen until you actually understand what to do and why.\n    - listitem:\n      - paragraph: Help on demand\n      - paragraph: Share a photo of your schoolwork. Brilliant will review it, help you get unstuck, and work through any mistakes with you. Or, you can ask a question about a concept or topic and Brilliant will teach it to you. Each tutoring session builds foundational understanding, rather than just giving you the answers.\n      - button \"Show Help on demand\"\n    - listitem:\n      - paragraph: Comprehensive skill mastery\n      - paragraph: Work through carefully sequenced concepts and targeted practice until you can solve problems independently. Brilliant helps you understand the structure behind math problems and computer programs, then works with you on reps and review until you’ve mastered the underlying skills.\n      - button \"Show Comprehensive skill mastery\"\n    - listitem:\n      - paragraph: Adaptive learning plan\n      - paragraph: Brilliant uses diagnostics to pinpoint your current level, then starts you on a learning plan that adapts in real-time as you progress. Frequent assessments track what you’ve learned and what you’ve missed, and identify gaps in your understanding. Your plan accelerates when you’re ready, and slows down to help you rebuild foundations when needed.\n      - button \"Show Adaptive learning plan\"\n    - listitem:\n      - paragraph: Progress tracking\n      - paragraph: See what you’ve mastered, what still needs work, and what to tackle next. Your dashboard tracks your learning activity, performance on mastery assessments, and where you needed the most help.\n      - button \"Show Progress tracking\"\n  - heading \"Watch how Brilliant works\" [level=2]\n  - paragraph: Learn with our tutor, Koji, on a shared interactive canvas. He sees where you’re getting stuck, then asks guiding questions, sketches on your screen, and gives hints to help you work through it.\n  - radiogroup \"Choose a subject\":\n    - radio \"Math\" [checked]\n    - radio \"Coding\"\n  - region \"Tutoring clips\":\n    - button \"Play\":\n      - img\n    - button \"Show Science-backed learning\"\n  - paragraph: Help when you need it\n  - paragraph: When you’re stuck, Koji asks guiding questions and offers visual hints to help you spot where you went wrong and solve the problem yourself.\n  - paragraph: 1 / 4\n  - button \"Show Help when you need it\"\n  - button \"Show Science-backed learning\"\n  - button \"Show Practice that sticks\"\n  - button \"Show Learn from mistakes\"\n  - button \"Previous slide\":\n    - img\n  - button \"Next slide\":\n    - img\n  - heading \"From 5th grade to college and beyond\" [level=2]:\n    - text: From 5\n    - superscript: th\n    - text: grade to college and beyond\n  - paragraph: Build solid conceptual foundations with guided tutoring, from fractions through calculus. Then build fluency with targeted practice, assessments, and reviews.\n  - tablist \"Level\":\n    - tab \"Foundations\"\n    - tab \"Algebra\" [selected]\n    - tab \"Probability and Statistics\"\n    - tab \"Calculus\"\n    - tab \"Mind-Bending Math\"\n  - tabpanel \"Algebra\":\n    - 'heading \"Algebra: Covered topics\" [level=3]'\n    - list:\n      - listitem: Linear equations\n      - listitem: Linear inequalities\n      - listitem: Slopes and intercepts\n      - listitem: Equations of lines\n      - listitem: Equations of circles\n      - listitem: Systems of equations\n      - listitem: Systems of inequalities\n      - listitem: Solving by graphing\n    - button \"13 additional topics\"\n  - heading \"Research-backed and effective\" [level=2]\n  - paragraph: Brilliant’s approach is built on the best available learning science, along with rigorous analysis of the millions of problem interactions and tutoring sessions happening on Brilliant daily.\n  - article:\n    - heading \"Tutoring interventions\" [level=3]\n    - paragraph: Koji provides instant, one-on-one help whenever you’re stuck. Get guidance, alternative explanations, or hints, using voice or chat.\n  - article:\n    - heading \"Mastery assessments\" [level=3]\n    - paragraph: Koji makes sure you understand every concept through regular assessments. If you come up short, he creates targeted practice to get you back on track.\n    - button \"Show Mastery assessments\"\n  - article:\n    - heading \"Personalized practice\" [level=3]\n    - paragraph: Koji personalizes your practice sessions to focus on concepts that need more review. Each problem is designed to lock in key ideas and get you back on track.\n    - button \"Show Personalized practice\"\n  - heading \"Fully accredited learning you can trust\" [level=2]\n  - article:\n    - img \"An aerial view of a university campus along a river\"\n    - heading \"Built by top learning experts\" [level=3]\n    - paragraph: Brilliant is crafted by award-winning teachers, subject-matter experts, and learning designers from top institutions.\n    - list:\n      - listitem:\n        - img \"Stanford University\"\n      - listitem:\n        - img \"MIT\"\n      - listitem:\n        - img \"Google\"\n      - listitem:\n        - img \"Caltech\"\n      - listitem:\n        - img \"Harvard University\"\n      - listitem:\n        - img \"Microsoft\":\n          - img\n  - article:\n    - heading \"Fully accredited, COPPA certified\" [level=3]\n    - paragraph:\n      - text: Brilliant is fully accredited by ACS-WASC and is independently certified to meet strict U.S. standards for kids’ online privacy and safety. Brilliant is a member in the kidSAFE Seal Program. To learn more, click on the seal or go to\n      - link \"www.kidsafe.com\":\n        - /url: https://www.kidsafe.com/\n      - text: .\n    - link \"kidSAFE COPPA Certified seal\":\n      - /url: https://kidsafe.com/member/brilliant\n    - img \"WASC accreditation seal\"\n  - article:\n    - heading \"100,000+ five-star app reviews\" [level=3]\n    - paragraph: Learners, parents, and teachers rate Brilliant among the top learning apps on the App Store and Google Play.\n    - img \"Five stars between laurels\"\n  - article:\n    - heading \"Trusted by thousands of schools\" [level=3]\n    - paragraph: Brilliant gives each classroom student access to their own interactive learning program. It sees what they’re doing, provides custom feedback, and assesses to ensure mastery. Teachers love it as classroom enrichment or as homework.\n    - link \"Learn more\":\n      - /url: /educators/?from=brilliant\n  - heading \"Students, parents, and teachers love us\" [level=2]\n  - region \"Testimonials\":\n    - paragraph: They enthusiastically use it outside of class. I had 8th graders say, ‘This makes me want to do more math!’\n    - paragraph: Aaron\n    - paragraph: Algebra teacher\n    - button \"Show Aaron’s review\"\n    - paragraph: I didn’t get the slope unit in class, but it finally clicked after talking to Koji for a few minutes!\n    - paragraph: Eliza\n    - paragraph: 7th grader\n    - button \"Show Eliza’s review\"\n    - paragraph: It’s been a win-win. My son’s grades are up and he doesn’t complain about studying with Brilliant.\n    - paragraph: Hana\n    - paragraph: Parent of 16 year old\n    - paragraph: I learned most of trigonometry in 12 days, I just got into a flow. I’m one of the best in my class now.\n    - paragraph: Tyler\n    - paragraph: 10th grader\n    - button \"Show Tyler’s review\"\n    - paragraph: She’ll get stuck on a problem and then yell, ‘Never mind, Mom, I got it!’ How great is that?\n    - paragraph: Arianne\n    - paragraph: Parent of 10 year old\n    - button \"Show Arianne’s review\"\n  - group \"Choose slide to display\":\n    - button \"Go to slide 1\"\n    - button \"Go to slide 2\"\n    - button \"Go to slide 3\" [disabled]\n    - button \"Go to slide 4\"\n    - button \"Go to slide 5\"\n  - heading \"The best tutor you’ll ever have is already here\" [level=2]\n  - button \"Get started\"\n  - link \"Get it on Google Play\":\n    - /url: https://play.google.com/store/apps/details?id=org.brilliant.android&listing=try-brilliant-app\n    - img \"Get it on Google Play\"\n  - link \"Download on the App Store\":\n    - /url: https://apps.apple.com/app/apple-store/id913335252?pt=105095803&ct=nux_qr_code&mt=8\n    - img \"Download on the App Store\"\n  - contentinfo:\n    - paragraph: Product\n    - link \"Topics\":\n      - /url: /courses/\n    - link \"Pricing\":\n      - /url: /subscribe/\n    - link \"Gift Brilliant\":\n      - /url: /gift-premium/\n    - link \"Resources\":\n      - /url: /resources/\n    - link \"Help\":\n      - /url: /help/\n    - paragraph: Solutions\n    - link \"Educators\":\n      - /url: /educators/?from=brilliant\n    - link \"Homeschools\":\n      - /url: /start/homeschool/\n    - link \"K–5 Math Practice (beta)\":\n      - /url: /practice/\n    - paragraph: Company\n    - link \"About Us\":\n      - /url: /about/\n    - link \"Careers\":\n      - /url: /careers/\n    - paragraph: Behind the Scenes\n    - link \"A Tutor in Every Home\":\n      - /url: https://blog.brilliant.org/a-world-class-tutor-in-every-home/\n    - link \"Coding Skills That Matter in the Age of AI\":\n      - /url: /coding-skills/\n    - link \"AI at Brilliant\":\n      - /url: https://blog.brilliant.org/hand-crafted-machine-made/\n    - link \"Brilliant on Facebook\":\n      - /url: https://www.facebook.com/brilliantorg\n      - img\n    - link \"Brilliant on Instagram\":\n      - /url: https://www.instagram.com/brilliantorg\n      - img\n    - link \"Brilliant on Twitter\":\n      - /url: https://twitter.com/brilliantorg\n      - img\n    - link \"Brilliant on LinkedIn\":\n      - /url: https://www.linkedin.com/company/brilliant-org/\n      - img\n    - link \"kidSAFE COPPA Certified seal\":\n      - /url: https://kidsafe.com/member/brilliant\n    - paragraph:\n      - text: Brilliant is a member in the kidSAFE Seal Program. To learn more, click on the seal or go to\n      - link \"www.kidsafe.com\":\n        - /url: https://www.kidsafe.com/\n      - text: .\n    - link \"Terms of service\":\n      - /url: /terms-of-use/\n    - button \"Do not sell my personal information\"\n    - link \"California privacy policy\":\n      - /url: /ccpa-policy/\n    - link \"Privacy policy\":\n      - /url: /privacy/\n    - paragraph: © 2026 Brilliant Worldwide, Inc., Brilliant and the Brilliant Logo are trademarks of Brilliant Worldwide, Inc.\n  - region \"Notifications alt+T\"\n  - alert\n  - dialog \"Notice Only Audience\":\n    - text: We use cookies to keep the site running and improve lessons and features.\n    - button \"Got It\""
+    }
+  },
+  "url": {
+    "state": "captured",
+    "value": {
+      "url": "https://brilliant.org/",
+      "origin": "https://brilliant.org",
+      "query_parameter_names": [],
+      "redacted": false
+    }
+  },
+  "dom_digest": "0a38c112548b23b562e664489c1d26b84c3d8e5c57902ae01f6abf94cc7e547c",
+  "limitations": [
+    "Artifact identity is unavailable for this observation.",
+    "Event sequence records provider receipt order; simultaneous browser causality is not inferred.",
+    "Network content is retained only when selected; Playwright response-body bytes are API results and are not guaranteed to match wire bytes.",
+    "Request bytes are limited to what Playwright exposes; not_exposed does not establish body absence or multipart file coverage.",
+    "Network content reads settle within 5 seconds each and the observer does not request bodies from unfinished responses.",
+    "Playwright scenario events do not expose request initiator stacks; receipt order does not prove causality.",
+    "Storage values are hashed only after declared-secret redaction.",
+    "Browser host platform and architecture were not observed."
+  ]
+}

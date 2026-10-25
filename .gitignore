@@ -18,15 +18,10 @@ migrate_working_dir/
 *.iws
 .idea/
 
-# Environment variables
-.env
-.env.*
-supabase/.temp/
-
-# IDE & Agents
-.vscode/
-.agents/
-
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -52,12 +47,12 @@ app.*.map.json
 # Widget Preview related
 .widget_preview/
 
-/android/key.properties
-/android/build/
-/android/.kotlin/
-*.jks
-*.keystore
-/config/*.json
-!/config/*.example.json
-/supabase/.env*
-!/supabase/.env.example
+# Local tool state and credentials must never be published.
+.tool-home/
+.local-backups/
+.env
+.env.*
+!.env.example
+supabase/.temp/
+supabase/.branches/
+/repo-history/

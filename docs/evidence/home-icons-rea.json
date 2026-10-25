@@ -1,0 +1,47 @@
+{
+  "evidence_id": "ev_651ac663e0d3eab014560d9577aba951e7a70f9a766edaa7bb6fc0178afe23e5",
+  "source": "https://brilliant.org/",
+  "operation": "capture_browser_scenario",
+  "dom_sha256": "f7e5fb39b9128abe05401be9e233b416eb525b324ac5a5217aa264b21ea0bc21",
+  "dom_bytes": 554321,
+  "observed": {
+    "svg_elements": 22,
+    "button3d_faces": 3,
+    "image_sources": [
+      "/_next/static/media/carousel-grid.2d1jf7svy0gdx.svg",
+      "/cdn-cgi/image/width=256,quality=75,format=auto/_next/static/media/refresh-wasc.1q6yqhpdcir_5.png",
+      "/cdn-cgi/image/width=96,quality=75,format=auto/_next/static/media/refresh-mobile-divider.2oi90sq44nr3m.svg",
+      "/cdn-cgi/image/width=256,quality=75,format=auto/_next/static/media/refresh-mobile-editors-choice.42ryo730qlf81.svg",
+      "/cdn-cgi/image/width=256,quality=75,format=auto/_next/static/media/refresh-mobile-google-play.34eatgoa05ucx.svg",
+      "/cdn-cgi/image/width=256,quality=75,format=auto/_next/static/media/refresh-mobile-laurels.0jagctbvj1yci.svg",
+      "/cdn-cgi/image/width=256,quality=75,format=auto/_next/static/media/refresh-laurels.27mbjhk8px04h.svg",
+      "/cdn-cgi/image/width=64,quality=75,format=auto/_next/static/media/refresh-mobile-learners.1jg3rqq72bkv2.svg",
+      "/cdn-cgi/image/width=64,quality=75,format=auto/_next/static/media/refresh-desktop-learners.2pwizxs34-sdf.svg",
+      "/cdn-cgi/image/width=96,quality=75,format=auto/_next/static/media/covered-topics-icon.3selgz46r1odu.svg",
+      "/cdn-cgi/image/width=3840,quality=75,format=auto/_next/static/media/pedagogy-tutoring-v4.3bb1z17zf4z26.png",
+      "/cdn-cgi/image/width=3840,quality=75,format=auto/_next/static/media/pedagogy-assessments-v4.3avnv8avlzgkt.png",
+      "/cdn-cgi/image/width=3840,quality=75,format=auto/_next/static/media/pedagogy-practice.266absh60vjf5.png",
+      "/cdn-cgi/image/width=3840,quality=75,format=auto/_next/static/media/pedagogy-real-world.0ax6orpfco5ns.png",
+      "/cdn-cgi/image/width=3840,quality=75,format=auto/_next/static/media/pedagogy-practice-coding.1he0d87jzfqbu.png",
+      "/cdn-cgi/image/width=3840,quality=75,format=auto/_next/static/media/campus-v4.0u972xlr131rh.jpg"
+    ]
+  },
+  "limitations": [
+    "Event sequence records provider receipt order; simultaneous browser causality is not inferred.",
+    "Network content is retained only when selected; Playwright response-body bytes are API results and are not guaranteed to match wire bytes.",
+    "Request bytes are limited to what Playwright exposes; not_exposed does not establish body absence or multipart file coverage.",
+    "Network content reads settle within 5 seconds each and the observer does not request bodies from unfinished responses.",
+    "Playwright scenario events do not expose request initiator stacks; receipt order does not prove causality.",
+    "Storage values are hashed only after declared-secret redaction.",
+    "Some network requests had not completed when capture ended; later activity is unknown."
+  ],
+  "completeness": {
+    "status": "incomplete",
+    "equality_eligible": false,
+    "missing_sections": [
+      "events"
+    ],
+    "truncated_sections": []
+  },
+  "note": "Public landing page only. User screenshot is the reference for signed-in home icon appearance. Original Flutter vector artwork; no claim of recovering private course assets."
+}

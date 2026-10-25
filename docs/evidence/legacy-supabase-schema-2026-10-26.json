@@ -1,0 +1,4938 @@
+{
+  "captured_at": "2026-10-26",
+  "project_ref": "seoswmcldwwytdrfrrrb",
+  "kind": "schema_metadata_not_data_backup",
+  "tables": [
+    {
+      "name": "public.parents",
+      "rls_enabled": true,
+      "rows": 11,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "email",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "parent_pin_hash",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "''::text"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "role",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "default_value": "'parent'::text"
+        },
+        {
+          "name": "pin_failures",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0"
+        },
+        {
+          "name": "pin_locked_until",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "active_kid_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "parent_unlocks_parent_id_fkey",
+          "source_table": "private.parent_unlocks",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "parents_active_kid_id_fkey",
+          "source_table": "public.parents",
+          "source_columns": [
+            "active_kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "ai_requests_parent_id_fkey",
+          "source_table": "private.ai_requests",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "support_requests_parent_id_fkey",
+          "source_table": "public.support_requests",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "parents_auth_user_fk",
+          "source_table": "public.parents",
+          "source_columns": [
+            "id"
+          ],
+          "target_table": "auth.users",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "parent_wallets_parent_id_fkey",
+          "source_table": "public.parent_wallets",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "trial_grants_parent_id_fkey",
+          "source_table": "public.trial_grants",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "demo_payment_transactions_parent_id_fkey",
+          "source_table": "public.demo_payment_transactions",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "notifications_parent_id_fkey",
+          "source_table": "public.notifications",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "subscription_logs_parent_id_fkey",
+          "source_table": "public.subscription_logs",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "subscriptions_parent_id_fkey",
+          "source_table": "public.subscriptions",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "orders_parent_id_fkey",
+          "source_table": "public.orders",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "payments_parent_id_fkey",
+          "source_table": "public.payments",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "transactions_parent_id_fkey",
+          "source_table": "public.transactions",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "learning_orders_parent_id_fkey",
+          "source_table": "public.learning_orders",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "subscription_periods_parent_id_fkey",
+          "source_table": "public.subscription_periods",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "kid_profiles_parent_id_fkey",
+          "source_table": "public.kid_profiles",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.kid_profiles",
+      "rls_enabled": true,
+      "rows": 7,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "parent_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "nickname",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "grade",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "check": "grade >= 1 AND grade <= 5"
+        },
+        {
+          "name": "current_hearts",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "5",
+          "check": "current_hearts >= 0 AND current_hearts <= 5"
+        },
+        {
+          "name": "max_hearts",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "5"
+        },
+        {
+          "name": "energy_stars",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "energy_stars >= 0"
+        },
+        {
+          "name": "screen_time_limit_minutes",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "30",
+          "check": "screen_time_limit_minutes >= 15 AND screen_time_limit_minutes <= 120"
+        },
+        {
+          "name": "avatar_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'owl_detective'::text"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "archived",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "kid_equipment_kid_id_fkey",
+          "source_table": "public.kid_equipment",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "parents_active_kid_id_fkey",
+          "source_table": "public.parents",
+          "source_columns": [
+            "active_kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "study_daily_usage_kid_id_fkey",
+          "source_table": "public.study_daily_usage",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "ai_requests_kid_id_fkey",
+          "source_table": "private.ai_requests",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "learning_review_states_kid_id_fkey",
+          "source_table": "public.learning_review_states",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "kid_inventory_kid_id_fkey",
+          "source_table": "public.kid_inventory",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "tournament_members_kid_id_fkey",
+          "source_table": "public.tournament_members",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "practice_garden_logs_kid_id_fkey",
+          "source_table": "public.practice_garden_logs",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "kid_streaks_kid_id_fkey",
+          "source_table": "public.kid_streaks",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "kid_progress_kid_id_fkey",
+          "source_table": "public.kid_progress",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "kid_profiles_parent_id_fkey",
+          "source_table": "public.kid_profiles",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "study_sessions_kid_id_fkey",
+          "source_table": "public.study_sessions",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.topics",
+      "rls_enabled": true,
+      "rows": 6,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "grade",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "check": "grade >= 1 AND grade <= 5"
+        },
+        {
+          "name": "topic_number",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "title",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "description",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "icon_name",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "default_value": "'functions'::text"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "published",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "true"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "lessons_topic_id_fkey",
+          "source_table": "public.lessons",
+          "source_columns": [
+            "topic_id"
+          ],
+          "target_table": "public.topics",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.lessons",
+      "rls_enabled": true,
+      "rows": 156,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "topic_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "lesson_number",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "title",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "subtitle",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "estimated_minutes",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "3"
+        },
+        {
+          "name": "xp_reward",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "30"
+        },
+        {
+          "name": "star_reward",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "3"
+        },
+        {
+          "name": "order_index",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "1"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "theory",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "essay_prompt",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "essay_guidance",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "mini_game_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "default_value": "'number'::text"
+        },
+        {
+          "name": "is_premium",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        },
+        {
+          "name": "access_tier",
+          "data_type": "USER-DEFINED",
+          "format": "subscription_tier",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'basic'::subscription_tier",
+          "enums": [
+            "basic",
+            "plus"
+          ]
+        },
+        {
+          "name": "published",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "true"
+        },
+        {
+          "name": "content_version",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "1"
+        },
+        {
+          "name": "essay_answer",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "study_sessions_lesson_id_fkey",
+          "source_table": "public.study_sessions",
+          "source_columns": [
+            "lesson_id"
+          ],
+          "target_table": "public.lessons",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "lesson_versions_lesson_id_fkey",
+          "source_table": "public.lesson_versions",
+          "source_columns": [
+            "lesson_id"
+          ],
+          "target_table": "public.lessons",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "lessons_topic_id_fkey",
+          "source_table": "public.lessons",
+          "source_columns": [
+            "topic_id"
+          ],
+          "target_table": "public.topics",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "kid_progress_lesson_id_fkey",
+          "source_table": "public.kid_progress",
+          "source_columns": [
+            "lesson_id"
+          ],
+          "target_table": "public.lessons",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "lesson_drafts_lesson_id_fkey",
+          "source_table": "public.lesson_drafts",
+          "source_columns": [
+            "lesson_id"
+          ],
+          "target_table": "public.lessons",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "questions_lesson_id_fkey",
+          "source_table": "public.questions",
+          "source_columns": [
+            "lesson_id"
+          ],
+          "target_table": "public.lessons",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.questions",
+      "rls_enabled": true,
+      "rows": 1507,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "lesson_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "question_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "question_type = ANY (ARRAY['drag_counters'::text, 'multiplication_table'::text, 'clock_rotation'::text, 'area_grid'::text, 'word_problem'::text])"
+        },
+        {
+          "name": "prompt",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "payload",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "socratic_hints",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'[]'::jsonb"
+        },
+        {
+          "name": "order_index",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "1"
+        },
+        {
+          "name": "subtitle",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "default_value": "''::text"
+        },
+        {
+          "name": "correct_answer",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "is_active",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "true"
+        },
+        {
+          "name": "skill_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "questions_skill_id_fkey",
+          "source_table": "public.questions",
+          "source_columns": [
+            "skill_id"
+          ],
+          "target_table": "public.skills",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "questions_lesson_id_fkey",
+          "source_table": "public.questions",
+          "source_columns": [
+            "lesson_id"
+          ],
+          "target_table": "public.lessons",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "question_attempts_question_id_fkey",
+          "source_table": "public.question_attempts",
+          "source_columns": [
+            "question_id"
+          ],
+          "target_table": "public.questions",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.kid_progress",
+      "rls_enabled": true,
+      "rows": 5,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "kid_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "lesson_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "is_completed",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        },
+        {
+          "name": "accuracy_percent",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0"
+        },
+        {
+          "name": "stars_earned",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0"
+        },
+        {
+          "name": "attempts_count",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "1"
+        },
+        {
+          "name": "completed_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "kid_progress_lesson_id_fkey",
+          "source_table": "public.kid_progress",
+          "source_columns": [
+            "lesson_id"
+          ],
+          "target_table": "public.lessons",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "kid_progress_kid_id_fkey",
+          "source_table": "public.kid_progress",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.kid_streaks",
+      "rls_enabled": true,
+      "rows": 3,
+      "columns": [
+        {
+          "name": "kid_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "streak_count",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "1"
+        },
+        {
+          "name": "last_activity_date",
+          "data_type": "date",
+          "format": "date",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "CURRENT_DATE"
+        },
+        {
+          "name": "shields_available",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "1"
+        },
+        {
+          "name": "cutoff_time",
+          "data_type": "time without time zone",
+          "format": "time",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'21:00:00'::time without time zone"
+        }
+      ],
+      "primary_keys": [
+        "kid_id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "kid_streaks_kid_id_fkey",
+          "source_table": "public.kid_streaks",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.practice_garden_logs",
+      "rls_enabled": true,
+      "rows": 4,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "kid_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "hearts_restored",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "1"
+        },
+        {
+          "name": "math_drills_completed",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "5"
+        },
+        {
+          "name": "completed_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "session_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable",
+            "unique"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "practice_garden_logs_session_id_fkey",
+          "source_table": "public.practice_garden_logs",
+          "source_columns": [
+            "session_id"
+          ],
+          "target_table": "public.study_sessions",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "practice_garden_logs_kid_id_fkey",
+          "source_table": "public.practice_garden_logs",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.tournaments",
+      "rls_enabled": true,
+      "rows": 3,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "grade",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "check": "grade >= 1 AND grade <= 5"
+        },
+        {
+          "name": "week_code",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "group_number",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "1"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "tournament_members_tournament_id_fkey",
+          "source_table": "public.tournament_members",
+          "source_columns": [
+            "tournament_id"
+          ],
+          "target_table": "public.tournaments",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.tournament_members",
+      "rls_enabled": true,
+      "rows": 3,
+      "columns": [
+        {
+          "name": "tournament_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "kid_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "weekly_xp",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0"
+        },
+        {
+          "name": "rank",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "1"
+        }
+      ],
+      "primary_keys": [
+        "tournament_id",
+        "kid_id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "tournament_members_kid_id_fkey",
+          "source_table": "public.tournament_members",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "tournament_members_tournament_id_fkey",
+          "source_table": "public.tournament_members",
+          "source_columns": [
+            "tournament_id"
+          ],
+          "target_table": "public.tournaments",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.mascot_items",
+      "rls_enabled": true,
+      "rows": 6,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "slot",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "slot = ANY (ARRAY['hat'::text, 'glasses'::text])"
+        },
+        {
+          "name": "name",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "price_stars",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "price_stars >= 0"
+        },
+        {
+          "name": "is_active",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "true"
+        },
+        {
+          "name": "icon",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "kid_equipment_hat_id_fkey",
+          "source_table": "public.kid_equipment",
+          "source_columns": [
+            "hat_id"
+          ],
+          "target_table": "public.mascot_items",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "kid_equipment_glasses_id_fkey",
+          "source_table": "public.kid_equipment",
+          "source_columns": [
+            "glasses_id"
+          ],
+          "target_table": "public.mascot_items",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "kid_inventory_item_id_fkey",
+          "source_table": "public.kid_inventory",
+          "source_columns": [
+            "item_id"
+          ],
+          "target_table": "public.mascot_items",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.kid_inventory",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "kid_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "item_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "purchased_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "kid_id",
+        "item_id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "kid_inventory_kid_id_fkey",
+          "source_table": "public.kid_inventory",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "kid_inventory_item_id_fkey",
+          "source_table": "public.kid_inventory",
+          "source_columns": [
+            "item_id"
+          ],
+          "target_table": "public.mascot_items",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.kid_equipment",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "kid_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "hat_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "glasses_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "kid_id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "kid_equipment_hat_id_fkey",
+          "source_table": "public.kid_equipment",
+          "source_columns": [
+            "hat_id"
+          ],
+          "target_table": "public.mascot_items",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "kid_equipment_kid_id_fkey",
+          "source_table": "public.kid_equipment",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "kid_equipment_glasses_id_fkey",
+          "source_table": "public.kid_equipment",
+          "source_columns": [
+            "glasses_id"
+          ],
+          "target_table": "public.mascot_items",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.study_sessions",
+      "rls_enabled": true,
+      "rows": 25,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "kid_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "lesson_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "started_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "duration_seconds",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0"
+        },
+        {
+          "name": "xp_earned",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0"
+        },
+        {
+          "name": "hearts_lost",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0"
+        },
+        {
+          "name": "kind",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'lesson'::text",
+          "check": "kind = ANY (ARRAY['lesson'::text, 'practice'::text, 'arena'::text])"
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'completed'::text",
+          "check": "status = ANY (ARRAY['active'::text, 'paused'::text, 'completed'::text, 'abandoned'::text])"
+        },
+        {
+          "name": "client_request_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable",
+            "unique"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "last_heartbeat_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "last_active",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        },
+        {
+          "name": "question_index",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0"
+        },
+        {
+          "name": "essay_passed",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        },
+        {
+          "name": "view_state",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "content_version",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "fractional_seconds",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0"
+        },
+        {
+          "name": "stars_awarded",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0"
+        },
+        {
+          "name": "accuracy_percent",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "question_attempts_session_id_fkey",
+          "source_table": "public.question_attempts",
+          "source_columns": [
+            "session_id"
+          ],
+          "target_table": "public.study_sessions",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "study_sessions_kid_id_fkey",
+          "source_table": "public.study_sessions",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "study_sessions_lesson_id_fkey",
+          "source_table": "public.study_sessions",
+          "source_columns": [
+            "lesson_id"
+          ],
+          "target_table": "public.lessons",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "practice_garden_logs_session_id_fkey",
+          "source_table": "public.practice_garden_logs",
+          "source_columns": [
+            "session_id"
+          ],
+          "target_table": "public.study_sessions",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "session_payloads_session_id_fkey",
+          "source_table": "private.session_payloads",
+          "source_columns": [
+            "session_id"
+          ],
+          "target_table": "public.study_sessions",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.question_attempts",
+      "rls_enabled": true,
+      "rows": 121,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "session_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "question_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "is_correct",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "hints_used",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0"
+        },
+        {
+          "name": "answered_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "request_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "question_ref",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "answer_value",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "question_attempts_question_id_fkey",
+          "source_table": "public.question_attempts",
+          "source_columns": [
+            "question_id"
+          ],
+          "target_table": "public.questions",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "learning_review_states_last_attempt_id_fkey",
+          "source_table": "public.learning_review_states",
+          "source_columns": [
+            "last_attempt_id"
+          ],
+          "target_table": "public.question_attempts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "question_attempts_session_id_fkey",
+          "source_table": "public.question_attempts",
+          "source_columns": [
+            "session_id"
+          ],
+          "target_table": "public.study_sessions",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.admins",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "email",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable",
+            "unique"
+          ]
+        },
+        {
+          "name": "full_name",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "admins_id_fkey",
+          "source_table": "public.admins",
+          "source_columns": [
+            "id"
+          ],
+          "target_table": "auth.users",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.user_roles",
+      "rls_enabled": true,
+      "rows": 13,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "user_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "role",
+          "data_type": "USER-DEFINED",
+          "format": "app_role",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'parent'::app_role",
+          "enums": [
+            "admin",
+            "moderator",
+            "parent"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ]
+    },
+    {
+      "name": "public.subscription_logs",
+      "rls_enabled": true,
+      "rows": 6,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "parent_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "action",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "old_tier",
+          "data_type": "USER-DEFINED",
+          "format": "subscription_tier",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "enums": [
+            "basic",
+            "plus"
+          ]
+        },
+        {
+          "name": "new_tier",
+          "data_type": "USER-DEFINED",
+          "format": "subscription_tier",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "enums": [
+            "basic",
+            "plus"
+          ]
+        },
+        {
+          "name": "performed_by",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "reason",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "subscription_logs_parent_id_fkey",
+          "source_table": "public.subscription_logs",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.subscriptions",
+      "rls_enabled": true,
+      "rows": 11,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "parent_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable",
+            "unique"
+          ]
+        },
+        {
+          "name": "tier",
+          "data_type": "USER-DEFINED",
+          "format": "subscription_tier",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'basic'::subscription_tier",
+          "enums": [
+            "basic",
+            "plus"
+          ]
+        },
+        {
+          "name": "status",
+          "data_type": "USER-DEFINED",
+          "format": "subscription_status",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'active'::subscription_status",
+          "enums": [
+            "active",
+            "expired",
+            "canceled"
+          ]
+        },
+        {
+          "name": "max_kids",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "1"
+        },
+        {
+          "name": "start_date",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "expires_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "upgraded_by",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "notes",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "subscriptions_parent_id_fkey",
+          "source_table": "public.subscriptions",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.payment_settings",
+      "rls_enabled": true,
+      "rows": 3,
+      "columns": [
+        {
+          "name": "key",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "value",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "key"
+      ]
+    },
+    {
+      "name": "public.subscription_plans",
+      "rls_enabled": true,
+      "rows": 2,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "code",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable",
+            "unique"
+          ]
+        },
+        {
+          "name": "name",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "tier",
+          "data_type": "USER-DEFINED",
+          "format": "subscription_tier",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'plus'::subscription_tier",
+          "enums": [
+            "basic",
+            "plus"
+          ]
+        },
+        {
+          "name": "price_vnd",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "check": "price_vnd >= 0"
+        },
+        {
+          "name": "duration_days",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "check": "duration_days > 0"
+        },
+        {
+          "name": "is_active",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "true"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "orders_plan_id_fkey",
+          "source_table": "public.orders",
+          "source_columns": [
+            "plan_id"
+          ],
+          "target_table": "public.subscription_plans",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.orders",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "order_code",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable",
+            "unique"
+          ]
+        },
+        {
+          "name": "parent_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "plan_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "amount_vnd",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "check": "amount_vnd >= 0"
+        },
+        {
+          "name": "provider",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "provider = ANY (ARRAY['vnpay'::text, 'vietqr'::text, 'momo'::text])"
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'pending'::text",
+          "check": "status = ANY (ARRAY['pending'::text, 'paid'::text, 'failed'::text, 'cancelled'::text, 'refunded'::text])"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "paid_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "payment_transactions_order_id_fkey",
+          "source_table": "public.payment_transactions",
+          "source_columns": [
+            "order_id"
+          ],
+          "target_table": "public.orders",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "orders_parent_id_fkey",
+          "source_table": "public.orders",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "orders_plan_id_fkey",
+          "source_table": "public.orders",
+          "source_columns": [
+            "plan_id"
+          ],
+          "target_table": "public.subscription_plans",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.payment_transactions",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "order_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "provider",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "provider_txn_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "amount_vnd",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "status = ANY (ARRAY['success'::text, 'failed'::text])"
+        },
+        {
+          "name": "raw_payload",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "payment_transactions_order_id_fkey",
+          "source_table": "public.payment_transactions",
+          "source_columns": [
+            "order_id"
+          ],
+          "target_table": "public.orders",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.payments",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "parent_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "provider",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "provider = ANY (ARRAY['momo'::text, 'zalopay'::text])"
+        },
+        {
+          "name": "order_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable",
+            "unique"
+          ]
+        },
+        {
+          "name": "amount",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'pending'::text"
+        },
+        {
+          "name": "qr_content",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "payments_parent_id_fkey",
+          "source_table": "public.payments",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.transactions",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "parent_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "amount",
+          "data_type": "numeric",
+          "format": "numeric",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "order_code",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable",
+            "unique"
+          ]
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "default_value": "'PENDING'::text"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "transactions_parent_id_fkey",
+          "source_table": "public.transactions",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.learning_plans",
+      "rls_enabled": true,
+      "rows": 2,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "code",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable",
+            "unique"
+          ]
+        },
+        {
+          "name": "name",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "length(name) >= 1 AND length(name) <= 120"
+        },
+        {
+          "name": "description",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "''::text"
+        },
+        {
+          "name": "tier",
+          "data_type": "USER-DEFINED",
+          "format": "subscription_tier",
+          "options": [
+            "updatable"
+          ],
+          "enums": [
+            "basic",
+            "plus"
+          ]
+        },
+        {
+          "name": "max_kids",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "check": "max_kids >= 1 AND max_kids <= 3"
+        },
+        {
+          "name": "published",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "features",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'[]'::jsonb"
+        },
+        {
+          "name": "trial_days",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "trial_days >= 0 AND trial_days <= 30"
+        },
+        {
+          "name": "requires_wallet",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        },
+        {
+          "name": "sort_order",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "100"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "plan_prices_plan_id_fkey",
+          "source_table": "public.plan_prices",
+          "source_columns": [
+            "plan_id"
+          ],
+          "target_table": "public.learning_plans",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.plan_prices",
+      "rls_enabled": true,
+      "rows": 4,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "plan_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "label",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "length(label) >= 1 AND length(label) <= 120"
+        },
+        {
+          "name": "duration_months",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "check": "duration_months = ANY (ARRAY[1, 3, 6, 12])"
+        },
+        {
+          "name": "amount_vnd",
+          "data_type": "bigint",
+          "format": "int8",
+          "options": [
+            "updatable"
+          ],
+          "check": "amount_vnd >= 0 AND amount_vnd <= '9999999999'::bigint"
+        },
+        {
+          "name": "currency",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'VND'::text",
+          "check": "currency = 'VND'::text"
+        },
+        {
+          "name": "published",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "demo_payment_transactions_plan_price_id_fkey",
+          "source_table": "public.demo_payment_transactions",
+          "source_columns": [
+            "plan_price_id"
+          ],
+          "target_table": "public.plan_prices",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "learning_orders_plan_price_id_fkey",
+          "source_table": "public.learning_orders",
+          "source_columns": [
+            "plan_price_id"
+          ],
+          "target_table": "public.plan_prices",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "plan_prices_plan_id_fkey",
+          "source_table": "public.plan_prices",
+          "source_columns": [
+            "plan_id"
+          ],
+          "target_table": "public.learning_plans",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.learning_orders",
+      "rls_enabled": true,
+      "rows": 3,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "parent_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "plan_price_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "amount_vnd",
+          "data_type": "bigint",
+          "format": "int8",
+          "options": [
+            "updatable"
+          ],
+          "check": "amount_vnd > 0"
+        },
+        {
+          "name": "currency",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'VND'::text",
+          "check": "currency = 'VND'::text"
+        },
+        {
+          "name": "snapshot",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'pending'::text",
+          "check": "status = ANY (ARRAY['pending'::text, 'paid'::text, 'failed'::text, 'expired'::text, 'refunded'::text])"
+        },
+        {
+          "name": "idempotency_key",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "expires_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "(now() + '00:15:00'::interval)"
+        },
+        {
+          "name": "paid_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "last_checked_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "payment_events_order_id_fkey",
+          "source_table": "public.payment_events",
+          "source_columns": [
+            "order_id"
+          ],
+          "target_table": "public.learning_orders",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "learning_orders_parent_id_fkey",
+          "source_table": "public.learning_orders",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "learning_orders_plan_price_id_fkey",
+          "source_table": "public.learning_orders",
+          "source_columns": [
+            "plan_price_id"
+          ],
+          "target_table": "public.plan_prices",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "learning_payments_order_id_fkey",
+          "source_table": "public.learning_payments",
+          "source_columns": [
+            "order_id"
+          ],
+          "target_table": "public.learning_orders",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "refund_requests_order_id_fkey",
+          "source_table": "public.refund_requests",
+          "source_columns": [
+            "order_id"
+          ],
+          "target_table": "public.learning_orders",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "support_requests_order_id_fkey",
+          "source_table": "public.support_requests",
+          "source_columns": [
+            "order_id"
+          ],
+          "target_table": "public.learning_orders",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.learning_payments",
+      "rls_enabled": true,
+      "rows": 2,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "order_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable",
+            "unique"
+          ]
+        },
+        {
+          "name": "provider",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "provider = ANY (ARRAY['vnpay'::text, 'momo'::text])"
+        },
+        {
+          "name": "external_transaction_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "amount_vnd",
+          "data_type": "bigint",
+          "format": "int8",
+          "options": [
+            "updatable"
+          ],
+          "check": "amount_vnd > 0"
+        },
+        {
+          "name": "verified_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "subscription_periods_payment_id_fkey",
+          "source_table": "public.subscription_periods",
+          "source_columns": [
+            "payment_id"
+          ],
+          "target_table": "public.learning_payments",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "learning_payments_order_id_fkey",
+          "source_table": "public.learning_payments",
+          "source_columns": [
+            "order_id"
+          ],
+          "target_table": "public.learning_orders",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.payment_events",
+      "rls_enabled": true,
+      "rows": 2,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "order_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "provider",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "provider = ANY (ARRAY['vnpay'::text, 'momo'::text])"
+        },
+        {
+          "name": "external_event_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "response_code",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "received_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "payment_events_order_id_fkey",
+          "source_table": "public.payment_events",
+          "source_columns": [
+            "order_id"
+          ],
+          "target_table": "public.learning_orders",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.subscription_periods",
+      "rls_enabled": true,
+      "rows": 7,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "parent_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "payment_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable",
+            "unique"
+          ]
+        },
+        {
+          "name": "source",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "source = ANY (ARRAY['vnpay'::text, 'momo'::text, 'trial'::text, 'legacy_admin'::text, 'admin'::text, 'demo'::text])"
+        },
+        {
+          "name": "starts_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "ends_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "snapshot",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "revoked_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "subscription_periods_parent_id_fkey",
+          "source_table": "public.subscription_periods",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "subscription_periods_payment_id_fkey",
+          "source_table": "public.subscription_periods",
+          "source_columns": [
+            "payment_id"
+          ],
+          "target_table": "public.learning_payments",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "private.parent_unlocks",
+      "rls_enabled": true,
+      "rows": 11,
+      "columns": [
+        {
+          "name": "token_hash",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "parent_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "session_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "expires_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "token_hash"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "parent_unlocks_parent_id_fkey",
+          "source_table": "private.parent_unlocks",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "private.session_payloads",
+      "rls_enabled": true,
+      "rows": 25,
+      "columns": [
+        {
+          "name": "session_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "content",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "session_id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "session_payloads_session_id_fkey",
+          "source_table": "private.session_payloads",
+          "source_columns": [
+            "session_id"
+          ],
+          "target_table": "public.study_sessions",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.study_daily_usage",
+      "rls_enabled": true,
+      "rows": 13,
+      "columns": [
+        {
+          "name": "kid_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "study_date",
+          "data_type": "date",
+          "format": "date",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "total_seconds",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "total_seconds >= 0"
+        }
+      ],
+      "primary_keys": [
+        "kid_id",
+        "study_date"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "study_daily_usage_kid_id_fkey",
+          "source_table": "public.study_daily_usage",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.admin_audit_logs",
+      "rls_enabled": true,
+      "rows": 22,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "actor_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "action",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "target_type",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "target_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "details",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ]
+    },
+    {
+      "name": "public.notifications",
+      "rls_enabled": true,
+      "rows": 5,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "parent_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "title",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "body",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "kind",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "dedupe_key",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "read_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "notifications_parent_id_fkey",
+          "source_table": "public.notifications",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.skills",
+      "rls_enabled": true,
+      "rows": 5,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "name",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "questions_skill_id_fkey",
+          "source_table": "public.questions",
+          "source_columns": [
+            "skill_id"
+          ],
+          "target_table": "public.skills",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.lesson_drafts",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "lesson_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable",
+            "unique"
+          ]
+        },
+        {
+          "name": "content",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "updated_by",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "lesson_drafts_lesson_id_fkey",
+          "source_table": "public.lesson_drafts",
+          "source_columns": [
+            "lesson_id"
+          ],
+          "target_table": "public.lessons",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.lesson_versions",
+      "rls_enabled": true,
+      "rows": 155,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "lesson_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "version",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "content",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "published_by",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "published_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "lesson_versions_lesson_id_fkey",
+          "source_table": "public.lesson_versions",
+          "source_columns": [
+            "lesson_id"
+          ],
+          "target_table": "public.lessons",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.refund_requests",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "order_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "requested_by",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "reason",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "length(btrim(reason)) >= 5 AND length(btrim(reason)) <= 500"
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'requested'::text",
+          "check": "status = ANY (ARRAY['requested'::text, 'processing'::text, 'unknown'::text, 'succeeded'::text, 'failed'::text])"
+        },
+        {
+          "name": "external_reference",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "response_code",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "refund_requests_order_id_fkey",
+          "source_table": "public.refund_requests",
+          "source_columns": [
+            "order_id"
+          ],
+          "target_table": "public.learning_orders",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.ai_settings",
+      "rls_enabled": true,
+      "rows": 1,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "true",
+          "check": "id"
+        },
+        {
+          "name": "basic_daily",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "basic_daily >= 0 AND basic_daily <= 100"
+        },
+        {
+          "name": "plus_daily",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "plus_daily >= 0 AND plus_daily <= 1000"
+        },
+        {
+          "name": "enabled",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ]
+    },
+    {
+      "name": "private.ai_requests",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "parent_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "request_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "kid_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "phase",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "phase = ANY (ARRAY['ocr'::text, 'hint'::text])"
+        },
+        {
+          "name": "study_date",
+          "data_type": "date",
+          "format": "date",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "status = ANY (ARRAY['processing'::text, 'completed'::text, 'failed'::text])"
+        },
+        {
+          "name": "response",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "parent_id",
+        "request_id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "ai_requests_parent_id_fkey",
+          "source_table": "private.ai_requests",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "ai_requests_kid_id_fkey",
+          "source_table": "private.ai_requests",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.support_requests",
+      "rls_enabled": true,
+      "rows": 3,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "parent_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "order_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "request_key",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "message",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "length(message) >= 5 AND length(message) <= 2000"
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'open'::text",
+          "check": "status = ANY (ARRAY['open'::text, 'resolved'::text])"
+        },
+        {
+          "name": "reply",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "resolved_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "support_requests_parent_id_fkey",
+          "source_table": "public.support_requests",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "support_requests_order_id_fkey",
+          "source_table": "public.support_requests",
+          "source_columns": [
+            "order_id"
+          ],
+          "target_table": "public.learning_orders",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.parent_wallets",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "parent_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "provider",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "provider = ANY (ARRAY['momo'::text, 'vnpay'::text])"
+        },
+        {
+          "name": "wallet_hash",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "wallet_hint",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'linked'::text",
+          "check": "status = ANY (ARRAY['linked'::text, 'unlinked'::text])"
+        },
+        {
+          "name": "provider_token",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "parent_wallets_parent_id_fkey",
+          "source_table": "public.parent_wallets",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "trial_grants_wallet_id_fkey",
+          "source_table": "public.trial_grants",
+          "source_columns": [
+            "wallet_id"
+          ],
+          "target_table": "public.parent_wallets",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.trial_grants",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "parent_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "wallet_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable",
+            "unique"
+          ]
+        },
+        {
+          "name": "plan_code",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'basic_trial'::text"
+        },
+        {
+          "name": "started_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "ends_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "parent_id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "trial_grants_wallet_id_fkey",
+          "source_table": "public.trial_grants",
+          "source_columns": [
+            "wallet_id"
+          ],
+          "target_table": "public.parent_wallets",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "trial_grants_parent_id_fkey",
+          "source_table": "public.trial_grants",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.learning_review_states",
+      "rls_enabled": true,
+      "rows": 0,
+      "columns": [
+        {
+          "name": "kid_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "question_ref",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "last_attempt_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "resolved",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        },
+        {
+          "name": "hidden",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        },
+        {
+          "name": "review_count",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "0",
+          "check": "review_count >= 0"
+        },
+        {
+          "name": "reviewed_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "kid_id",
+        "question_ref"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "learning_review_states_last_attempt_id_fkey",
+          "source_table": "public.learning_review_states",
+          "source_columns": [
+            "last_attempt_id"
+          ],
+          "target_table": "public.question_attempts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "learning_review_states_kid_id_fkey",
+          "source_table": "public.learning_review_states",
+          "source_columns": [
+            "kid_id"
+          ],
+          "target_table": "public.kid_profiles",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.plan_limits",
+      "rls_enabled": true,
+      "rows": 3,
+      "columns": [
+        {
+          "name": "plan_code",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "check": "plan_code = ANY (ARRAY['basic'::text, 'trial'::text, 'plus'::text])"
+        },
+        {
+          "name": "daily_lessons",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "daily_lessons IS NULL OR daily_lessons >= 0"
+        },
+        {
+          "name": "daily_practice",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "daily_practice IS NULL OR daily_practice >= 0"
+        },
+        {
+          "name": "daily_arena",
+          "data_type": "integer",
+          "format": "int4",
+          "options": [
+            "nullable",
+            "updatable"
+          ],
+          "check": "daily_arena IS NULL OR daily_arena >= 0 AND daily_arena <= 5"
+        },
+        {
+          "name": "description",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "''::text"
+        }
+      ],
+      "primary_keys": [
+        "plan_code"
+      ]
+    },
+    {
+      "name": "private.demo_payment_settings",
+      "rls_enabled": true,
+      "rows": 1,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "true",
+          "check": "id"
+        },
+        {
+          "name": "enabled",
+          "data_type": "boolean",
+          "format": "bool",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "false"
+        },
+        {
+          "name": "expires_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ]
+    },
+    {
+      "name": "public.demo_payment_transactions",
+      "rls_enabled": true,
+      "rows": 4,
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "gen_random_uuid()"
+        },
+        {
+          "name": "parent_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "plan_price_id",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "amount_vnd",
+          "data_type": "bigint",
+          "format": "int8",
+          "options": [
+            "updatable"
+          ],
+          "check": "amount_vnd > 0"
+        },
+        {
+          "name": "currency",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'VND'::text",
+          "check": "currency = 'VND'::text"
+        },
+        {
+          "name": "snapshot",
+          "data_type": "jsonb",
+          "format": "jsonb",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "status",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "'pending'::text",
+          "check": "status = ANY (ARRAY['pending'::text, 'paid'::text])"
+        },
+        {
+          "name": "idempotency_key",
+          "data_type": "uuid",
+          "format": "uuid",
+          "options": [
+            "updatable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "now()"
+        },
+        {
+          "name": "expires_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "updatable"
+          ],
+          "default_value": "(now() + '00:15:00'::interval)"
+        },
+        {
+          "name": "paid_at",
+          "data_type": "timestamp with time zone",
+          "format": "timestamptz",
+          "options": [
+            "nullable",
+            "updatable"
+          ]
+        },
+        {
+          "name": "external_transaction_id",
+          "data_type": "text",
+          "format": "text",
+          "options": [
+            "nullable",
+            "updatable",
+            "unique"
+          ]
+        }
+      ],
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_key_constraints": [
+        {
+          "name": "demo_payment_transactions_parent_id_fkey",
+          "source_table": "public.demo_payment_transactions",
+          "source_columns": [
+            "parent_id"
+          ],
+          "target_table": "public.parents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "demo_payment_transactions_plan_price_id_fkey",
+          "source_table": "public.demo_payment_transactions",
+          "source_columns": [
+            "plan_price_id"
+          ],
+          "target_table": "public.plan_prices",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    }
+  ]
+}

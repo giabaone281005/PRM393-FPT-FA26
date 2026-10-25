@@ -1,4 +1,0 @@
-storePassword=YOUR_UPLOAD_STORE_PASSWORD
-keyPassword=YOUR_UPLOAD_KEY_PASSWORD
-keyAlias=upload
-storeFile=D:/secure/mathlingo-upload.jks

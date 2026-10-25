@@ -1,0 +1,24 @@
+{
+  "evidence_id": "ev_bd9da40afcc50bf3f5babfe0153b44577ffc3a9e80af5813d7a5f971ef612008",
+  "url": "https://brilliant.org/help/",
+  "operation": "capture_browser_scenario",
+  "accessibility_sha256": "dae5de95bad99c444709f40a5ffd3a71781e373c8ded086ed52ae43831f11a9b",
+  "observed_categories": [
+    "Brilliant Basics",
+    "Product Features",
+    "Account Management",
+    "Help & Support"
+  ],
+  "observed_footer_routes": [
+    "/help/",
+    "/about/",
+    "/gift-premium/"
+  ],
+  "completeness": {
+    "status": "complete",
+    "equality_eligible": true,
+    "missing_sections": [],
+    "truncated_sections": []
+  },
+  "scope": "Public Help Center only. Popup order and appearance use the user screenshot; this capture does not establish signed-in settings behavior."
+}

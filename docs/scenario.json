@@ -1,0 +1,357 @@
+{
+  "browser": {
+    "mode": "launch",
+    "executable_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "headless": true
+  },
+  "start_url": {
+    "url": "https://brilliant.org/"
+  },
+  "actions": [
+    {
+      "step_id": "ready",
+      "action": "wait_for_timeout",
+      "duration_ms": 2000
+    },
+    {
+      "step_id": "dismiss_cookie",
+      "action": "click",
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Got It"
+      },
+      "timeout_ms": 5000
+    },
+    {
+      "step_id": "learner",
+      "action": "click",
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "I’m a learner"
+      },
+      "timeout_ms": 7000
+    },
+    {
+      "step_id": "welcome",
+      "action": "wait_for_timeout",
+      "duration_ms": 1500
+    },
+    {
+      "step_id": "continue",
+      "action": "click",
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Continue"
+      },
+      "timeout_ms": 7000
+    },
+    {
+      "step_id": "loaded",
+      "action": "wait_for_timeout",
+      "duration_ms": 1500
+    },
+    {
+      "timeout_ms": 7000,
+      "step_id": "motivation",
+      "action": "click",
+      "locator": {
+        "kind": "role",
+        "role": "radio",
+        "name": "Staying sharp"
+      }
+    },
+    {
+      "timeout_ms": 7000,
+      "step_id": "motivation_next",
+      "action": "click",
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Continue"
+      }
+    },
+    {
+      "duration_ms": 1500,
+      "step_id": "next_loaded",
+      "action": "wait_for_timeout"
+    },
+    {
+      "step_id": "voice",
+      "timeout_ms": 7000,
+      "action": "click",
+      "locator": {
+        "role": "radio",
+        "name": "Melodic",
+        "kind": "role"
+      }
+    },
+    {
+      "step_id": "voice_next",
+      "timeout_ms": 7000,
+      "action": "click",
+      "locator": {
+        "role": "button",
+        "name": "Continue",
+        "kind": "role"
+      }
+    },
+    {
+      "step_id": "voice_loaded",
+      "duration_ms": 1500,
+      "action": "wait_for_timeout"
+    },
+    {
+      "step_id": "help_next",
+      "timeout_ms": 7000,
+      "action": "click",
+      "locator": {
+        "kind": "role",
+        "name": "Continue",
+        "role": "button"
+      }
+    },
+    {
+      "step_id": "help_loaded",
+      "action": "wait_for_timeout",
+      "duration_ms": 1500
+    },
+    {
+      "locator": {
+        "selector": "input[type=number]",
+        "kind": "css"
+      },
+      "action": "fill",
+      "step_id": "test_age",
+      "timeout_ms": 7000,
+      "value": {
+        "source": "literal",
+        "value": "25"
+      }
+    },
+    {
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Continue"
+      },
+      "action": "click",
+      "step_id": "age_next",
+      "timeout_ms": 7000
+    },
+    {
+      "action": "wait_for_timeout",
+      "step_id": "age_loaded",
+      "duration_ms": 1500
+    },
+    {
+      "locator": {
+        "kind": "role",
+        "name": "Math",
+        "role": "radio"
+      },
+      "action": "click",
+      "timeout_ms": 7000,
+      "step_id": "subject"
+    },
+    {
+      "locator": {
+        "kind": "role",
+        "name": "Continue",
+        "role": "button"
+      },
+      "action": "click",
+      "timeout_ms": 7000,
+      "step_id": "subject_next"
+    },
+    {
+      "action": "wait_for_timeout",
+      "duration_ms": 1500,
+      "step_id": "subject_loaded"
+    },
+    {
+      "action": "click",
+      "locator": {
+        "name": "Continue",
+        "role": "button",
+        "kind": "role"
+      },
+      "step_id": "experts_next",
+      "timeout_ms": 7000
+    },
+    {
+      "action": "wait_for_timeout",
+      "step_id": "experts_loaded",
+      "duration_ms": 1500
+    },
+    {
+      "timeout_ms": 7000,
+      "action": "click",
+      "step_id": "level",
+      "locator": {
+        "name": "Basic Algebra I can use variables and solve equations.",
+        "kind": "role",
+        "role": "radio"
+      }
+    },
+    {
+      "timeout_ms": 7000,
+      "action": "click",
+      "step_id": "level_next",
+      "locator": {
+        "name": "Continue",
+        "kind": "role",
+        "role": "button"
+      }
+    },
+    {
+      "action": "wait_for_timeout",
+      "step_id": "level_loaded",
+      "duration_ms": 1500
+    },
+    {
+      "locator": {
+        "role": "button",
+        "name": "Continue",
+        "kind": "role"
+      },
+      "step_id": "diagnostic_next",
+      "timeout_ms": 7000,
+      "action": "click"
+    },
+    {
+      "step_id": "diagnostic_loaded",
+      "duration_ms": 1500,
+      "action": "wait_for_timeout"
+    },
+    {
+      "step_id": "confidence_1",
+      "action": "click",
+      "locator": {
+        "role": "radio",
+        "name": "Yes",
+        "kind": "role"
+      },
+      "timeout_ms": 7000
+    },
+    {
+      "step_id": "confidence_loaded",
+      "action": "wait_for_timeout",
+      "duration_ms": 1500
+    },
+    {
+      "action": "click",
+      "timeout_ms": 7000,
+      "step_id": "confidence_2",
+      "locator": {
+        "role": "radio",
+        "kind": "role",
+        "name": "Yes"
+      }
+    },
+    {
+      "duration_ms": 800,
+      "action": "wait_for_timeout",
+      "step_id": "confidence_2_loaded"
+    },
+    {
+      "action": "click",
+      "timeout_ms": 7000,
+      "step_id": "confidence_3",
+      "locator": {
+        "role": "radio",
+        "kind": "role",
+        "name": "Maybe"
+      }
+    },
+    {
+      "duration_ms": 1500,
+      "action": "wait_for_timeout",
+      "step_id": "confidence_3_loaded"
+    },
+    {
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Continue"
+      },
+      "action": "click",
+      "timeout_ms": 7000,
+      "step_id": "plan_next"
+    },
+    {
+      "duration_ms": 1500,
+      "action": "wait_for_timeout",
+      "step_id": "plan_loaded"
+    },
+    {
+      "locator": {
+        "role": "radio",
+        "name": "10 min",
+        "kind": "role"
+      },
+      "action": "click",
+      "step_id": "daily",
+      "timeout_ms": 7000
+    },
+    {
+      "locator": {
+        "role": "button",
+        "name": "Continue",
+        "kind": "role"
+      },
+      "action": "click",
+      "step_id": "daily_next",
+      "timeout_ms": 7000
+    },
+    {
+      "duration_ms": 1500,
+      "action": "wait_for_timeout",
+      "step_id": "daily_loaded"
+    },
+    {
+      "timeout_ms": 7000,
+      "locator": {
+        "kind": "role",
+        "role": "radio",
+        "name": "Another time"
+      },
+      "step_id": "routine",
+      "action": "click"
+    },
+    {
+      "timeout_ms": 7000,
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Continue"
+      },
+      "step_id": "routine_next",
+      "action": "click"
+    },
+    {
+      "step_id": "routine_loaded",
+      "action": "wait_for_timeout",
+      "duration_ms": 1500
+    }
+  ],
+  "environment": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "capture": {
+    "after_each_step": [
+      "accessibility",
+      "url"
+    ],
+    "at_end": [
+      "accessibility",
+      "url",
+      "screenshot"
+    ]
+  }
+}
