@@ -14,7 +14,7 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: flutter analyze --no-pub
-      - run: flutter test --no-pub
+      - run: flutter test --no-pub --reporter expanded
       - run: dart tools/check_diverse.dart
       - run: dart tools/check_depth.dart
       - run: dart tools/check_space.dart

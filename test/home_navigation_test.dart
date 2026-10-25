@@ -83,7 +83,10 @@ void main() {
     final before = store.progress('logic');
     await tester.pumpWidget(LearnApp(store: store));
     await tester.pumpAndSettle();
-    expect(find.text('Bước 2 / 5'), findsOneWidget);
+    expect(
+      find.text('Bước 2 / ${topicById('logic').experiments.length}'),
+      findsOneWidget,
+    );
     await tap(tester, find.text('Học tiếp'));
     expect(find.text('Bóc từng lớp'), findsOneWidget);
     expect(store.progress('logic')!['states'], before!['states']);

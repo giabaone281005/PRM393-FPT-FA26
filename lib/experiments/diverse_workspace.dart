@@ -35,16 +35,40 @@ class DiverseWorkspace extends StatelessWidget {
           const Text('Nếu A sáng → B sáng', textAlign: TextAlign.center),
           const SizedBox(height: 16),
           for (final key in ['a', 'b'])
-            SwitchListTile.adaptive(
-              key: ValueKey('condition-$key'),
-              title: Text('Đèn ${key.toUpperCase()}'),
-              subtitle: Text(data[key] == true ? 'Đang sáng' : 'Đang tắt'),
-              secondary: Icon(
-                data[key] == true ? Icons.lightbulb : Icons.lightbulb_outline,
-                color: data[key] == true ? BrilliantPalette.successInk : ink,
+            MergeSemantics(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  children: [
+                    ExcludeSemantics(
+                      child: Icon(
+                        data[key] == true
+                            ? Icons.lightbulb
+                            : Icons.lightbulb_outline,
+                        color: data[key] == true
+                            ? BrilliantPalette.successInk
+                            : ink,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Đèn ${key.toUpperCase()}'),
+                          Text(data[key] == true ? 'Đang sáng' : 'Đang tắt'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Switch.adaptive(
+                      key: ValueKey('condition-$key'),
+                      value: data[key] == true,
+                      onChanged: locked ? null : (v) => change(key, v),
+                    ),
+                  ],
+                ),
               ),
-              value: data[key] == true,
-              onChanged: locked ? null : (v) => change(key, v),
             ),
           const Text(
             'Thử từng trạng thái rồi đối chiếu với quy tắc.',
