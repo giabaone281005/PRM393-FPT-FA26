@@ -16,6 +16,42 @@ void main() {
   });
   tearDown(() => store.dispose());
 
+  Future<void> tapLessonControl(WidgetTester tester, Finder finder) async {
+    // ListView lazily builds its children. Scroll the lesson controller first
+    // rather than calling ensureVisible on an element that does not exist yet.
+    // Controller scrolling also avoids dragging the interactive 3D canvas.
+    final list = tester.widget<ListView>(
+      find
+          .descendant(
+            of: find.byType(LessonPage),
+            matching: find.byType(ListView),
+          )
+          .first,
+    );
+    final controller = list.controller!;
+    for (var i = 0; finder.evaluate().isEmpty && i < 40; i++) {
+      final position = controller.position;
+      final next = (position.pixels + 180).clamp(
+        position.minScrollExtent,
+        position.maxScrollExtent,
+      );
+      if (next == position.pixels) {
+        break;
+      }
+      controller.jumpTo(next);
+      await tester.pumpAndSettle();
+    }
+    expect(
+      finder,
+      findsOneWidget,
+      reason: 'Expected the lesson control to be built after scrolling',
+    );
+    await tester.ensureVisible(finder);
+    await tester.pumpAndSettle();
+    await tester.tap(finder);
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('Number-line lesson exposes three progressively revealed hints', (
     tester,
   ) async {
@@ -33,15 +69,12 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Gợi ý nhỏ'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Gợi ý nhỏ'));
-    await tester.pumpAndSettle();
+    await tapLessonControl(tester, find.text('Gợi ý nhỏ'));
     expect(find.text('Mức gợi ý 1/3'), findsOneWidget);
-    await tester.ensureVisible(find.byKey(const ValueKey('reveal-next-hint')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('reveal-next-hint')));
-    await tester.pumpAndSettle();
+    await tapLessonControl(
+      tester,
+      find.byKey(const ValueKey('reveal-next-hint')),
+    );
     expect(find.text('Mức gợi ý 2/3'), findsOneWidget);
     expect((store.progress('math')!['hintLevels'] as Map)[spec.id], 2);
     await tester.pumpWidget(const SizedBox());
@@ -56,12 +89,7 @@ void main() {
         theme: buildAppTheme(),
         home: LessonPage(topic: topic, store: current),
       );
-      Future<void> tap(Finder finder) async {
-        await tester.ensureVisible(finder);
-        await tester.pumpAndSettle();
-        await tester.tap(finder);
-        await tester.pumpAndSettle();
-      }
+      Future<void> tap(Finder finder) => tapLessonControl(tester, finder);
 
       await tester.pumpWidget(lesson(store));
       await tester.pumpAndSettle();
