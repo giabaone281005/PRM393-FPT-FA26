@@ -117,28 +117,36 @@ String spaceHint(ExperimentSpec spec, ExperimentData data, int level) {
   final hint = level.clamp(1, 3);
   switch (spec.id) {
     case 'geometry-solid-volume':
-      if (hint == 1)
+      if (hint == 1) {
         return 'Thử giữ hai cạnh không đổi, đổi cạnh còn lại rồi quan sát cả thể tích và bề mặt.';
-      if (hint == 2)
+      }
+      if (hint == 2) {
         return 'Thể tích là tích ba cạnh. Bề mặt là 2 × (dài × cao + dài × sâu + cao × sâu). Cần thỏa cả hai điều kiện.';
+      }
       return 'Thử các cạnh 2, 2 và 3 rồi kiểm tra sáu mặt. Có thể đổi chỗ ba kích thước mà không đổi thể tích hoặc bề mặt.';
     case 'algebra-solid-relation':
-      if (hint == 1)
+      if (hint == 1) {
         return 'Làm chiều cao và chiều sâu bằng nhau, rồi kiểm tra quan hệ với chiều dài.';
-      if (hint == 2)
+      }
+      if (hint == 2) {
         return 'Gọi chiều cao là h: chiều sâu cũng là h, chiều dài là 2h. Thể tích là 2 × h × h × h.';
+      }
       return 'Thử cao 2, sâu 2, dài 4. Đối chiếu từng quan hệ trước khi kiểm tra thể tích 16.';
     case 'geography-globe-grid':
-      if (hint == 1)
+      if (hint == 1) {
         return 'Tìm phía Bắc xích đạo trước. Xoay địa cầu chỉ đổi góc nhìn, chưa đổi điểm đã chọn.';
-      if (hint == 2)
+      }
+      if (hint == 2) {
         return 'Vĩ độ điều khiển Bắc–Nam; kinh độ điều khiển Đông–Tây. Ở đây Bắc và Đông mang dấu dương.';
+      }
       return 'Đặt vĩ độ +15° và kinh độ +105°. Dùng “Nhìn tới điểm đã chọn” để kiểm tra vị trí trên lưới.';
     case 'geography-rock-layers':
-      if (hint == 1)
+      if (hint == 1) {
         return 'So sánh tuổi hai lớp nằm cạnh nhau. Lớp nào đã hình thành trước?';
-      if (hint == 2)
+      }
+      if (hint == 2) {
         return 'Tuổi lớn hơn nghĩa là hình thành sớm hơn. Với các lớp chưa bị đảo lộn, lớp cũ hơn nằm bên dưới.';
+      }
       return 'Sắp từ trên xuống: 10, 20, 30 triệu năm. Đây là mô hình trầm tích chưa bị đảo lộn, không phải quy tắc cho mọi địa tầng.';
     default:
       return spec.hint;
@@ -147,8 +155,9 @@ String spaceHint(ExperimentSpec spec, ExperimentData data, int level) {
 
 String spaceFeedback(ExperimentSpec spec, ExperimentData data) {
   final result = evaluateSpace(spec.id, data);
-  if (result.feedbackKey == 'invalid-state')
+  if (result.feedbackKey == 'invalid-state') {
     return 'Trạng thái mô hình chưa hợp lệ. Dùng “Làm lại” rồi thử điều chỉnh từng bước.';
+  }
   if (result.isCorrect) return spec.explanation;
   switch (spec.id) {
     case 'geometry-solid-volume':

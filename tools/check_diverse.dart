@@ -1,6 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 
-import '../lib/experiments/diverse_catalog.dart';
+import 'package:brilliant_mobile/experiments/diverse_catalog.dart';
 
 void main() {
   var checks = 0;
@@ -33,7 +34,7 @@ void main() {
     check(!data.isCorrect({'outlier': invalid}));
     check(!fraction.isCorrect({'position': invalid}));
   }
-  print(
+  stdout.writeln(
     '$checks checks passed: domains, truth table, invalid types and JSON restoration.',
   );
 }

@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
-import '../lib/experiments/math_catalog.dart';
-import '../lib/experiments/discovery_catalog.dart';
-import '../lib/experiments/extended_catalog.dart';
-import '../lib/experiments/diverse_catalog.dart';
-import '../lib/experiments/solid_catalog.dart';
+import 'package:brilliant_mobile/experiments/discovery_catalog.dart';
+import 'package:brilliant_mobile/experiments/diverse_catalog.dart';
+import 'package:brilliant_mobile/experiments/extended_catalog.dart';
+import 'package:brilliant_mobile/experiments/math_catalog.dart';
+import 'package:brilliant_mobile/experiments/solid_catalog.dart';
 
 /// Export immutable scene data; Dart validators are not backend evaluators.
 void main() {
@@ -76,5 +76,7 @@ void main() {
       'verification': 'backend_evaluators_not_deployed',
     }),
   );
-  print('Exported ${topics.length} topics / ${activities.length} activities.');
+  stdout.writeln(
+    'Exported ${topics.length} topics / ${activities.length} activities.',
+  );
 }

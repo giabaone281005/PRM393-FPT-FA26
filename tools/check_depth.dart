@@ -1,11 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 
-import '../lib/experiments/solid_catalog.dart';
-import '../lib/experiments/solid_model.dart';
-import '../lib/experiments/space_guidance.dart';
-import '../lib/experiments/math_catalog.dart';
-import '../lib/experiments/diverse_catalog.dart';
-import '../lib/experiments/lesson_guidance.dart';
+import 'package:brilliant_mobile/experiments/diverse_catalog.dart';
+import 'package:brilliant_mobile/experiments/lesson_guidance.dart';
+import 'package:brilliant_mobile/experiments/math_catalog.dart';
+import 'package:brilliant_mobile/experiments/solid_catalog.dart';
+import 'package:brilliant_mobile/experiments/solid_model.dart';
+import 'package:brilliant_mobile/experiments/space_guidance.dart';
 
 void main() {
   var checks = 0;
@@ -191,5 +192,5 @@ void main() {
     !supportsProgressiveGuidance(mathExperiments['logic']!.first),
     'Legacy guidance unchanged',
   );
-  print('$checks lesson-depth checks passed.');
+  stdout.writeln('$checks lesson-depth checks passed.');
 }

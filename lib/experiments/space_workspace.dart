@@ -62,8 +62,9 @@ class _SpaceWorkspaceState extends State<SpaceWorkspace> {
   int number(String key, int fallback) =>
       widget.data[key] is int ? widget.data[key] as int : fallback;
   void change(String key, int value) {
-    if (!widget.locked && widget.data[key] != value)
+    if (!widget.locked && widget.data[key] != value) {
       widget.onChanged({...widget.data, key: value});
+    }
   }
 
   void rotate(double dx, double dy) => setState(() {
@@ -174,12 +175,13 @@ class _SpaceWorkspaceState extends State<SpaceWorkspace> {
                               yaw,
                               pitch,
                             );
-                            if (coords != null)
+                            if (coords != null) {
                               widget.onChanged({
                                 ...widget.data,
                                 'latitude': coords[0],
                                 'longitude': coords[1],
                               });
+                            }
                           },
                     child: RepaintBoundary(
                       child: SizedBox.square(

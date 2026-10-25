@@ -1,7 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
-import '../lib/experiments/solid_catalog.dart';
-import '../lib/experiments/solid_model.dart';
+import 'package:brilliant_mobile/experiments/solid_catalog.dart';
+import 'package:brilliant_mobile/experiments/solid_model.dart';
 
 void main() {
   var checks = 0;
@@ -124,7 +125,7 @@ void main() {
   check(globeCoordinates(1.1, 0, 0, 0) == null, 'Ignore tap outside sphere');
   check((globePoint(0, 90).x - 1).abs() < 1e-9, 'East orientation');
   check((globePoint(90, 0).y + 1).abs() < 1e-9, 'North orientation');
-  print(
+  stdout.writeln(
     '$checks checks passed: solid constraints, layers, camera projection, globe picking and restoration.',
   );
 }
