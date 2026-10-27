@@ -1,6 +1,6 @@
 # Current validation
 
-The active app is the Matlingo frontend imported from brilliant_mobile. Historical MathLingo reports are in docs/legacy/repository-root and do not validate this codebase.
+The active app is the Matlingo frontend imported from brilliant_mobile. Historical MathLingo reports do not validate this codebase. Development notes and historical reports referenced below are retained locally and are no longer tracked in Git; the current setup and API guides remain in the repository.
 
 Continuation check on 2026-10-27: `flutter analyze --no-pub` passes with no issues and all 175 Flutter tests pass. Standalone checks pass (50 interaction, 2,491 depth, 17,552 geometry), and server/mobile evaluator parity passes all 729 cases across 53 activities. `flutter build apk --debug` passes without cloud dart defines; output is `build/app/outputs/flutter-apk/app-debug.apk`. This check uses the current uncommitted workspace; it does not revalidate the deployed backend, real mailbox, physical phone or previously distributed release APK. Test log: `build/continuation-tests.log`.
 

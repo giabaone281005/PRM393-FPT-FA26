@@ -63,7 +63,6 @@ APK debug nằm tại `build/app/outputs/flutter-apk/app-debug.apk`. Để build
 ## Tài liệu tham khảo
 
 - [Hướng dẫn đóng góp và quy tắc dự án](AGENTS.md)
-- [Trạng thái phát triển và công việc còn lại](PROJECT_CONTEXT.md)
 - [Kết quả và quy trình kiểm thử](VALIDATION.md)
 - [Hướng dẫn bản Android](docs/PHONE_READINESS.md)
 - [Đăng nhập và sao lưu cloud](docs/MOBILE_CLOUD_BACKUP.md)

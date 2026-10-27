@@ -31,4 +31,4 @@ Live SQL checks passed for owner isolation across two users, admin draft access,
 
 Private tables deliberately have no client policies/grants; their RLS deny-all informational findings are expected. Auth still reports leaked-password protection disabled; see the [Supabase remediation](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection). Multiple permissive content policies were merged into one per table. Fresh unused indexes are not evidence of a performance failure.
 
-See `docs/SUPABASE_RESET_REPORT.md` for rollout status. Never commit secret/service-role keys, Auth tokens, local user snapshots or SDK caches. Published clients use a publishable key and user JWT; privileged credentials stay on the backend.
+See `../SUPABASE_INTEGRATION_STATUS.md` for integration status. Never commit secret/service-role keys, Auth tokens, local user snapshots or SDK caches. Published clients use a publishable key and user JWT; privileged credentials stay on the backend.
