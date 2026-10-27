@@ -70,22 +70,26 @@ class _MathExperimentState extends State<MathExperiment> {
     padding: const EdgeInsets.symmetric(vertical: 10),
     child: Text(text, textAlign: TextAlign.center),
   );
-  Widget tile(String text, {Color color = paper}) => Container(
+  Widget tile(String text, {Color? color}) => Container(
     constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: color,
-      border: Border.all(color: BrilliantPalette.border),
+      color: color ?? Theme.of(context).colorScheme.primaryContainer,
+      border: Border.all(color: Theme.of(context).colorScheme.primary),
       borderRadius: BorderRadius.circular(12),
     ),
-    child: Text(text, textAlign: TextAlign.center),
+    child: Text(
+      text,
+      textAlign: TextAlign.center,
+      style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer),
+    ),
   );
   Widget drag(int value, String label) => Draggable<int>(
     data: value,
     maxSimultaneousDrags: widget.locked ? 0 : 1,
     feedback: Material(
       color: Colors.transparent,
-      child: tile(label, color: BrilliantPalette.successSurface),
+      child: tile(label, color: Theme.of(context).colorScheme.primaryContainer),
     ),
     childWhenDragging: Opacity(opacity: .35, child: tile(label)),
     child: tile(label),
@@ -114,11 +118,9 @@ class _MathExperimentState extends State<MathExperiment> {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: candidates.isEmpty
-                ? BrilliantPalette.surface
-                : BrilliantPalette.successSurface,
-            border: Border.all(
-              color: candidates.isEmpty ? BrilliantPalette.border : green,
-            ),
+                ? Theme.of(context).colorScheme.surfaceContainerLow
+                : Theme.of(context).colorScheme.primaryContainer,
+            border: Border.all(color: Theme.of(context).colorScheme.primary),
             borderRadius: BorderRadius.circular(12),
           ),
           child: child ?? Text(label, textAlign: TextAlign.center),

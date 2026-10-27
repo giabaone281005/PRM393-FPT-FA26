@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'experiments/experiment_model.dart';
 import 'learning_activity.dart';
+import 'data/models/app_failure.dart';
+import 'data/models/learning_journal.dart';
 
 class LearnerProfile {
   LearnerProfile(
@@ -49,10 +51,15 @@ class CompletionReceipt {
 
 /// Local-first durable learning state, isolated by profile. No credentials live here.
 class LearningStore extends ChangeNotifier {
-  LearningStore(this.preferences, {this.writeSnapshot}) {
+  LearningStore(
+    this.preferences, {
+    this.writeSnapshot,
+    this.enableServerSync = false,
+  }) {
     _read();
   }
   final SharedPreferences preferences;
+  final bool enableServerSync;
   final Future<bool> Function(String key, String value)? writeSnapshot;
   static const storageKey = 'nary:journey:v3';
   final Map<String, LearnerProfile> _profiles = {};
@@ -83,6 +90,62 @@ class LearningStore extends ChangeNotifier {
           .whereType<String>()
           .toSet();
   int get points => completed.length * 30;
+  Map<String, dynamic> serverSyncFor(String id) =>
+      learningCopy(LearningJournal.root(_for(id)));
+  int get verifiedPoints =>
+      (LearningJournal.root(_current)['verifiedXp'] as num?)?.toInt() ?? 0;
+  int get pendingServerSessions =>
+      learningMap(LearningJournal.root(_current)['sessions']).values.where((x) {
+        final row = learningMap(x);
+        return row['verified'] != true &&
+            (row['serverStarted'] != true ||
+                (row['draftVersion'] as int? ?? 0) >
+                    (row['sentDraftVersion'] as int? ?? 0) ||
+                (row['attempts'] as List? ?? []).length >
+                    (row['sentAttempts'] as int? ?? 0) ||
+                row['complete'] == true);
+      }).length;
+
+  Future<void> updateServerSync(String id, Map<String, dynamic> sync) async {
+    if (!_profiles.containsKey(id)) return;
+    final data = _for(id);
+    final before = data['serverSync'];
+    final next = learningCopy(sync);
+    data['serverSync'] = next;
+    if (!await _persist()) {
+      if (identical(data['serverSync'], next)) data['serverSync'] = before;
+      throw LocalLearningFailure(
+        'Chưa lưu được trạng thái đồng bộ. Tiến độ vẫn được giữ trên thiết bị; hãy thử lại.',
+      );
+    }
+    _emit();
+  }
+
+  Future<void> acceptServerProfile(
+    String id,
+    Map<String, dynamic> remote,
+    Map<String, dynamic> sync,
+  ) async {
+    final learner = _profiles[id];
+    final name = remote['name'] as String? ?? '';
+    if (learner == null || name.trim().isEmpty || name.length > 40) {
+      throw const AppFailure(
+        'Thông tin hồ sơ trên cloud chưa tương thích. Bản trên máy vẫn được giữ.',
+      );
+    }
+    learner.name = name;
+    learner.dailyMinutes = (remote['daily_minutes'] as num).toInt();
+    learner.interests = List<String>.from(remote['interest_topic_ids'] as List);
+    learner.onboarded = remote['onboarded_at'] != null;
+    _for(id)['serverSync'] = learningCopy(sync);
+    if (!await _persist()) {
+      throw LocalLearningFailure(
+        'Chưa lưu được lựa chọn trên thiết bị. Giữ app mở và thử lại.',
+      );
+    }
+    _emit();
+  }
+
   List<Map<String, dynamic>> get history => (_current['history'] as List? ?? [])
       .whereType<Map>()
       .map((e) => Map<String, dynamic>.from(e))
@@ -251,6 +314,49 @@ class LearningStore extends ChangeNotifier {
     await _persist();
   }
 
+  /// A personal backup, never evidence for server-verified XP.
+  Map<String, dynamic> exportProfile(String id) {
+    final learner = _profiles[id];
+    if (learner == null) throw StateError('Hồ sơ không tồn tại.');
+    return _clone({
+      'version': 3,
+      'profile': learner.toJson(),
+      'learning': _for(id),
+    });
+  }
+
+  /// Restore as a separate profile so unsent local work is never overwritten.
+  Future<String> restoreProfile(Map<String, dynamic> payload) async {
+    if (payload['version'] != 3 ||
+        payload['profile'] is! Map ||
+        payload['learning'] is! Map) {
+      throw const BackupFormatFailure(
+        'Định dạng bản sao lưu này chưa được hỗ trợ. Hãy cập nhật app hoặc chọn bản sao lưu khác.',
+      );
+    }
+    final source = LearnerProfile.fromJson(_map(payload['profile']));
+    if (source.name.trim().isEmpty || source.name.length > 40) {
+      throw const BackupFormatFailure(
+        'Tên hồ sơ trong bản sao lưu chưa hợp lệ. Chọn bản sao lưu khác hoặc thử tải lại nhé.',
+      );
+    }
+    final id =
+        'device-${DateTime.now().microsecondsSinceEpoch}-${Random.secure().nextInt(1 << 30)}';
+    final restored = LearnerProfile.fromJson({...source.toJson(), 'id': id});
+    _profiles[id] = restored;
+    _learning[id] = _clone(_map(payload['learning']));
+    LearningJournal.fork(_learning[id]!);
+    if (!await _persist()) {
+      _profiles.remove(id);
+      _learning.remove(id);
+      throw LocalLearningFailure(
+        'Chưa lưu được bản khôi phục trên thiết bị. Giữ app mở rồi thử lại nhé.',
+      );
+    }
+    _emit();
+    return id;
+  }
+
   Future<void> createDeviceProfile(String name) async {
     final clean = name.trim();
     if (clean.isEmpty || clean.length > 40) {
@@ -312,6 +418,7 @@ class LearningStore extends ChangeNotifier {
     });
     data['drafts'] = drafts;
     data['lastCourse'] = courseId;
+    if (enableServerSync) LearningJournal.save(data, courseId, value);
     _emit();
     await _persist();
   }
@@ -323,9 +430,11 @@ class LearningStore extends ChangeNotifier {
     String? expectedProfileId,
   }) async {
     final id = _activeId;
-    if (id == null) throw StateError('Cần mở hồ sơ trước.');
+    if (id == null) throw LocalLearningFailure('Mở hồ sơ học để tiếp tục nhé.');
     if (expectedProfileId != null && id != expectedProfileId) {
-      throw StateError('Phiên học thuộc hồ sơ khác.');
+      throw LocalLearningFailure(
+        'Hồ sơ đang học đã thay đổi. Mở lại hồ sơ để tiếp tục.',
+      );
     }
     final states = _map(draft['states']);
     final previousIds = completedExperimentIds(courseId);
@@ -337,7 +446,9 @@ class LearningStore extends ChangeNotifier {
           ? spec.isCorrect(_map(states[spec.id]))
           : credited.contains(spec.id),
     )) {
-      throw StateError('Cần hoàn thành tất cả thí nghiệm trước khi kết thúc.');
+      throw LocalLearningFailure(
+        'Còn thí nghiệm chưa hoàn thành. Quay lại các bước trước để kiểm tra nhé.',
+      );
     }
     final data = _for(id);
     final before = _clone(data);
@@ -360,6 +471,18 @@ class LearningStore extends ChangeNotifier {
       'xp': awarded ? 30 : 0,
       'experimentIds': experiments.map((e) => e.id).toList(),
     };
+    if (enableServerSync) {
+      record['serverSessionId'] = LearningJournal.save(
+        data,
+        courseId,
+        draft,
+        complete: true,
+        finalStates: {
+          for (final spec in experiments)
+            if (states[spec.id] is Map) spec.id: _map(states[spec.id]),
+        },
+      );
+    }
     done[courseId] = record;
     data['completed'] = done;
     data['history'] = [
@@ -374,7 +497,9 @@ class LearningStore extends ChangeNotifier {
     if (!saved) {
       _learning[id] = before;
       _emit();
-      throw StateError('Chưa lưu được kết quả. Có thể thử lại.');
+      throw LocalLearningFailure(
+        'Chưa lưu được kết quả trên thiết bị. Giữ app mở và thử lưu lại nhé.',
+      );
     }
     return CompletionReceipt(id, awarded, _clone(record));
   }

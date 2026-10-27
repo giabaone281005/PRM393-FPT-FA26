@@ -36,6 +36,12 @@ const discoveryPaths = [
     Icons.bolt_outlined,
     ['science', 'circuits', 'geography'],
   ),
+  DiscoveryPath(
+    'Nghệ thuật & tư duy xã hội',
+    'Quan sát tranh, đọc học thuyết và luyện giải thích bằng bằng chứng.',
+    Icons.menu_book_outlined,
+    ['painting', 'marxism'],
+  ),
 ];
 
 /// Curated routes through existing experiments, not new course content.

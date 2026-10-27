@@ -15,8 +15,19 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze --no-pub
       - run: flutter test --no-pub --reporter expanded
+      - run: node supabase/tests/evaluator_parity.mjs
       - run: dart tools/check_diverse.dart
       - run: dart tools/check_depth.dart
       - run: dart tools/check_space.dart
       - run: flutter build apk --debug --no-pub
       # CI never applies schema_reset.sql or connects to the live database.
+  edge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: '2.9.6'
+      - run: deno check supabase/functions/learning-api/index.ts
+      - run: deno lint supabase/functions/learning-api/index.ts supabase/functions/learning-api/handler.ts supabase/functions/_shared/http.ts supabase/tests/learning_handler_test.ts
+      - run: deno test supabase/tests/learning_handler_test.ts

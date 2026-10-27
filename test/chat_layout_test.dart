@@ -6,8 +6,42 @@ import 'package:brilliant_mobile/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:brilliant_mobile/data/repositories/engine_registry.dart';
 
 void main() {
+  testWidgets(
+    'chat explains a known engine failure while preserving the draft',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildAppTheme(),
+          home: Scaffold(
+            body: HomeChatBox(
+              onSend: (_) async => throw const EngineFailure(
+                'Khóa hoặc token của kết nối chưa hợp lệ. Hãy cập nhật trong Engine học tập.',
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('chat-input')),
+        'Giải thích hình này',
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('chat-send')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Khóa hoặc token'), findsOneWidget);
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const ValueKey('chat-input')))
+            .controller!
+            .text,
+        'Giải thích hình này',
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
   testWidgets(
     'Composer keeps a draft locally while no responder is connected',
     (tester) async {

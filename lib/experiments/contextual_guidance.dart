@@ -3,6 +3,16 @@ import 'experiment_model.dart';
 /// Offline observations of the learner's model, without changing it.
 /// These are deterministic rules, not a chat or AI service.
 String contextualHint(ExperimentSpec spec, ExperimentData data) {
+  if (spec.mechanism == 'reasonedChoice') {
+    final result = spec.evaluate(data);
+    if (result.feedbackKey == 'invalid-state') {
+      return 'Chọn cả kết quả và lý do trước khi kiểm tra. ${spec.hint}';
+    }
+    if (result.feedbackKey == 'rethink-reason') {
+      return 'Kết quả đã phù hợp. Hãy đối chiếu lý do với kiến thức và tình huống của bài. ${spec.hint}';
+    }
+    return spec.hint;
+  }
   if (spec.stage != 'Khám phá') return spec.hint;
   switch (spec.mechanism) {
     case 'balanceBlocks':

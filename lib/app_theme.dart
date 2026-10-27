@@ -337,7 +337,11 @@ class LessonProgress extends StatelessWidget {
                   value: value,
                   minHeight: 8,
                   color: Theme.of(context).colorScheme.primary,
-                  backgroundColor: BrilliantPalette.track,
+                  backgroundColor:
+                      Theme.of(context)
+                          .progressIndicatorTheme
+                          .linearTrackColor ??
+                      BrilliantPalette.track,
                 ),
               ),
             ),

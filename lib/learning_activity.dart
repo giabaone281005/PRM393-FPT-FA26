@@ -4,6 +4,23 @@ String activityDay(DateTime time) {
   return '${local.year}-${local.month.toString().padLeft(2, '0')}-${local.day.toString().padLeft(2, '0')}';
 }
 
+String studyClockLabel(int milliseconds) {
+  final seconds = milliseconds < 0 ? 0 : milliseconds ~/ 1000;
+  final minutes = seconds ~/ 60;
+  return '${minutes.toString().padLeft(2, '0')}:${(seconds % 60).toString().padLeft(2, '0')}';
+}
+
+String studyTimeLabel(int milliseconds) {
+  final seconds = milliseconds < 0 ? 0 : milliseconds ~/ 1000;
+  if (seconds < 60) return '$seconds giây';
+  final minutes = seconds ~/ 60;
+  return [
+    if (minutes >= 60) '${minutes ~/ 60} giờ',
+    if (minutes % 60 > 0) '${minutes % 60} phút',
+    if (seconds % 60 > 0) '${seconds % 60} giây',
+  ].join(' ');
+}
+
 /// Split foreground stopwatch time at local midnight, including sessions that
 /// span days. Background time never reaches this function.
 void addActiveTime(

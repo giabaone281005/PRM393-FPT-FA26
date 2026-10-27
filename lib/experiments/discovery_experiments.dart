@@ -613,7 +613,9 @@ class _DiscoveryExperimentState extends State<DiscoveryExperiment> {
                             child: IconButton(
                               onPressed: () => connect(i),
                               icon: const Icon(Icons.circle_outlined, size: 32),
-                              color: _wireStart == i ? green : ink,
+                              color: _wireStart == i
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -686,7 +688,8 @@ class _DiscoveryExperimentState extends State<DiscoveryExperiment> {
                         '${['A — nhánh bảo trì', 'B — nhánh dự phòng', 'C — công tắc chính'][i]}: ${s[i] ? 'đóng' : 'mở'}',
                       ),
                       value: s[i],
-                      activeThumbColor: green,
+                      activeThumbColor: Theme.of(context).colorScheme.onPrimary,
+                      activeTrackColor: Theme.of(context).colorScheme.primary,
                       onChanged: (v) {
                         s[i] = v;
                         change('switches', s);

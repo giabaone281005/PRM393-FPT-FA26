@@ -1,4 +1,7 @@
 import 'app_layout.dart';
+import 'data/models/learning_modules.dart';
+import 'data/models/app_failure.dart';
+import 'features/tutor/shared_canvas.dart';
 
 import 'package:flutter/material.dart';
 
@@ -10,10 +13,15 @@ class ChatMessage {
 
 /// Connect a backend here when ready. Credentials belong in that backend.
 typedef ChatResponder = Future<String> Function(List<ChatMessage> messages);
+typedef CanvasChatResponder = Future<String> Function(
+  List<ChatMessage> messages,
+  SharedCanvasDocument canvas,
+);
 
 class HomeChatBox extends StatefulWidget {
-  const HomeChatBox({super.key, this.onSend});
+  const HomeChatBox({super.key, this.onSend, this.onCanvasSend});
   final ChatResponder? onSend;
+  final CanvasChatResponder? onCanvasSend;
   @override
   State<HomeChatBox> createState() => _HomeChatBoxState();
 }
@@ -23,6 +31,9 @@ class _HomeChatBoxState extends State<HomeChatBox> {
   final List<ChatMessage> _messages = [];
   bool _busy = false;
   String? _error;
+  bool _showCanvas = false;
+  SharedCanvasDocument _canvas = SharedCanvasDocument();
+  bool get _connected => widget.onSend != null || widget.onCanvasSend != null;
   @override
   void dispose() {
     _input.dispose();
@@ -31,16 +42,19 @@ class _HomeChatBoxState extends State<HomeChatBox> {
 
   Future<void> _send() async {
     final text = _input.text.trim();
-    if (text.isEmpty || _busy || widget.onSend == null) return;
+    if (text.isEmpty || _busy || !_connected) return;
     final question = ChatMessage(text: text, fromLearner: true);
     setState(() {
       _busy = true;
       _error = null;
     });
     try {
-      final response = await widget.onSend!(
-        List.unmodifiable([..._messages, question]),
-      );
+      final messages = List<ChatMessage>.unmodifiable([..._messages, question]);
+      final response = _showCanvas && widget.onCanvasSend != null
+          ? await widget.onCanvasSend!(messages, _canvas)
+          : widget.onSend != null
+          ? await widget.onSend!(messages)
+          : await widget.onCanvasSend!(messages, SharedCanvasDocument());
       if (response.trim().isEmpty) throw StateError('Empty response');
       if (!mounted) return;
       setState(() {
@@ -50,10 +64,11 @@ class _HomeChatBoxState extends State<HomeChatBox> {
         ]);
         _input.clear();
       });
-    } catch (_) {
+    } catch (error) {
       if (mounted) {
         setState(
-          () => _error = 'Chưa gửi được. Câu hỏi vẫn ở đây để bạn thử lại.',
+          () => _error =
+              '${friendlyError(error, fallback: 'Chưa gửi được.')} Câu hỏi vẫn ở đây để bạn thử lại.',
         );
       }
     } finally {
@@ -106,6 +121,20 @@ class _HomeChatBoxState extends State<HomeChatBox> {
             ],
           ),
           const SizedBox(height: 14),
+          if (widget.onCanvasSend != null) ...[
+            TextButton.icon(
+              onPressed: _busy
+                  ? null
+                  : () => setState(() => _showCanvas = !_showCanvas),
+              icon: const Icon(Icons.draw_outlined),
+              label: Text(_showCanvas ? 'Ẩn bảng vẽ' : 'Cùng Koji vẽ lời giải'),
+            ),
+            if (_showCanvas)
+              SharedCanvas(
+                document: _canvas,
+                onChanged: (value) => setState(() => _canvas = value),
+              ),
+          ],
           if (_messages.isNotEmpty)
             ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 260),
@@ -185,7 +214,7 @@ class _HomeChatBoxState extends State<HomeChatBox> {
               Expanded(
                 child: Text(
                   _error ??
-                      (widget.onSend == null
+                      (!_connected
                           ? 'Trợ lý chưa được kết nối.'
                           : _busy
                           ? 'Đang suy nghĩ…'
@@ -200,8 +229,7 @@ class _HomeChatBoxState extends State<HomeChatBox> {
               IconButton.filled(
                 key: const ValueKey('chat-send'),
                 tooltip: 'Gửi câu hỏi',
-                onPressed:
-                    widget.onSend == null || _busy || _input.text.trim().isEmpty
+                onPressed: !_connected || _busy || _input.text.trim().isEmpty
                     ? null
                     : _send,
                 icon: _busy

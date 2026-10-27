@@ -96,12 +96,14 @@ void main() {
       final button = find.byKey(const ValueKey('remove-pair'));
       for (int i = 0; i < 5; i++) {
         await tester.ensureVisible(button);
+        await tester.pumpAndSettle();
         await tester.tap(button);
         await tester.pumpAndSettle();
       }
       expect(find.text('x + 0 = 4'), findsOneWidget);
       final check = find.text('Kiểm tra');
       await tester.ensureVisible(check);
+      await tester.pumpAndSettle();
       await tester.tap(check);
       await tester.pumpAndSettle();
       expect(find.text('Bạn đã tìm ra!'), findsOneWidget);

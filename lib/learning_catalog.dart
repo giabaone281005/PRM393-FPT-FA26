@@ -7,6 +7,7 @@ import 'experiments/discovery_catalog.dart';
 import 'experiments/extended_catalog.dart';
 import 'experiments/diverse_catalog.dart';
 import 'experiments/solid_catalog.dart';
+import 'experiments/deep_catalog.dart';
 
 class LearningTopic {
   const LearningTopic(
@@ -31,6 +32,7 @@ final experimentCatalog = <String, List<ExperimentSpec>>{
       ...(extensionExperiments[entry.key] ?? []),
       ...(diverseExperiments[entry.key] ?? []),
       ...(solidExperiments[entry.key] ?? []),
+      ...(deepExperiments[entry.key] ?? []),
     ],
   'algebra': [
     ...extensionExperiments['algebra']!,
@@ -38,6 +40,8 @@ final experimentCatalog = <String, List<ExperimentSpec>>{
   ],
   'geography': solidExperiments['geography']!,
   'optimization': extensionExperiments['optimization']!,
+  'marxism': deepExperiments['marxism']!,
+  'painting': deepExperiments['painting']!,
 };
 const topics = [
   LearningTopic(
@@ -138,6 +142,24 @@ const topics = [
     Icons.public,
     BrilliantPalette.successSurface,
     'Xoay quả địa cầu',
+  ),
+  LearningTopic(
+    'marxism',
+    'Chủ nghĩa Mác–Lênin',
+    'Tìm hiểu khái niệm, phân tích tình huống và đọc nguồn có đối chiếu.',
+    'Triết học & xã hội',
+    Icons.menu_book_outlined,
+    BrilliantPalette.successSurface,
+    'Đọc, phân tích và đối chiếu',
+  ),
+  LearningTopic(
+    'painting',
+    'Hội họa & ngôn ngữ thị giác',
+    'Từ sắc độ, hình khối đến chiều sâu và phân tích bố cục.',
+    'Nghệ thuật',
+    Icons.palette_outlined,
+    BrilliantPalette.successSurface,
+    'Quan sát để hiểu một bức tranh',
   ),
 ];
 LearningTopic topicById(String id) =>

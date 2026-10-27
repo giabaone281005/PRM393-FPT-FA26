@@ -112,7 +112,11 @@ void main() {
     await tester.tap(find.text('Trang chủ'));
     await tester.pumpAndSettle();
     await capture('home-resume-minimal');
-    await tester.ensureVisible(find.byKey(const ValueKey('home-chat')));
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('home-chat')),
+      180,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     await capture('home-chat');
     await store.saveProgress('coding', {

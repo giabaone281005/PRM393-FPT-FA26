@@ -1,4 +1,5 @@
 import 'extended_solutions.dart';
+import 'deep_solutions.dart';
 
 import 'dart:convert';
 
@@ -14,6 +15,7 @@ import 'math_experiments_test.dart' show mathSolutionStates;
 import 'discovery_experiments_test.dart' show discoverySolutionStates;
 
 final solutions = {
+  ...deepSolutions,
   ...mathSolutionStates,
   ...discoverySolutionStates,
   ...extendedSolutions,
@@ -70,12 +72,12 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
   }
 
-  test('Catalog has eleven topics, 53 activities and 30 mechanisms', () {
+  test('Catalog has thirteen topics, 71 activities and 31 mechanisms', () {
     final specs = experimentCatalog.values.expand((e) => e).toList();
-    expect(topics.length, 11);
-    expect(specs.length, 53);
-    expect(specs.map((e) => e.id).toSet().length, 53);
-    expect(specs.map((e) => e.mechanism).toSet().length, 30);
+    expect(topics.length, 13);
+    expect(specs.length, 71);
+    expect(specs.map((e) => e.id).toSet().length, 71);
+    expect(specs.map((e) => e.mechanism).toSet().length, 31);
     for (final spec in specs) {
       expect(spec.isCorrect(spec.initialData()), false, reason: spec.id);
       expect(spec.isCorrect(solutions[spec.id]!), true, reason: spec.id);
@@ -366,7 +368,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
   testWidgets(
-    'All lesson screens fit 320px, use interactive surfaces and no answer inputs',
+    'All lesson screens fit 320px and expose the correct interactive surfaces',
     (tester) async {
       screen(tester, const Size(320, 640));
       await tester.runAsync(learner);
@@ -394,7 +396,12 @@ void main() {
           await tester.pumpAndSettle();
           expect(find.byType(ExperimentWorkspace), findsOneWidget);
           expect(find.byType(TextField), findsNothing);
-          expect(find.byIcon(Icons.radio_button_off), findsNothing);
+          if (topic.experiments[step].mechanism == 'reasonedChoice') {
+            expect(find.byKey(const ValueKey('answer-0')), findsOneWidget);
+            expect(find.byKey(const ValueKey('reason-0')), findsOneWidget);
+          } else {
+            expect(find.byIcon(Icons.radio_button_off), findsNothing);
+          }
           expect(tester.takeException(), isNull, reason: '${topic.id}:$step');
         }
       }

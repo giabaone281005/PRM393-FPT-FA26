@@ -32,7 +32,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Hồ sơ'));
     await tester.pumpAndSettle();
-    expect(find.text('1 phút'), findsOneWidget);
+    expect(find.text('1 phút 30 giây'), findsOneWidget);
     expect(find.text('7 ngày gần đây'), findsOneWidget);
     await tester.ensureVisible(
       find.byKey(ValueKey('activity-${activityDay(yesterday)}')),

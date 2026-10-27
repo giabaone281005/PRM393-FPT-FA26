@@ -1,4 +1,8 @@
 import 'app_layout.dart';
+import 'features/account/cloud_account_page.dart';
+import 'features/account/learning_sync_scope.dart';
+import 'features/engines/engine_scope.dart';
+import 'data/models/app_failure.dart';
 
 import 'dart:async';
 
@@ -19,6 +23,10 @@ import 'entry_flow.dart';
 import 'learning_store.dart';
 import 'learning_catalog.dart';
 import 'experiments/experiment_model.dart';
+import 'experiments/reasoning_workspace.dart';
+import 'lesson_theme.dart';
+import 'topic_roadmap.dart';
+import 'home_owl_mascot.dart';
 import 'experiments/diverse_workspace.dart';
 import 'experiments/space_workspace.dart';
 import 'experiments/space_guidance.dart';
@@ -57,55 +65,67 @@ class _LearnAppState extends State<LearnApp> with WidgetsBindingObserver {
   }
 
   @override
-  Widget build(BuildContext context) => ListenableBuilder(
-    listenable: appearance,
-    builder: (context, _) => AppearanceScope(
-      preferences: appearance,
-      child: MaterialApp(
-        title: 'Matlingo • Học bằng khám phá',
-        debugShowCheckedModeBanner: false,
-        theme: appearance.theme,
-        builder: (context, child) {
-          final media = MediaQuery.of(context);
-          return MediaQuery(
-            data: media.copyWith(
-              textScaler: TextScaler.linear(
-                media.textScaler.scale(14) / 14 * appearance.textSize,
+  Widget build(BuildContext context) {
+    final cloud = CloudScope.maybeOf(context);
+    return ListenableBuilder(
+      listenable: appearance,
+      builder: (context, _) => AppearanceScope(
+        preferences: appearance,
+        child: MaterialApp(
+          key: ValueKey(cloud?.userId),
+          title: 'Matlingo • Học bằng khám phá',
+          debugShowCheckedModeBanner: false,
+          theme: appearance.theme,
+          builder: (context, child) {
+            final media = MediaQuery.of(context);
+            return MediaQuery(
+              data: media.copyWith(
+                textScaler: TextScaler.linear(
+                  media.textScaler.scale(14) / 14 * appearance.textSize,
+                ),
+                disableAnimations:
+                    media.disableAnimations || appearance.reduceMotion,
               ),
-              disableAnimations:
-                  media.disableAnimations || appearance.reduceMotion,
-            ),
-            child: child!,
-          );
-        },
-        home: ListenableBuilder(
-          listenable: widget.store,
-          builder: (context, _) {
-            if (!widget.store.hasSession) {
-              return MotionEntrance(
-                replayKey: 'entry',
-                child: EntryPage(store: widget.store),
-              );
-            }
-            if (!widget.store.profile!.onboarded) {
-              return MotionEntrance(
-                replayKey: 'onboarding',
-                child: OnboardingPage(store: widget.store),
-              );
-            }
-            return MotionEntrance(
-              replayKey: widget.store.profile!.id,
-              child: HomeShell(
-                key: ValueKey(widget.store.profile!.id),
-                store: widget.store,
-                chatResponder: widget.chatResponder,
-              ),
+              child: child!,
             );
           },
+          home: ListenableBuilder(
+            listenable: widget.store,
+            builder: (context, _) {
+              if (cloud != null && !cloud.signedIn) {
+                return CloudAccountPage(controller: cloud);
+              }
+              if (cloud != null &&
+                  widget.store.profile != null &&
+                  !cloud.canUseProfile(widget.store.profile!.id)) {
+                return EntryPage(store: widget.store);
+              }
+              if (!widget.store.hasSession) {
+                return MotionEntrance(
+                  replayKey: 'entry',
+                  child: EntryPage(store: widget.store),
+                );
+              }
+              if (!widget.store.profile!.onboarded) {
+                return MotionEntrance(
+                  replayKey: 'onboarding',
+                  child: OnboardingPage(store: widget.store),
+                );
+              }
+              return MotionEntrance(
+                replayKey: widget.store.profile!.id,
+                child: HomeShell(
+                  key: ValueKey(widget.store.profile!.id),
+                  store: widget.store,
+                  chatResponder: widget.chatResponder,
+                ),
+              );
+            },
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class HomeShell extends StatefulWidget {
@@ -280,8 +300,6 @@ class TodayPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             if (resume != null) ...[
-              TopicArtwork(topic: resume, height: 144),
-              const SizedBox(height: 14),
               Text(
                 resume.title,
                 textAlign: TextAlign.left,
@@ -324,35 +342,9 @@ class TodayPage extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               TextButton(onPressed: onExplore, child: const Text('Đổi chủ đề')),
+              const SizedBox(height: 18),
+              const HomeOwlMascot(),
             ] else ...[
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 164,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: TopicArtwork(
-                        topic: topicById('geometry'),
-                        height: 132,
-                      ),
-                    ),
-                    Expanded(
-                      child: TopicArtwork(
-                        topic: topicById('probability'),
-                        height: 164,
-                      ),
-                    ),
-                    Expanded(
-                      child: TopicArtwork(
-                        topic: topicById('coding'),
-                        height: 132,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 28),
               Text(
                 store.completed.isEmpty
                     ? 'Chọn một chủ đề bạn thích.\nBắt đầu bằng một thí nghiệm nhỏ.'
@@ -370,9 +362,17 @@ class TodayPage extends StatelessWidget {
                 onPressed: onExplore,
                 child: const Text('Chọn chủ đề'),
               ),
+              const SizedBox(height: 24),
+              const HomeOwlMascot(),
             ],
             const SizedBox(height: 28),
-            HomeChatBox(onSend: chatResponder),
+            HomeChatBox(
+              onSend:
+                  chatResponder ?? EngineScope.maybeOf(context)?.chatResponder,
+              onCanvasSend: chatResponder == null
+                  ? EngineScope.maybeOf(context)?.canvasChatResponder
+                  : null,
+            ),
           ],
         ),
       ),
@@ -702,106 +702,85 @@ class TopicPage extends StatelessWidget {
   final LearningTopic topic;
   final LearningStore store;
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppPageHeader(title: Text(topic.subject)),
-    body: AppPageBody(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: AppLayout.panel(context),
-            borderRadius: BorderRadius.circular(AppLayout.cardRadius),
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: store,
+    builder: (context, _) => Theme(
+      data: LessonTheme(topic.id, 0, Theme.of(context)).theme,
+      child: Builder(
+        builder: (context) => Scaffold(
+          appBar: AppPageHeader(title: Text(topic.subject)),
+          body: AppPageBody(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(AppLayout.cardRadius),
+                ),
+                child: TopicArtwork(topic: topic, height: 110),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                topic.title,
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                topic.subtitle,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 28),
+              TopicRoadmap(topic: topic, store: store),
+              const SizedBox(height: 24),
+            ],
           ),
-          child: TopicArtwork(topic: topic, height: 170),
-        ),
-        const SizedBox(height: 24),
-        Text(topic.title, style: Theme.of(context).textTheme.headlineLarge),
-        const SizedBox(height: 12),
-        Text(topic.subtitle, style: Theme.of(context).textTheme.bodyLarge),
-        const SizedBox(height: 24),
-        const Text(
-          'BẠN SẼ TỰ TAY…',
-          style: TextStyle(
-            fontSize: 11,
-            letterSpacing: 1.2,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 16),
-        for (int i = 0; i < topic.experiments.length; i++)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 18),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: i == 0 ? topic.color : BrilliantPalette.surface,
-                    shape: BoxShape.circle,
+          bottomNavigationBar: SafeArea(
+            child: IntrinsicHeight(
+              child: Center(
+                heightFactor: 1,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: AppLayout.contentWidth,
                   ),
-                  child: Center(
-                    child: Text(
-                      '${i + 1}',
-                      style: const TextStyle(fontWeight: FontWeight.w700),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
+                    child: PrimaryAction(
+                      expand: true,
+                      onPressed: () => openLesson(context, topic, store),
+                      child: Text(
+                        store.progress(topic.id) != null
+                            ? 'Tiếp tục phiên học'
+                            : store.completed.contains(topic.id)
+                            ? (topic.experiments.every(
+                                    (s) => store
+                                        .completedExperimentIds(topic.id)
+                                        .contains(s.id),
+                                  )
+                                  ? 'Khám phá lại'
+                                  : 'Khám phá bài mới')
+                            : 'Vào phòng thí nghiệm',
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Text(
-                    '${topic.experiments[i].stage} · ${topic.experiments[i].title}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                const Icon(
-                  Icons.gesture,
-                  size: 20,
-                  color: BrilliantPalette.secondaryText,
-                ),
-              ],
+              ),
             ),
           ),
-        const SizedBox(height: 12),
-        PrimaryAction(
-          expand: true,
-          onPressed: () => openLesson(context, topic, store),
-          child: Text(
-            store.progress(topic.id) != null
-                ? 'Tiếp tục phiên học'
-                : store.completed.contains(topic.id)
-                ? (topic.experiments.every(
-                        (s) => store
-                            .completedExperimentIds(topic.id)
-                            .contains(s.id),
-                      )
-                      ? 'Khám phá lại'
-                      : 'Khám phá bài mới')
-                : 'Vào phòng thí nghiệm',
-          ),
         ),
-        const SizedBox(height: 16),
-        const Text(
-          'Chạm, thử, thay đổi. Ý tưởng xuất hiện trong lúc bạn làm.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 12,
-            height: 1.5,
-            color: BrilliantPalette.secondaryText,
-          ),
-        ),
-        const SizedBox(height: 12),
-      ],
+      ),
     ),
   );
 }
 
 class LessonPage extends StatefulWidget {
-  const LessonPage({super.key, required this.topic, required this.store});
+  const LessonPage({
+    super.key,
+    required this.topic,
+    required this.store,
+    this.stopwatch,
+  });
   final LearningTopic topic;
   final LearningStore store;
+  final Stopwatch? stopwatch;
   @override
   State<LessonPage> createState() => _LessonPageState();
 }
@@ -813,9 +792,10 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
   bool finishing = false;
   bool hintVisible = false;
   String? error;
-  final clock = Stopwatch();
+  late final clock = widget.stopwatch ?? Stopwatch();
   final scroll = ScrollController();
   Timer? autosave;
+  bool appActive = true;
   int get step =>
       (draft['step'] as int).clamp(0, widget.topic.experiments.length - 1);
   ExperimentSpec get spec => widget.topic.experiments[step];
@@ -877,7 +857,9 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
     );
     draft['elapsedMs'] ??= ((draft['seconds'] as num?)?.toInt() ?? 0) * 1000;
     clock.start();
-    autosave = Timer.periodic(const Duration(seconds: 15), (_) => persist());
+    autosave = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (clock.isRunning) unawaited(persist());
+    });
     // Persist an opened lesson too, so a zero-action session can be resumed.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) persist();
@@ -902,17 +884,36 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
       return;
     }
     _accountTime();
-    await widget.store.saveProgress(widget.topic.id, draft);
+    await widget.store.saveProgress(widget.topic.id, {
+      ...draft,
+      'activeActivityId': spec.id,
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncClock();
+  }
+
+  void _syncClock() {
+    final visible = ModalRoute.isCurrentOf(context) ?? true;
+    if (visible &&
+        appActive &&
+        !finishing &&
+        widget.store.profile?.id == ownerId) {
+      clock.start();
+    } else if (clock.isRunning) {
+      clock.stop();
+      // Route visibility can change during build; publish the save afterwards.
+      unawaited(Future<void>.microtask(persist));
+    }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      clock.start();
-    } else {
-      clock.stop();
-      unawaited(persist());
-    }
+    appActive = state == AppLifecycleState.resumed;
+    _syncClock();
   }
 
   @override
@@ -1013,19 +1014,33 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
             ),
           ),
         );
-      } catch (_) {
+      } catch (failure) {
         if (!mounted) return;
         setState(() {
           finishing = false;
-          error = 'Chưa thể hoàn thành. Kiểm tra lại các bước và thử lưu lại.';
+          error =
+              widget.store.saveError ??
+              friendlyError(
+                failure,
+                fallback: 'Chưa hoàn tất bước lưu kết quả. Bạn có thể thử lại; tiến độ hiện tại vẫn ở đây.',
+              );
         });
-        clock.start();
+        _syncClock();
       }
     }
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) {
+    final visual = LessonTheme(widget.topic.id, step, Theme.of(context));
+    return Theme(
+      data: visual.theme,
+      child: Builder(builder: (context) => _lesson(context, visual)),
+    );
+  }
+
+  Widget _lesson(BuildContext context, LessonTheme visual) => Scaffold(
+    key: const ValueKey('themed-lesson'),
     body: SafeArea(
       child: AppContentFrame(
         child: Column(
@@ -1059,6 +1074,17 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
                 ],
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: _LessonStudyTime(
+                  elapsed: () =>
+                      ((draft['elapsedMs'] as num?)?.toInt() ?? 0) +
+                      clock.elapsedMilliseconds,
+                ),
+              ),
+            ),
             Expanded(
               child: MotionEntrance(
                 replayKey: spec.id,
@@ -1069,13 +1095,17 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
                   children: [
                     Text(
                       spec.stage.toUpperCase(),
-                      style: Theme.of(context).textTheme.labelSmall,
+                      style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                        color: visual.theme.colorScheme.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       spec.title,
                       textAlign: TextAlign.left,
-                      style: Theme.of(context).textTheme.headlineMedium,
+                      style: Theme.of(context).textTheme.headlineMedium!
+                          .copyWith(color: visual.theme.colorScheme.primary),
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -1086,11 +1116,15 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: paper,
+                        color: spec.mechanism == 'reasonedChoice'
+                            ? visual.theme.colorScheme.surface
+                            : visual.canvasTheme.colorScheme.surface,
                         borderRadius: BorderRadius.circular(
                           AppLayout.cardRadius,
                         ),
-                        border: Border.all(color: BrilliantPalette.track),
+                        border: Border.all(
+                          color: visual.theme.colorScheme.outlineVariant,
+                        ),
                         boxShadow: const [
                           BoxShadow(
                             color: Color(0x0A000000),
@@ -1099,13 +1133,18 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
                           ),
                         ],
                       ),
-                      child: RepaintBoundary(
-                        child: ExperimentWorkspace(
-                          key: ValueKey('${spec.id}:$revision'),
-                          spec: spec,
-                          data: data,
-                          locked: correct || finishing,
-                          onChanged: edit,
+                      child: Theme(
+                        data: spec.mechanism == 'reasonedChoice'
+                            ? visual.theme
+                            : visual.canvasTheme,
+                        child: RepaintBoundary(
+                          child: ExperimentWorkspace(
+                            key: ValueKey('${spec.id}:$revision'),
+                            spec: spec,
+                            data: data,
+                            locked: correct || finishing,
+                            onChanged: edit,
+                          ),
                         ),
                       ),
                     ),
@@ -1147,7 +1186,8 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
                           ? Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: BrilliantPalette.surface,
+                                color:
+                                    visual.theme.colorScheme.secondaryContainer,
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               child: Column(
@@ -1161,7 +1201,13 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
                                             hintLevel,
                                           )
                                         : contextualHint(spec, data),
-                                    style: const TextStyle(height: 1.5),
+                                    style: TextStyle(
+                                      height: 1.5,
+                                      color: visual
+                                          .theme
+                                          .colorScheme
+                                          .onSecondaryContainer,
+                                    ),
                                   ),
                                   if (supportsProgressiveGuidance(spec)) ...[
                                     const SizedBox(height: 8),
@@ -1195,9 +1241,7 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
                         key: const ValueKey('lesson-feedback'),
                         padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
-                          color: correct
-                              ? BrilliantPalette.successSurface
-                              : BrilliantPalette.errorSurface,
+                          color: visual.theme.colorScheme.surfaceContainerHigh,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Column(
@@ -1296,6 +1340,39 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
   );
 }
 
+class _LessonStudyTime extends StatefulWidget {
+  const _LessonStudyTime({required this.elapsed});
+  final int Function() elapsed;
+  @override
+  State<_LessonStudyTime> createState() => _LessonStudyTimeState();
+}
+
+class _LessonStudyTimeState extends State<_LessonStudyTime> {
+  Timer? ticker;
+  @override
+  void initState() {
+    super.initState();
+    // Only repaint this readout. Durable saving remains on the existing cadence.
+    ticker = Timer.periodic(const Duration(seconds: 1), (_) => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    ticker?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Text(
+    'Phiên này · ${studyClockLabel(widget.elapsed())}',
+    key: const ValueKey('lesson-study-time'),
+    style: TextStyle(
+      fontSize: 12,
+      color: Theme.of(context).colorScheme.primary,
+    ),
+  );
+}
+
 class ExperimentWorkspace extends StatelessWidget {
   const ExperimentWorkspace({
     super.key,
@@ -1310,6 +1387,14 @@ class ExperimentWorkspace extends StatelessWidget {
   final ValueChanged<ExperimentData> onChanged;
   @override
   Widget build(BuildContext context) {
+    if (spec.mechanism == 'reasonedChoice') {
+      return ReasoningWorkspace(
+        spec: spec,
+        data: data,
+        locked: locked,
+        onChanged: onChanged,
+      );
+    }
     if (supportsMathExperiment(spec.mechanism)) {
       return MathExperiment(
         spec: spec,
@@ -1440,6 +1525,7 @@ class CompletionPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 26),
+            const LearningSyncStatus(),
             PrimaryAction(
               expand: true,
               onPressed: () {
@@ -1473,9 +1559,8 @@ class _ProfilePageState extends State<ProfilePage> {
   DateTime selected = DateTime.now();
   String _time(DailyLearningActivity activity) {
     final ms = activity.activeMs;
-    if (ms == null) return activity.sessions == 0 ? '0 phút' : '—';
-    if (ms > 0 && ms < 60000) return '<1 phút';
-    return '${ms ~/ 60000} phút';
+    if (ms == null) return activity.sessions == 0 ? '0 giây' : '—';
+    return studyTimeLabel(ms);
   }
 
   @override
@@ -1648,6 +1733,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ],
                 const SizedBox(height: 24),
+                const CloudAccountButton(),
                 TextButton.icon(
                   onPressed: () async {
                     await widget.store.flush();
@@ -1655,7 +1741,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            widget.store.saveError ?? 'Đã lưu phiên học.',
+                            widget.store.saveError ??
+                                'Đã lưu tiến độ trên thiết bị.',
                           ),
                         ),
                       );

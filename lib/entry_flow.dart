@@ -1,4 +1,5 @@
 import 'app_layout.dart';
+import 'features/account/cloud_account_page.dart';
 
 import 'dart:math' as math;
 
@@ -55,7 +56,8 @@ class _EntryPageState extends State<EntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final profiles = widget.store.profiles;
+    final cloud = CloudScope.maybeOf(context);
+    final profiles = cloud?.profiles ?? widget.store.profiles;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -178,19 +180,21 @@ class _EntryPageState extends State<EntryPage> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Row(
+                    Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.phonelink_lock_outlined,
                           size: 18,
                           color: BrilliantPalette.secondaryText,
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Hồ sơ trên thiết bị • Học được khi offline. Phiên học lưu ở đây, chưa đồng bộ sang thiết bị khác.',
-                            style: TextStyle(
+                            cloud == null
+                                ? 'Hồ sơ trên thiết bị • Học được khi offline.'
+                                : 'Tiến độ tự lưu lên tài khoản khi có mạng. Khi offline, dữ liệu được giữ trên thiết bị và gửi lại khi kết nối.',
+                            style: const TextStyle(
                               fontSize: 12,
                               height: 1.5,
                               color: BrilliantPalette.secondaryText,
@@ -199,6 +203,7 @@ class _EntryPageState extends State<EntryPage> {
                         ),
                       ],
                     ),
+                    const CloudAccountButton(),
                     if (_error != null || widget.store.saveError != null)
                       _ErrorNote(_error ?? widget.store.saveError!),
                   ],

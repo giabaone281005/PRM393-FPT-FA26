@@ -56,3 +56,5 @@ app.*.map.json
 supabase/.temp/
 supabase/.branches/
 /repo-history/
+/config/app.mobile.json
+/config/app.e2e.json

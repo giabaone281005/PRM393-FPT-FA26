@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 import 'app_motion.dart';
 import 'app_preferences.dart';
 import 'learning_store.dart';
+import 'features/account/cloud_account_page.dart';
+import 'features/engines/engine_scope.dart';
+import 'features/engines/engine_settings_page.dart';
 
-enum _MenuDestination { appearance, gift, about, help, logout }
+enum _MenuDestination { appearance, cloud, engines, gift, about, help, logout }
 
 class SettingsMenuButton extends StatelessWidget {
   const SettingsMenuButton({super.key, required this.store});
@@ -25,11 +28,22 @@ class SettingsMenuButton extends StatelessWidget {
     shadowColor: const Color(0x18000000),
     onSelected: (destination) async {
       if (destination == _MenuDestination.logout) {
-        await store.signOut();
+        final cloud = CloudScope.maybeOf(context);
+        if (cloud != null) {
+          await cloud.signOut();
+        } else {
+          await store.signOut();
+        }
         return;
       }
       final page = switch (destination) {
         _MenuDestination.appearance => const AppearancePage(),
+        _MenuDestination.cloud => CloudAccountPage(
+          controller: CloudScope.maybeOf(context)!,
+        ),
+        _MenuDestination.engines => EngineSettingsPage(
+          runtime: EngineScope.maybeOf(context)!.runtime,
+        ),
         _MenuDestination.gift => const GiftPremiumPage(),
         _MenuDestination.about => const AboutMatlingoPage(),
         _MenuDestination.help => const HelpMatlingoPage(),
@@ -39,30 +53,41 @@ class SettingsMenuButton extends StatelessWidget {
         Navigator.push(context, DiscoveryRoute<void>(builder: (_) => page));
       }
     },
-    itemBuilder: (_) => const [
-      PopupMenuItem(
+    itemBuilder: (_) => [
+      if (EngineScope.maybeOf(context) != null)
+        const PopupMenuItem(
+          value: _MenuDestination.engines,
+          key: ValueKey('menu-engines'),
+          child: Text('Engine học tập'),
+        ),
+      if (CloudScope.maybeOf(context) != null)
+        const PopupMenuItem(
+          value: _MenuDestination.cloud,
+          child: Text('Tài khoản & sao lưu'),
+        ),
+      const PopupMenuItem(
         value: _MenuDestination.appearance,
         key: ValueKey('menu-appearance'),
         child: Text('Cài đặt'),
       ),
-      PopupMenuItem(
+      const PopupMenuItem(
         value: _MenuDestination.gift,
         key: ValueKey('menu-gift'),
         child: Text('Tặng Premium'),
       ),
-      PopupMenuDivider(),
-      PopupMenuItem(
+      const PopupMenuDivider(),
+      const PopupMenuItem(
         value: _MenuDestination.about,
         key: ValueKey('menu-about'),
         child: Text('Giới thiệu'),
       ),
-      PopupMenuItem(
+      const PopupMenuItem(
         value: _MenuDestination.help,
         key: ValueKey('menu-help'),
         child: Text('Trợ giúp'),
       ),
-      PopupMenuDivider(),
-      PopupMenuItem(
+      const PopupMenuDivider(),
+      const PopupMenuItem(
         value: _MenuDestination.logout,
         key: ValueKey('menu-logout'),
         child: Text('Đăng xuất'),
@@ -163,7 +188,7 @@ class AboutMatlingoPage extends StatelessWidget {
       Text('Dữ liệu của bạn', style: Theme.of(context).textTheme.titleLarge),
       const SizedBox(height: 12),
       const Text(
-        'Hồ sơ, tiến độ và cài đặt được lưu trên thiết bị này. Đăng xuất không xóa hồ sơ. Gỡ ứng dụng hoặc xóa dữ liệu hệ thống có thể làm mất tiến độ; hiện chưa có đồng bộ hoặc sao lưu đám mây.',
+        'Hồ sơ và tiến độ được lưu trên thiết bị. Mở Tài khoản & sao lưu để liên kết hồ sơ với tài khoản cloud và khôi phục trên điện thoại khác. Đăng xuất không xóa hồ sơ; hãy kiểm tra bản sao lưu trước khi gỡ ứng dụng.',
         style: TextStyle(height: 1.6),
       ),
       const SizedBox(height: 24),

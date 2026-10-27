@@ -1,5 +1,9 @@
 # Matlingo — học qua thí nghiệm tương tác
 
+> **Context phát triển hiện tại (26/10/2026): [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md).** Đọc cùng `AGENTS.md` và `VALIDATION.md` trước khi làm tiếp. Một số mô tả bên dưới ghi lại các đợt phát triển cũ; tài liệu context phân biệt rõ trạng thái hiện tại và phần còn chờ.
+
+Bản Android 1.3.1 và hướng dẫn cài/kiểm thử online: [PHONE_READINESS.md](docs/PHONE_READINESS.md).
+
 Flutter mobile app, tiếng Việt, chạy offline. Luồng hoàn chỉnh: **tạo/mở hồ sơ → chọn sở thích/nhịp học → khám phá chủ đề → ba thí nghiệm → hoàn thành → lịch sử và tiếp tục phiên**.
 
 ## Bài học 3D và cập nhật mobile

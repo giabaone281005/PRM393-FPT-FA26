@@ -108,6 +108,40 @@ class _SculptedTopicPainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
     );
     switch (id) {
+      case 'marxism':
+        rounded(canvas, const Rect.fromLTWH(39, 40, 122, 108), 12, [
+          navy,
+          blue,
+        ]);
+        rounded(canvas, const Rect.fromLTWH(48, 31, 104, 108), 8, [
+          const Color(0xFFFFF4D8),
+          gold,
+        ]);
+        line(canvas, [const Offset(100, 38), const Offset(100, 133)], navy, 3);
+        for (var y = 58.0; y < 119; y += 18) {
+          line(canvas, [Offset(60, y), Offset(88, y)], navy, 3);
+          line(canvas, [Offset(112, y), Offset(139, y)], navy, 3);
+        }
+      case 'painting':
+        oval(canvas, const Rect.fromLTWH(35, 38, 130, 105), [
+          const Color(0xFFFFF4D8),
+          gold,
+        ]);
+        for (final (point, color) in [
+          (const Offset(65, 67), blue),
+          (const Offset(100, 57), violet),
+          (const Offset(135, 76), emerald),
+          (const Offset(118, 116), navy),
+        ]) {
+          canvas.drawCircle(point, 12, Paint()..color = color);
+        }
+        line(canvas, [const Offset(58, 144), const Offset(134, 33)], navy, 8);
+        line(
+          canvas,
+          [const Offset(128, 42), const Offset(141, 23)],
+          emerald,
+          12,
+        );
       case 'algebra':
       case 'logic':
         _gear(
