@@ -301,16 +301,15 @@ class LearningSyncController extends ChangeNotifier {
       }
       final ids = learningMap(store.serverSyncFor(localId)['sessions']).keys
           .toList();
+      var deferredLessons = 0;
       for (final id in ids) {
         _guard(owner, localId, generation);
         var row = _row(localId, id);
         if (row['verified'] == true) continue;
         final topic = topics.where((t) => t.id == row['topic']).firstOrNull;
         if (topic == null) {
-          throw const LearningApiFailure(
-            'unsupported_activity',
-            'Chủ đề này chưa được hỗ trợ đồng bộ. Tiến độ vẫn được giữ trên thiết bị.',
-          );
+          deferredLessons++;
+          continue;
         }
         if (row['releaseId'] == null) {
           _catalog ??= await repository.catalog(owner);
@@ -323,6 +322,7 @@ class LearningSyncController extends ChangeNotifier {
           final local = {for (final spec in topic.experiments) spec.id: spec};
           if (release['id'] == null ||
               activities.isEmpty ||
+              activities.length != local.length ||
               activities.any((a) {
                 final spec = local[a['activity_id']];
                 return spec == null ||
@@ -331,10 +331,10 @@ class LearningSyncController extends ChangeNotifier {
                     _canonical(a['config']) != _canonical(spec.config) ||
                     _canonical(a['initial_state']) != _canonical(spec.initial);
               })) {
-            throw const LearningApiFailure(
-              'unsupported_lesson_version',
-              'Bài học hiện chưa tương thích với máy chủ. Tiến độ vẫn được giữ; hãy cập nhật ứng dụng.',
-            );
+            // Keep unpublished/incompatible lessons durable without blocking
+            // other sessions or sending content the release cannot evaluate.
+            deferredLessons++;
+            continue;
           }
           await _sessionPatch(localId, id, {
             'releaseId': release['id'],
@@ -344,6 +344,17 @@ class LearningSyncController extends ChangeNotifier {
             },
           });
           row = _row(localId, id);
+        }
+        final versions = learningMap(row['versions']);
+        final localActivities = topic.experiments
+            .map((spec) => spec.id)
+            .toSet();
+        if (localActivities.length != versions.length ||
+            topic.experiments.any(
+              (spec) => versions[spec.id] != spec.contentVersion,
+            )) {
+          deferredLessons++;
+          continue;
         }
         if (row['serverStarted'] != true) {
           _guard(owner, localId, generation);
@@ -467,9 +478,12 @@ class LearningSyncController extends ChangeNotifier {
       final report = await repository.progress(owner, profileId);
       _guard(owner, localId, generation);
       await _rootPatch(localId, {'verifiedXp': report['verified_xp'] ?? 0});
-      noticeKind = NoticeKind.success;
+      if (deferredLessons > 0) _catalog = null;
+      noticeKind = deferredLessons > 0 ? NoticeKind.info : NoticeKind.success;
       hasProfileConflict = false;
-      message = store.pendingServerSessions == 0
+      message = deferredLessons > 0
+          ? 'Một số bài đang chờ phiên bản máy chủ hỗ trợ. Bài làm vẫn được giữ trên thiết bị; bạn có thể tiếp tục học.'
+          : store.pendingServerSessions == 0
           ? 'Tiến độ đã được đồng bộ với máy chủ.'
           : 'Đã đồng bộ một phần; thay đổi mới đang chờ gửi tiếp.';
     } on _AccountChanged {

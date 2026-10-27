@@ -4,7 +4,7 @@
 
 ## Tính năng chính
 
-- **Học qua thực hành:** 11 chủ đề, 53 hoạt động với 30 cơ chế tương tác, gồm toán học, logic, lập trình, dữ liệu, mạch điện và hình học 3D.
+- **Học qua thực hành:** 13 chủ đề, 71 hoạt động, gồm toán học, logic, lập trình, dữ liệu, mạch điện, hình học 3D, triết học và hội họa.
 - **Theo dõi tiến độ:** lưu hồ sơ, bài đang học, lịch sử, thời gian học và XP.
 - **Tài khoản và cloud:** đăng nhập, xác nhận email, tự sao lưu hồ sơ và gửi kết quả học lên Supabase để xác nhận XP.
 - **Trợ lý học tập:** chat AI, bảng vẽ và môi trường thực hành Python/JavaScript qua engine do người dùng cấu hình.
@@ -16,7 +16,7 @@ Luồng sử dụng: **Mở hồ sơ → Chọn chủ đề → Thực hành →
 
 Flutter 3.47.4 · Dart 3.13.3 · Supabase · SharedPreferences · Flutter Secure Storage.
 
-Phiên bản hiện tại: **1.3.1+5**. Android là nền tảng đã kiểm thử; iOS cần macOS/Xcode và chưa được xác minh.
+Phiên bản hiện tại: **1.3.2+6**. Android là nền tảng đã kiểm thử; iOS cần macOS/Xcode và chưa được xác minh.
 
 ## Chạy dự án
 
@@ -39,6 +39,8 @@ flutter run --dart-define-from-file=config/app.mobile.json
 
 File cấu hình local được Git ignore. Không đưa service role key hoặc khóa AI dùng chung vào ứng dụng. Chat AI và chạy code cần cấu hình engine riêng trong menu **Engine học tập**.
 
+Luồng quên mật khẩu cần áp dụng [email recovery](supabase/templates/README.md) trên backend rồi bật `PASSWORD_RECOVERY_ENABLED` trong file cấu hình mobile.
+
 ## Kiểm tra và build Android
 
 ```sh
@@ -48,6 +50,8 @@ flutter build apk --debug
 ```
 
 APK debug nằm tại `build/app/outputs/flutter-apk/app-debug.apk`. Để build bản có cloud, thêm `--dart-define-from-file=config/app.mobile.json` vào lệnh build.
+
+Bản release yêu cầu keystore riêng: sao chép `android/key.properties.example` thành `android/key.properties`, điền thông tin signing và giữ keystore ngoài repo. Sau đó chạy `flutter build appbundle --release --dart-define-from-file=config/app.mobile.json`. File chứa mật khẩu signing không được commit.
 
 ## Cấu trúc chính
 

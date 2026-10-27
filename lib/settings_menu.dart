@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'app_motion.dart';
 import 'app_preferences.dart';
 import 'learning_store.dart';
+import 'learning_catalog.dart';
+import 'data/repositories/app_info_repository.dart';
 import 'features/account/cloud_account_page.dart';
 import 'features/engines/engine_scope.dart';
 import 'features/engines/engine_settings_page.dart';
@@ -70,11 +72,6 @@ class SettingsMenuButton extends StatelessWidget {
         key: ValueKey('menu-appearance'),
         child: Text('Cài đặt'),
       ),
-      const PopupMenuItem(
-        value: _MenuDestination.gift,
-        key: ValueKey('menu-gift'),
-        child: Text('Tặng Premium'),
-      ),
       const PopupMenuDivider(),
       const PopupMenuItem(
         value: _MenuDestination.about,
@@ -132,8 +129,8 @@ class GiftPremiumPage extends StatelessWidget {
         style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
       ),
       const SizedBox(height: 12),
-      const Text(
-        'Hiện tại, bạn có thể khám phá miễn phí toàn bộ 10 chủ đề và 46 thí nghiệm trong Matlingo. Khi mở quà tặng, thông tin gói và giá sẽ xuất hiện tại đây.',
+      Text(
+        'Hiện tại, bạn có thể khám phá miễn phí toàn bộ ${topics.length} chủ đề và ${experimentCatalog.values.fold<int>(0, (count, items) => count + items.length)} hoạt động trong Matlingo.',
         textAlign: TextAlign.center,
         style: TextStyle(height: 1.6),
       ),
@@ -146,8 +143,14 @@ class GiftPremiumPage extends StatelessWidget {
   );
 }
 
-class AboutMatlingoPage extends StatelessWidget {
+class AboutMatlingoPage extends StatefulWidget {
   const AboutMatlingoPage({super.key});
+  @override
+  State<AboutMatlingoPage> createState() => _AboutMatlingoPageState();
+}
+
+class _AboutMatlingoPageState extends State<AboutMatlingoPage> {
+  late final _version = AppInfoRepository().versionLabel();
   @override
   Widget build(BuildContext context) => _InformationPage(
     title: 'Giới thiệu',
@@ -162,17 +165,25 @@ class AboutMatlingoPage extends StatelessWidget {
       const SizedBox(height: 8),
       const Text('Hiểu bằng cách tự tay làm.', style: TextStyle(fontSize: 18)),
       const SizedBox(height: 8),
-      const Text('Phiên bản 1.3.0 (4)'),
+      FutureBuilder<String>(
+        future: _version,
+        builder: (context, snapshot) => Text(
+          snapshot.data ?? 'Đang đọc phiên bản…',
+          key: const ValueKey('app-version'),
+        ),
+      ),
       const SizedBox(height: 28),
       const Text(
-        'Kéo, xoay, ghép và thử. Mỗi chủ đề là ba thí nghiệm nhỏ giúp bạn tự tìm ra quy luật.',
+        'Kéo, xoay, ghép và thử. Khám phá từng chủ đề qua các hoạt động tương tác để tự tìm ra quy luật.',
         style: TextStyle(height: 1.6),
       ),
       const SizedBox(height: 24),
-      const ListTile(
+      ListTile(
         contentPadding: EdgeInsets.zero,
-        leading: Icon(Icons.grid_view_rounded),
-        title: Text('10 chủ đề · 46 thí nghiệm'),
+        leading: const Icon(Icons.grid_view_rounded),
+        title: Text(
+          '${topics.length} chủ đề · ${experimentCatalog.values.fold<int>(0, (count, items) => count + items.length)} hoạt động',
+        ),
       ),
       const ListTile(
         contentPadding: EdgeInsets.zero,
@@ -188,7 +199,7 @@ class AboutMatlingoPage extends StatelessWidget {
       Text('Dữ liệu của bạn', style: Theme.of(context).textTheme.titleLarge),
       const SizedBox(height: 12),
       const Text(
-        'Hồ sơ và tiến độ được lưu trên thiết bị. Mở Tài khoản & sao lưu để liên kết hồ sơ với tài khoản cloud và khôi phục trên điện thoại khác. Đăng xuất không xóa hồ sơ; hãy kiểm tra bản sao lưu trước khi gỡ ứng dụng.',
+        'Hồ sơ và tiến độ được lưu trên thiết bị. Với bản có cloud, hồ sơ đang mở tự sao lưu sau khi đăng nhập khi có mạng. Mở Tài khoản & sao lưu để kiểm tra bản cloud hoặc khôi phục thành hồ sơ riêng trên điện thoại khác. Đăng xuất không xóa hồ sơ; hãy kiểm tra bản sao lưu trước khi gỡ ứng dụng.',
         style: TextStyle(height: 1.6),
       ),
       const SizedBox(height: 24),
@@ -220,27 +231,27 @@ class _HelpMatlingoPageState extends State<HelpMatlingoPage> {
     ),
     (
       'XP được tính ra sao?',
-      'Hoàn thành cả ba thí nghiệm của một chủ đề để nhận 30 XP lần đầu. Ôn lại vẫn lưu lịch sử nhưng không cộng trùng XP.',
+      'Hoàn thành các hoạt động bắt buộc của một chủ đề để nhận 30 XP lần đầu. Ôn lại vẫn lưu lịch sử nhưng không cộng trùng XP. XP học cá nhân và XP server đã xác nhận được hiển thị riêng.',
     ),
     (
       'Đổi hồ sơ hoặc đăng xuất có mất bài không?',
-      'Không. Mở tab Hồ sơ để lưu phiên hoặc đổi người học. Đăng xuất giữ lại hồ sơ và tiến độ trên thiết bị; chọn lại hồ sơ để tiếp tục.',
+      'Đăng xuất không xóa hồ sơ đã lưu. Nếu app báo lỗi lưu, giữ app mở và thử lưu lại trước. Bản có cloud yêu cầu đăng nhập lại đúng tài khoản để mở hồ sơ đã liên kết.',
     ),
     (
       'Có cần kết nối mạng để học không?',
-      'Các thí nghiệm và tiến độ hoạt động offline. Nếu được kết nối trong tương lai, trợ lý chat sẽ cần mạng để trả lời.',
+      'Sau khi đăng nhập ở bản có cloud, bạn có thể thực hành các bài đã có trong app khi mất mạng. Sao lưu, xác nhận XP và các engine AI/code từ xa cần mạng. Bản phát triển không cấu hình cloud có chế độ offline.',
     ),
     (
       'Vì sao chat chưa gửi được?',
-      'Trợ lý hiện chưa được kết nối. Bạn có thể soạn câu hỏi và chọn gợi ý; nút gửi sẽ hoạt động khi trợ lý sẵn sàng.',
+      'Mở menu → Engine học tập, thêm kết nối AI và chọn engine đang dùng. Kiểm tra endpoint, model, khóa truy cập và mạng. Khi gửi lỗi, câu hỏi vẫn được giữ để thử lại.',
     ),
     (
       'Đổi nền, màu và cỡ chữ ở đâu?',
       'Mở menu ở góc trên bên phải, chọn Cài đặt. Thay đổi được áp dụng ngay và lưu trên thiết bị.',
     ),
     (
-      'Đã có thể tặng Premium chưa?',
-      'Chưa. Mục Tặng Premium hiện giới thiệu tính năng sắp có; chưa có bước thanh toán. Toàn bộ nội dung hiện có vẫn dùng miễn phí.',
+      'Khôi phục trên máy khác có gộp tiến độ không?',
+      'Chưa. Khôi phục tạo một hồ sơ riêng và giữ hồ sơ cũ cùng bài chưa gửi. Kiểm tra tài khoản và thời gian bản sao lưu trước khi chọn khôi phục.',
     ),
   ];
   @override

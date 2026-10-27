@@ -6,6 +6,7 @@ import 'journey_app.dart';
 import 'learning_store.dart';
 import 'data/providers/cloud_backup_controller.dart';
 import 'data/repositories/auth_repository.dart';
+import 'data/repositories/password_recovery_repository.dart';
 import 'data/repositories/backup_repository.dart';
 import 'features/account/cloud_account_page.dart';
 import 'features/engines/engine_scope.dart';
@@ -34,6 +35,10 @@ void main() async {
   final cloud = CloudBackupController(
     store: store,
     auth: SupabaseAuthRepository(client),
+    createPasswordRecovery:
+        const bool.fromEnvironment('PASSWORD_RECOVERY_ENABLED')
+        ? () => SupabasePasswordRecoveryRepository(url, key)
+        : null,
     repository: SupabaseBackupRepository(client),
   );
   final sync = LearningSyncController(

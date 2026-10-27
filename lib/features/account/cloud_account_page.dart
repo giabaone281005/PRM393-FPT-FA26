@@ -8,6 +8,7 @@ import '../../app_motion.dart';
 import '../../data/providers/cloud_backup_controller.dart';
 import '../shared/app_notice.dart';
 import 'learning_sync_scope.dart';
+import 'password_recovery_page.dart';
 
 class CloudScope extends InheritedNotifier<CloudBackupController> {
   const CloudScope({
@@ -348,6 +349,27 @@ class _CloudAccountPageState extends State<CloudAccountPage> {
                               : 'Chưa có tài khoản? Đăng ký',
                         ),
                       ),
+                      if (!_register &&
+                          controller.createPasswordRecovery != null)
+                        TextButton(
+                          key: const ValueKey('cloud-forgot-password'),
+                          onPressed: controller.busy
+                              ? null
+                              : () {
+                                  _password.clear();
+                                  Navigator.push(
+                                    context,
+                                    DiscoveryRoute<void>(
+                                      builder: (_) => PasswordRecoveryPage(
+                                        createRepository:
+                                            controller.createPasswordRecovery!,
+                                        initialEmail: _email.text,
+                                      ),
+                                    ),
+                                  );
+                                },
+                          child: const Text('Quên mật khẩu?'),
+                        ),
                       TextButton.icon(
                         key: const ValueKey('cloud-enter-code'),
                         onPressed: controller.busy

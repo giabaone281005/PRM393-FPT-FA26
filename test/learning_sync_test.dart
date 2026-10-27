@@ -62,10 +62,12 @@ class SyncTestRepository implements LearningRepository {
   final payloads = <String, String>{};
   final operations = <String>[];
   final profiles = <String, Map<String, dynamic>>{};
+  final draftRevisions = <String, int>{};
   int draftRevision = 0, xp = 0, completions = 0;
   bool offline = false,
       loseDraftResponse = false,
       conflictProfileUpdate = false;
+  bool baselineOnly = false;
   Completer<void>? profileDelay;
   @override
   Future<Map<String, dynamic>?> profile(String owner, String id) async {
@@ -80,14 +82,15 @@ class SyncTestRepository implements LearningRepository {
     'activities': [
       for (final t in topics)
         for (final s in t.experiments)
-          {
-            'topic_id': t.id,
-            'activity_id': s.id,
-            'content_version': s.contentVersion,
-            'mechanism': s.mechanism,
-            'config': s.config,
-            'initial_state': s.initial,
-          },
+          if (!baselineOnly || s.mechanism != 'reasonedChoice')
+            {
+              'topic_id': t.id,
+              'activity_id': s.id,
+              'content_version': s.contentVersion,
+              'mechanism': s.mechanism,
+              'config': s.config,
+              'initial_state': s.initial,
+            },
     ],
   };
   Future<Map<String, dynamic>> apply(
@@ -111,10 +114,13 @@ class SyncTestRepository implements LearningRepository {
       result = {...payload, 'revision': '1', 'owner_user_id': owner};
       profiles[payload['id'] as String] = result;
     } else if (kind == 'draft.save') {
-      expect('${payload['expected_revision']}', '$draftRevision');
+      final draftId = payload['id'] as String;
+      final revision = draftRevisions[draftId] ?? 0;
+      expect('${payload['expected_revision']}', '$revision');
+      draftRevisions[draftId] = revision + 1;
       draftRevision++;
       result = {
-        'draft': {'revision': '$draftRevision'},
+        'draft': {'revision': '${revision + 1}'},
       };
     } else if (kind == 'attempt.submit') {
       final spec = topics
@@ -207,6 +213,70 @@ void main() {
     store.dispose();
     await auth.events.close();
   });
+
+  test('unpublished lessons preserve their queue without blocking supported lessons', () async {
+    repository.baselineOnly = true;
+    final painting = topicById('painting').experiments.first;
+    await store.saveProgress('painting', {
+      'version': 3,
+      'step': 0,
+      'attempts': 1,
+      'activeActivityId': painting.id,
+      'states': {painting.id: painting.initialData()},
+    });
+    final paintingBefore = learningMap(
+      store.serverSyncFor(store.profile!.id)['sessions'],
+    ).values.map(learningMap).single;
+    await store.finish(
+      topic.id,
+      experiments: topic.experiments,
+      draft: draft(),
+    );
+    await sync.syncNow();
+    expect(repository.completions, 1);
+    expect(store.verifiedPoints, 30);
+    expect(store.pendingServerSessions, 1);
+    expect(sync.message, contains('chờ phiên bản máy chủ hỗ trợ'));
+    final paintingAfter = learningMap(
+      store.serverSyncFor(store.profile!.id)['sessions'],
+    ).values.map(learningMap).firstWhere((row) => row['topic'] == 'painting');
+    expect(paintingAfter, paintingBefore);
+    expect(
+      repository.payloads.values
+          .map((body) => jsonDecode(body) as Map)
+          .where((body) => body['topic_id'] == 'painting'),
+      isEmpty,
+    );
+    repository.baselineOnly = false;
+    await sync.syncNow();
+    expect(store.pendingServerSessions, 0);
+    expect(repository.completions, 1);
+  });
+
+  test(
+    'a partially published topic is deferred before starting a server session',
+    () async {
+      repository.baselineOnly = true;
+      final spec = topicById('coding').experiments.first;
+      await store.saveProgress('coding', {
+        'version': 3,
+        'step': 0,
+        'attempts': 1,
+        'activeActivityId': spec.id,
+        'states': {spec.id: spec.initialData()},
+      });
+      await sync.syncNow();
+      expect(
+        repository.operations.where((op) => op.endsWith('/session.start')),
+        isEmpty,
+      );
+      expect(store.pendingServerSessions, 1);
+      expect(store.verifiedPoints, 0);
+      repository.baselineOnly = false;
+      await sync.syncNow();
+      expect(store.pendingServerSessions, 0);
+    },
+  );
 
   test('local completion and journal commit together, then server confirms exactly once', () async {
     final value = draft();

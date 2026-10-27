@@ -59,7 +59,13 @@ supabase/.branches/
 /config/app.mobile.json
 /config/app.e2e.json
 
+# Release signing credentials.
+/android/key.properties
+*.jks
+*.keystore
+
 # Local development notes and historical reports.
+/docs/ANDROID_BETA_PLAN.md
 /PROJECT_CONTEXT.md
 /docs/CHAT_AND_SETTINGS_MENU.md
 /docs/CODEBASE_REPLACEMENT.md

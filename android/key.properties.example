@@ -1,0 +1,6 @@
+# Copy to android/key.properties (ignored). Keep the keystore outside the repo.
+# storeFile is absolute or relative to the android directory. Use forward slashes.
+storeFile=C:/path/to/private/matlingo-upload.jks
+storePassword=replace-with-your-store-password
+keyAlias=upload
+keyPassword=replace-with-your-key-password

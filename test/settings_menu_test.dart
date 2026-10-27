@@ -5,10 +5,18 @@ import 'package:brilliant_mobile/settings_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 void main() {
   late LearningStore store;
   setUp(() async {
+    PackageInfo.setMockInitialValues(
+      appName: 'Matlingo',
+      packageName: 'com.learningstudio.brilliant_mobile',
+      version: '2.0.3',
+      buildNumber: '42',
+      buildSignature: '',
+    );
     SharedPreferences.setMockInitialValues({});
     store = LearningStore(await SharedPreferences.getInstance());
     await store.createDeviceProfile('An');
@@ -22,7 +30,7 @@ void main() {
   }
 
   testWidgets(
-    'Popup routes all four information pages and preserves the selected tab',
+    'Popup hides unavailable Premium and preserves the selected tab',
     (tester) async {
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = const Size(280, 1000);
@@ -34,15 +42,15 @@ void main() {
       await tester.pumpAndSettle();
       for (final entry in {
         'appearance': AppearancePage,
-        'gift': GiftPremiumPage,
         'about': AboutMatlingoPage,
         'help': HelpMatlingoPage,
       }.entries) {
         await menu(tester);
         expect(
           find.byWidgetPredicate((widget) => widget is PopupMenuItem),
-          findsNWidgets(5),
+          findsNWidgets(4),
         );
+        expect(find.byKey(const ValueKey('menu-gift')), findsNothing);
         final item = find.byKey(ValueKey('menu-${entry.key}'));
         final bounds = tester.getRect(item);
         expect(bounds.left, greaterThanOrEqualTo(0));
@@ -50,6 +58,10 @@ void main() {
         await tester.tap(item);
         await tester.pumpAndSettle();
         expect(find.byType(entry.value), findsOneWidget);
+        if (entry.key == 'about') {
+          expect(find.text('Phiên bản 2.0.3 (42)'), findsOneWidget);
+          expect(find.text('13 chủ đề · 71 hoạt động'), findsOneWidget);
+        }
         Navigator.pop(tester.element(find.byType(entry.value)));
         await tester.pumpAndSettle();
         expect(

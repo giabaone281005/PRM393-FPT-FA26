@@ -2,6 +2,13 @@
 
 Đã kiểm tra ngày 26/10/2026. Giữ codebase và hệ giao diện REA hiện có.
 
+Thông tin bên dưới là bằng chứng cho bản 1.3.1. Code hiện tại là 1.3.2+6;
+xem `../VALIDATION.md` cho kiểm tra mới. Release mới yêu cầu cấu hình keystore
+từ `android/key.properties.example`; bản thử ký debug chỉ build khi bật rõ
+`MATLINGO_ALLOW_DEBUG_SIGNING=true` trong môi trường tiến trình và không dùng
+để phát hành store. Recovery mới cần template Reset password và flag cấu hình;
+chưa xác nhận email recovery thật hoặc QA máy vật lý cho bản 1.3.2.
+
 ## File để cài
 
 - APK: `build/releases/Matlingo-1.3.1.apk` (59.645.225 byte, khoảng 56,9 MiB).

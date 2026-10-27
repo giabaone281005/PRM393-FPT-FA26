@@ -1,5 +1,24 @@
 # Email xác nhận Matlingo
 
+## Khôi phục mật khẩu
+
+`recovery.html` là body cho **Authentication → Emails → Templates → Reset password**.
+Subject đề xuất: **Mã khôi phục mật khẩu Matlingo**. Phải áp dụng template này trên
+project trước khi bật luồng recovery cho người dùng: app nhận `{{ .Token }}` bằng
+`verifyOTP(type: OtpType.recovery)`, sau đó `updateUser(password: ...)` trên một
+Auth client tạm, không lưu session và không thay tài khoản đang học. Không thay
+template Confirm signup bằng template recovery.
+
+Sau khi áp dụng và kiểm tra email, đặt `PASSWORD_RECOVERY_ENABLED: true` trong
+file dart defines của bản mobile rồi build lại. Mặc định tính năng được ẩn để
+không mở màn nhập mã khi hosted template chỉ gửi link khôi phục.
+
+Mẫu recovery mới được thêm vào source; chưa xác minh hosted config hay nhận thư
+thật trong lượt triển khai này. Test client dùng HTTP giả lập, không chứng minh SMTP.
+App có cooldown 60 giây; rate limits/expiry phía server vẫn quyết định.
+
+## Xác nhận đăng ký
+
 `confirmation.html` là body cho **Authentication → Emails → Templates → Confirm signup**
 trong project `seoswmcldwwytdrfrrrb`. Subject: **Mã xác nhận tài khoản Matlingo**.
 Nếu Dashboard dùng navigation cũ, tìm **Authentication → Email Templates → Confirm signup**.

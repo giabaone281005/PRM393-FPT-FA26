@@ -9,12 +9,14 @@ import '../models/cloud_backup.dart';
 import '../models/app_failure.dart';
 import '../repositories/auth_repository.dart';
 import '../repositories/backup_repository.dart';
+import '../repositories/password_recovery_repository.dart';
 
 class CloudBackupController extends ChangeNotifier {
   CloudBackupController({
     required this.store,
     required this.auth,
     required this.repository,
+    this.createPasswordRecovery,
     DateTime Function()? clock,
   }) : _now = clock ?? DateTime.now {
     _links = _bindings();
@@ -41,6 +43,7 @@ class CloudBackupController extends ChangeNotifier {
   final LearningStore store;
   final AuthRepository auth;
   final BackupRepository repository;
+  final PasswordRecoveryRepository Function()? createPasswordRecovery;
   final DateTime Function() _now;
   StreamSubscription<String?>? _subscription;
   Timer? _debounce, _retry;
