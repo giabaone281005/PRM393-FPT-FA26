@@ -7,6 +7,16 @@ abstract final class AppLayout {
   static const tileRadius = 16.0;
   static const pagePadding = EdgeInsets.fromLTRB(gutter, 24, gutter, 32);
 
+  static EdgeInsets safePagePadding(BuildContext context) {
+    final safe = MediaQuery.paddingOf(context);
+    return EdgeInsets.fromLTRB(
+      pagePadding.left + safe.left,
+      pagePadding.top,
+      pagePadding.right + safe.right,
+      pagePadding.bottom + safe.bottom,
+    );
+  }
+
   static Color panel(BuildContext context) => Color.alphaBlend(
     Theme.of(context).colorScheme.primary.withValues(alpha: .035),
     Theme.of(context).colorScheme.surface,
@@ -34,7 +44,7 @@ class AppPageBody extends StatelessWidget {
     child: ListView(
       key: scrollKey,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: AppLayout.pagePadding,
+      padding: AppLayout.safePagePadding(context),
       children: children,
     ),
   );

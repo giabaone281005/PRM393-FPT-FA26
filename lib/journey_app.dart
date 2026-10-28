@@ -389,6 +389,13 @@ class ExplorePage extends StatefulWidget {
 
 class _ExplorePageState extends State<ExplorePage> {
   String query = '', filter = 'all';
+  final _search = TextEditingController();
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
   bool matches(LearningTopic t) =>
       '${t.title} ${t.subtitle} ${t.subject}'.toLowerCase().contains(
         query.toLowerCase(),
@@ -402,7 +409,7 @@ class _ExplorePageState extends State<ExplorePage> {
       constraints: const BoxConstraints(maxWidth: AppLayout.contentWidth),
       child: ListView(
         key: const ValueKey('topics-scroll'),
-        padding: AppLayout.pagePadding,
+        padding: AppLayout.safePagePadding(context),
         children: [
           Text(
             'Chủ đề của bạn',
@@ -416,10 +423,25 @@ class _ExplorePageState extends State<ExplorePage> {
           const SizedBox(height: 24),
           TextField(
             key: const ValueKey('topic-search'),
+            controller: _search,
+            textInputAction: TextInputAction.search,
+            onSubmitted: (_) => FocusScope.of(context).unfocus(),
             onChanged: (v) => setState(() => query = v),
-            decoration: const InputDecoration(
-              hintText: 'Tìm chủ đề…',
-              prefixIcon: Icon(Icons.search),
+            decoration: InputDecoration(
+              labelText: 'Tìm chủ đề',
+              hintText: 'Tên hoặc lĩnh vực…',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: query.isEmpty
+                  ? null
+                  : IconButton(
+                      key: const ValueKey('topic-search-clear'),
+                      tooltip: 'Xóa tìm kiếm',
+                      onPressed: () {
+                        _search.clear();
+                        setState(() => query = '');
+                      },
+                      icon: const Icon(Icons.close_rounded),
+                    ),
             ),
           ),
           const SizedBox(height: 14),
@@ -1585,7 +1607,7 @@ class _ProfilePageState extends State<ProfilePage> {
             constraints: const BoxConstraints(maxWidth: AppLayout.contentWidth),
             child: ListView(
               key: const ValueKey('profile-summary'),
-              padding: AppLayout.pagePadding,
+              padding: AppLayout.safePagePadding(context),
               children: [
                 Row(
                   children: [
@@ -1681,7 +1703,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 const SizedBox(height: 24),
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: .04),
                     borderRadius: BorderRadius.circular(AppLayout.cardRadius),
@@ -1689,25 +1711,43 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '7 ngày gần đây',
-                        style: Theme.of(context).textTheme.titleMedium,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          '7 ngày gần đây',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        '$activeDays ngày có học',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: BrilliantPalette.secondaryText,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          '$activeDays ngày có học',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: BrilliantPalette.secondaryText,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 20),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          for (final day in days)
-                            Expanded(child: _day(context, day, color)),
-                        ],
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final maxColumns = (constraints.maxWidth / 48)
+                              .floor()
+                              .clamp(1, days.length);
+                          final rows = (days.length / maxColumns).ceil();
+                          final columns = (days.length / rows).ceil();
+                          return Wrap(
+                            runSpacing: 8,
+                            children: [
+                              for (final day in days)
+                                SizedBox(
+                                  width: constraints.maxWidth / columns,
+                                  child: _day(context, day, color),
+                                ),
+                            ],
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -1774,7 +1814,8 @@ class _ProfilePageState extends State<ProfilePage> {
     return Semantics(
       selected: chosen,
       button: true,
-      label: 'Ngày ${day.day}/${day.month}, ${data.sessions} phiên hoàn thành',
+      label:
+          'Ngày ${day.day}/${day.month}, ${_time(data)}, ${data.sessions} phiên hoàn thành',
       child: InkWell(
         key: ValueKey('activity-${activityDay(day)}'),
         borderRadius: BorderRadius.circular(12),

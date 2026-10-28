@@ -72,6 +72,7 @@ class _EntryPageState extends State<EntryPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const _Brand(),
+                    const CloudSessionBar(),
                     const SizedBox(height: 20),
                     const _DiscoveryArt(height: 174),
                     const SizedBox(height: 24),
@@ -297,6 +298,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       ),
                     ],
                   ),
+                  const CloudSessionBar(),
                   const SizedBox(height: 16),
                   Row(
                     children: [
