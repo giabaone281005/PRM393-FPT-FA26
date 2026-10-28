@@ -112,6 +112,7 @@ void main() {
       await tester.pumpAndSettle();
       final forgot = find.byKey(const ValueKey('cloud-forgot-password'));
       await tester.ensureVisible(forgot);
+      await tester.pumpAndSettle();
       await tester.tap(forgot);
       await tester.pumpAndSettle();
       expect(find.byType(PasswordRecoveryPage), findsOneWidget);

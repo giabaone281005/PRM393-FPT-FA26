@@ -260,6 +260,11 @@ void main() {
     expect(find.byType(HomeShell), findsOneWidget);
     final id = store.profile!.id;
     await tap(tester, find.text('Hồ sơ'));
+    await tester.scrollUntilVisible(
+      find.text('Đóng phiên & đổi hồ sơ'),
+      180,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tap(tester, find.text('Đóng phiên & đổi hồ sơ'));
     expect(find.byType(EntryPage), findsOneWidget);
     await tap(tester, find.byKey(ValueKey('profile-$id')));

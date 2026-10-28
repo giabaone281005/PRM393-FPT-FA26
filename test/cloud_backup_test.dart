@@ -26,6 +26,9 @@ class _Auth implements AuthRepository {
   String? owner;
   AuthException? verifyError;
   AuthException? resendError;
+  AuthException? signInError;
+  Completer<void>? authDelay;
+  int signIns = 0, signUps = 0;
   bool requireConfirmation = false;
   int resends = 0;
   final verified = <(String, String)>[];
@@ -37,6 +40,9 @@ class _Auth implements AuthRepository {
   Stream<String?> get changes => events.stream;
   @override
   Future<void> signIn(String email, String password) async {
+    signIns++;
+    if (authDelay != null) await authDelay!.future;
+    if (signInError != null) throw signInError!;
     if (requireConfirmation) {
       throw const AuthException(
         'Email not confirmed',
@@ -48,7 +54,12 @@ class _Auth implements AuthRepository {
   }
 
   @override
-  Future<bool> signUp(String email, String password) async => false;
+  Future<bool> signUp(String email, String password) async {
+    signUps++;
+    if (authDelay != null) await authDelay!.future;
+    return false;
+  }
+
   @override
   Future<void> verifyEmailCode(String email, String code) async {
     if (verifyError != null) throw verifyError!;
@@ -131,6 +142,320 @@ void main() {
     store.dispose();
     await auth.events.close();
   });
+
+  Future<void> loadAuthFonts() async {
+    for (final family in ['CofoBrilliant', 'NotoSans']) {
+      final loader = FontLoader(family);
+      for (final weight in ['Regular', 'Medium', 'Bold']) {
+        loader.addFont(rootBundle.load('assets/fonts/$family-$weight.ttf'));
+      }
+      await loader.load();
+    }
+    await (FontLoader(
+      'CofoRobert',
+    )..addFont(rootBundle.load('assets/fonts/CofoRobert-Medium.ttf'))).load();
+    await (FontLoader(
+      'MaterialIcons',
+    )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
+  }
+
+  testWidgets(
+    'invalid auth form reveals the first error and keyboard Next reaches password',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildAppTheme(),
+          home: CloudAccountPage(controller: cloud),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final submit = find.byKey(const ValueKey('cloud-auth-submit'));
+      await tester.scrollUntilVisible(
+        submit,
+        180,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(submit);
+      await tester.pumpAndSettle();
+      final email = find.byKey(const ValueKey('cloud-email'));
+      final password = find.byKey(const ValueKey('cloud-password'));
+      EditableText editable(Finder field) => tester.widget<EditableText>(
+        find.descendant(of: field, matching: find.byType(EditableText)),
+      );
+      expect(editable(email).focusNode.hasFocus, isTrue);
+      expect(tester.getRect(email).top, greaterThanOrEqualTo(64));
+      await tester.enterText(email, 'learner@example.test');
+      await tester.pumpAndSettle();
+      expect(find.text('Nhập email hợp lệ.'), findsNothing);
+      await tester.testTextInput.receiveAction(TextInputAction.next);
+      await tester.pumpAndSettle();
+      expect(editable(password).focusNode.hasFocus, isTrue);
+      await tester.enterText(password, 'test-password');
+      auth.signInError = const AuthException(
+        'private',
+        code: 'invalid_credentials',
+      );
+      await tester.ensureVisible(submit);
+      await tester.pumpAndSettle();
+      await tester.tap(submit);
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      await tester.pumpAndSettle();
+      final notice = find.textContaining('Email hoặc mật khẩu chưa đúng');
+      expect(notice, findsOneWidget);
+      expect(
+        tester.getRect(notice).bottom,
+        lessThan(tester.getRect(submit).top),
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets(
+    'login and registration have distinct headings and reset stale field errors',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildAppTheme(),
+          home: CloudAccountPage(controller: cloud),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Chào bạn trở lại.'), findsOneWidget);
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('cloud-auth-submit')),
+      );
+      await tester.tap(find.byKey(const ValueKey('cloud-auth-submit')));
+      await tester.pumpAndSettle();
+      expect(find.text('Nhập email hợp lệ.'), findsOneWidget);
+      await tester.enterText(
+        find.byKey(const ValueKey('cloud-email')),
+        'learner@example.test',
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('cloud-password')),
+        'old-password',
+      );
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('cloud-mode-register')),
+        -250,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.byKey(const ValueKey('cloud-mode-register')));
+      await tester.pumpAndSettle();
+      expect(find.text('Tạo tài khoản mới.'), findsOneWidget);
+      expect(find.text('Chào bạn trở lại.'), findsNothing);
+      expect(find.text('Dùng ít nhất 8 ký tự.'), findsOneWidget);
+      expect(find.text('Nhập email hợp lệ.'), findsNothing);
+      expect(
+        tester
+            .widget<TextFormField>(find.byKey(const ValueKey('cloud-email')))
+            .controller!
+            .text,
+        'learner@example.test',
+      );
+      expect(
+        tester
+            .widget<TextFormField>(find.byKey(const ValueKey('cloud-password')))
+            .controller!
+            .text,
+        isEmpty,
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  for (final register in [false, true]) {
+    testWidgets(
+      '${register ? 'registration' : 'login'} shows animated pending state, blocks mode switches and recovers',
+      (tester) async {
+        await loadAuthFonts();
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = const Size(320, 1100);
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final boundary = GlobalKey();
+        await tester.pumpWidget(
+          RepaintBoundary(
+            key: boundary,
+            child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: buildAppTheme(),
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(context)
+                    .copyWith(textScaler: const TextScaler.linear(1.4)),
+                child: child!,
+              ),
+              home: CloudAccountPage(controller: cloud),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        if (register) {
+          await tester.tap(find.byKey(const ValueKey('cloud-mode-register')));
+          await tester.pumpAndSettle();
+        }
+        Future<void> preview(String suffix) async {
+          await tester.runAsync(() async {
+            final render =
+                boundary.currentContext!.findRenderObject()!
+                    as RenderRepaintBoundary;
+            final image = await render.toImage(pixelRatio: 2);
+            final data = await image.toByteData(format: ui.ImageByteFormat.png);
+            await File(
+              'build/auth-${register ? 'register' : 'login'}$suffix.png',
+            ).writeAsBytes(data!.buffer.asUint8List());
+            image.dispose();
+          });
+        }
+
+        await preview('');
+        auth.authDelay = Completer<void>();
+        if (!register) {
+          auth.signInError = const AuthException(
+            'private error',
+            code: 'invalid_credentials',
+          );
+        }
+        await tester.enterText(
+          find.byKey(const ValueKey('cloud-email')),
+          'learner@example.test',
+        );
+        await tester.enterText(
+          find.byKey(const ValueKey('cloud-password')),
+          'test-password',
+        );
+        final button = find.byKey(const ValueKey('cloud-auth-submit'));
+        await tester.ensureVisible(button);
+        await tester.tap(button);
+        await tester.pump(const Duration(milliseconds: 600));
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(
+          find.text(register ? 'Đang tạo tài khoản…' : 'Đang đăng nhập…'),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('cloud-auth-loading')),
+          findsOneWidget,
+        );
+        expect(
+          tester
+              .widget<CircularProgressIndicator>(
+                find.byType(CircularProgressIndicator),
+              )
+              .value,
+          isNull,
+        );
+        expect(tester.binding.hasScheduledFrame, isTrue);
+        expect(tester.widget<FilledButton>(button).onPressed, isNull);
+        expect(
+          tester
+              .widget<TextButton>(
+                find.byKey(const ValueKey('cloud-mode-register')),
+              )
+              .onPressed,
+          isNull,
+        );
+        expect(
+          tester
+              .widget<TextButton>(
+                find.byKey(const ValueKey('cloud-mode-login')),
+              )
+              .onPressed,
+          isNull,
+        );
+        expect(
+          tester
+              .widget<TextFormField>(find.byKey(const ValueKey('cloud-email')))
+              .enabled,
+          isFalse,
+        );
+        await tester.tap(button);
+        expect(register ? auth.signUps : auth.signIns, 1);
+        await tester.pump();
+        await preview('-loading');
+        expect(tester.takeException(), isNull);
+        auth.authDelay!.complete();
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('cloud-auth-loading')), findsNothing);
+        if (register) {
+          expect(find.byKey(const ValueKey('cloud-otp')), findsOneWidget);
+          expect(find.text('Xác nhận email'), findsOneWidget);
+        } else {
+          expect(
+            find.textContaining('Email hoặc mật khẩu chưa đúng'),
+            findsOneWidget,
+          );
+          expect(tester.widget<FilledButton>(button).onPressed, isNotNull);
+          await tester.ensureVisible(
+            find.byKey(const ValueKey('cloud-mode-register')),
+          );
+          await tester.tap(find.byKey(const ValueKey('cloud-mode-register')));
+          await tester.pumpAndSettle();
+          expect(
+            find.textContaining('Email hoặc mật khẩu chưa đúng'),
+            findsNothing,
+          );
+        }
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
+
+  testWidgets(
+    'reduced motion keeps pending state readable without a looping animation',
+    (tester) async {
+      auth.authDelay = Completer<void>();
+      auth.signInError = const AuthException(
+        'private',
+        code: 'invalid_credentials',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildAppTheme(),
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(disableAnimations: true),
+            child: child!,
+          ),
+          home: CloudAccountPage(controller: cloud),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('cloud-email')),
+        'learner@example.test',
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('cloud-password')),
+        'test-password',
+      );
+      final button = find.byKey(const ValueKey('cloud-auth-submit'));
+      await tester.ensureVisible(button);
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(find.text('Đang đăng nhập…'), findsOneWidget);
+      expect(
+        tester
+            .widget<CircularProgressIndicator>(
+              find.byType(CircularProgressIndicator),
+            )
+            .value,
+        .65,
+      );
+      auth.authDelay!.complete();
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
 
   test('registration opens verification without claiming an authenticated session or backup', () async {
     await cloud.signIn(' learner@example.test ', 'password', register: true);
@@ -290,6 +615,98 @@ void main() {
       );
     },
   );
+
+  testWidgets('fresh configured install opens login before profile creation', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final freshStore = LearningStore(await SharedPreferences.getInstance());
+    final freshCloud = CloudBackupController(
+      store: freshStore,
+      auth: auth,
+      repository: remote,
+    );
+    try {
+      await tester.pumpWidget(
+        CloudScope(
+          controller: freshCloud,
+          child: LearnApp(store: freshStore),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(freshStore.profiles, isEmpty);
+      expect(find.byType(CloudAccountPage), findsOneWidget);
+      expect(find.byType(EntryPage), findsNothing);
+      expect(find.byType(HomeShell), findsNothing);
+      expect(find.text('Đăng ký'), findsOneWidget);
+      expect(find.byKey(const ValueKey('entry-create')), findsNothing);
+    } finally {
+      await tester.pumpWidget(const SizedBox());
+      freshCloud.dispose();
+      freshStore.dispose();
+    }
+  });
+
+  for (final onboarding in [false, true]) {
+    testWidgets(
+      '${onboarding ? 'onboarding' : 'profile picker'} exposes account logout without leaking saved profiles',
+      (tester) async {
+        tester.view.physicalSize = const Size(320, 740);
+        tester.view.devicePixelRatio = 1;
+        tester.platformDispatcher.textScaleFactorTestValue = 1.4;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        final originalId = store.profile!.id;
+        await store.saveProgress('logic', {'step': 1});
+        await tester.runAsync(() => cloud.signIn('a@example.test', 'password'));
+        if (onboarding) {
+          await tester.runAsync(() => store.createDeviceProfile('New learner'));
+        } else {
+          await tester.runAsync(store.signOut);
+        }
+        final original = jsonEncode(store.exportProfile(originalId));
+        final count = store.profiles.length;
+        await tester.pumpWidget(
+          CloudScope(
+            controller: cloud,
+            child: LearnApp(store: store),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.byType(onboarding ? OnboardingPage : EntryPage),
+          findsOneWidget,
+        );
+        expect(find.textContaining('learner@example.test'), findsOneWidget);
+        final logout = find.byKey(const ValueKey('entry-account-logout'));
+        expect(tester.getSize(logout).height, greaterThanOrEqualTo(48));
+        await tester.tap(logout);
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pumpAndSettle();
+        expect(cloud.signedIn, isFalse);
+        expect(find.byType(CloudAccountPage), findsOneWidget);
+        expect(store.profiles.length, count);
+        expect(jsonEncode(store.exportProfile(originalId)), original);
+
+        // Simulate the SDK restoring a different authenticated account.
+        auth.owner = 'user-b';
+        auth.events.add('user-b');
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(EntryPage), findsOneWidget);
+        expect(cloud.profiles, isEmpty);
+        expect(find.text('An'), findsNothing);
+        expect(jsonEncode(store.exportProfile(originalId)), original);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox());
+      },
+    );
+  }
 
   testWidgets(
     'configured app requires login and removes open routes on logout',
