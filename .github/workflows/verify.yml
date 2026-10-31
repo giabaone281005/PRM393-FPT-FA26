@@ -31,3 +31,6 @@ jobs:
       - run: deno check supabase/functions/learning-api/index.ts
       - run: deno lint supabase/functions/learning-api/index.ts supabase/functions/learning-api/handler.ts supabase/functions/_shared/http.ts supabase/tests/learning_handler_test.ts
       - run: deno test supabase/tests/learning_handler_test.ts
+      - run: deno check supabase/functions/tutor-chat/index.ts
+      - run: deno lint supabase/functions/tutor-chat supabase/tests/tutor_handler_test.ts
+      - run: deno test supabase/tests/tutor_handler_test.ts

@@ -9,7 +9,8 @@ Project: `seoswmcldwwytdrfrrrb` (Singapore). Application reset was explicitly re
 - `merge_content_policies.sql`: applied as `20261025185302_merge_content_read_policies`.
 - `catalog.json`: frontend scene data exported by `dart tools/export_catalog.dart`. Server evaluator implementations are compiled from the same pure Dart catalogs into `functions/learning-api/evaluator.js`.
 - `functions/learning-api/`: deployed canonical learning, evaluator, sync, admin and private image API. See `../docs/LEARNING_SERVER_API.md`.
-- `functions/_retired/`: historical stub source, formerly deployed to 12 legacy payment/AI endpoints. After official CLI login on 2026-10-26, all 12 deployments were deleted as requested. Only `learning-api` remains (v4 after the conflict-response fix). Do not redeploy the retired stubs.
+- `functions/tutor-chat/`: authenticated default Gemini tutor for signed-in mobile users without a selected personal engine. Provider credentials stay in Edge secrets; see `../docs/ENGINE_ARCHITECTURE.md` for setup and quota limits. No schema changes.
+- `functions/_retired/`: historical stub source, formerly deployed to 12 legacy payment/AI endpoints. After official CLI login on 2026-10-26, all 12 deployments were deleted as requested. Do not redeploy the retired stubs.
 
 The reset source artifacts and retained legacy filenames are not a complete replayable migration history. New additive migrations are created with the local CLI, then placed after retained future-dated files as required by AGENTS.md. The connected migration tool records its own UTC timestamps; reconcile by name/content before any db push/reset.
 

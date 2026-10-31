@@ -12,6 +12,7 @@ import 'features/account/cloud_account_page.dart';
 import 'features/engines/engine_scope.dart';
 import 'data/providers/learning_sync_controller.dart';
 import 'data/repositories/learning_repository.dart';
+import 'data/repositories/supabase_tutor_repository.dart';
 import 'features/account/learning_sync_scope.dart';
 
 export 'journey_app.dart';
@@ -55,7 +56,15 @@ void main() async {
       controller: cloud,
       child: LearningSyncScope(
         controller: sync,
-        child: EngineHost(child: LearnApp(store: store)),
+        child: EngineHost(
+          createDefaultTutor: (owner) => SupabaseTutorRepository(
+            client: client,
+            url: url,
+            publishableKey: key,
+            owner: owner,
+          ),
+          child: LearnApp(store: store),
+        ),
       ),
     ),
   );

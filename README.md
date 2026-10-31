@@ -7,7 +7,7 @@
 - **Học qua thực hành:** 13 chủ đề, 71 hoạt động, gồm toán học, logic, lập trình, dữ liệu, mạch điện, hình học 3D, triết học và hội họa.
 - **Theo dõi tiến độ:** lưu hồ sơ, bài đang học, lịch sử, thời gian học và XP.
 - **Tài khoản và cloud:** đăng nhập, xác nhận email, tự sao lưu hồ sơ và gửi kết quả học lên Supabase để xác nhận XP.
-- **Trợ lý học tập:** chat AI, bảng vẽ và môi trường thực hành Python/JavaScript qua engine do người dùng cấu hình.
+- **Trợ lý học tập:** Gemini mặc định cho tài khoản đã đăng nhập, bảng vẽ và môi trường thực hành Python/JavaScript qua engine do người dùng cấu hình.
 - **Tùy chỉnh giao diện:** hỗ trợ chữ lớn, giảm chuyển động và lưu lựa chọn trên thiết bị.
 
 Luồng sử dụng: **Mở hồ sơ → Chọn chủ đề → Thực hành → Hoàn thành → Xem tiến độ.**
@@ -37,7 +37,9 @@ Lệnh trên chạy chế độ offline phục vụ phát triển. Để bật �
 flutter run --dart-define-from-file=config/app.mobile.json
 ```
 
-File cấu hình local được Git ignore. Không đưa service role key hoặc khóa AI dùng chung vào ứng dụng. Chat AI và chạy code cần cấu hình engine riêng trong menu **Engine học tập**.
+File cấu hình local được Git ignore. Không đưa service role key hoặc khóa AI dùng chung vào ứng dụng. Trên backend chung của team, Gemini đã được cấu hình ở server: đăng nhập rồi dùng chat tại Trang chủ, không cần nhập API key. Engine AI cá nhân và engine chạy code có thể cấu hình trong menu **Engine học tập**.
+
+Hướng dẫn cài đặt và checklist test từng chức năng: **[SETUP_VA_TEST_CHO_TEAM.md](docs/SETUP_VA_TEST_CHO_TEAM.md)**.
 
 Luồng quên mật khẩu cần áp dụng [email recovery](supabase/templates/README.md) trên backend rồi bật `PASSWORD_RECOVERY_ENABLED` trong file cấu hình mobile.
 
@@ -72,4 +74,4 @@ Bản release yêu cầu keystore riêng: sao chép `android/key.properties.exam
 - [Đăng nhập và sao lưu cloud](docs/MOBILE_CLOUD_BACKUP.md)
 - [Thiết lập backend](supabase/README.md)
 
-Sao lưu cloud hiện khôi phục thành hồ sơ riêng, chưa tự hợp nhất tiến độ giữa nhiều thiết bị. Hộp thư thật, điện thoại vật lý và dịch vụ AI/code bên ngoài vẫn cần kiểm tra thực tế.
+Sao lưu cloud hiện khôi phục thành hồ sơ riêng, chưa tự hợp nhất tiến độ giữa nhiều thiết bị. Gemini mặc định đã có kiểm tra HTTP thật; hộp thư, điện thoại vật lý, chat qua UI và engine code ngoài vẫn cần kiểm tra theo checklist của team.
