@@ -101,8 +101,8 @@ UI08 là mục tiêu kiểm tra, không phải khẳng định mọi màn hình 
 | CL05 / P1 | Cloud; D05, hồ sơ demo | Tài khoản & sao lưu; kiểm tra backup mới; tải danh sách; khôi phục; mở hồ sơ khôi phục | Tiến độ đúng backup; tạo hồ sơ riêng; hồ sơ/bài nháp cũ còn, không tự gộp |
 | CL06 / P2 | Hai máy test cùng tài khoản | Đồng bộ cả hai; A sửa thông tin và gửi; B sửa/gửi từ bản cũ; chọn bản giữ nếu báo xung đột | Có lựa chọn khi xung đột; không âm thầm ghi đè; bài/XP xác nhận còn. Không tái hiện được thì ghi BLOCKED và điều kiện |
 | CL07 / P2 | Recovery bật, template đã áp dụng | Quên mật khẩu; xác nhận bằng mã tài khoản test; đặt mật khẩu mới, đăng nhập lại | Đổi/đăng nhập được; mã sai/hết hạn không đổi mật khẩu. Flag tắt thì N/A |
-| EX01 / P2 | Chưa cấu hình AI | Nhập câu D10 và thử gửi | Hướng dẫn cấu hình/lý do rõ; không giả trả lời; giữ bản nháp khi lỗi |
-| EX02 / P2 | AI engine đã thử thành công | Gửi D10; thử khi mất mạng | Có phản hồi provider khi mạng tốt; lỗi rõ và giữ câu hỏi khi lỗi; không kỳ vọng văn bản cố định |
+| EX01 / P1 | Bản cloud; đăng nhập; chưa chọn AI cá nhân; `tutor-chat` đã triển khai | Trang chủ → chat → gửi câu D10 | Gemini mặc định trả lời thật; không cần API key/Thêm engine; không kỳ vọng văn bản cố định |
+| EX02 / P1 | Gemini mặc định hoặc AI cá nhân đã hoạt động | Gửi D10; thử khi mất mạng; bật mạng rồi gửi lại | Có phản hồi khi mạng tốt; lỗi rõ và giữ câu hỏi khi lỗi. Bản offline không có cloud và chưa chọn AI thì hiển thị chưa kết nối |
 | EX03 / P2 | Python engine đã thử thành công | Chạy `print(2 + 3)` rồi thử lỗi cú pháp | Stdout có `5` khi thành công; lỗi dễ hiểu, không treo |
 
 CL03–CL04 chọn Logic thuộc baseline có evaluator server theo repository. Local có 71 hoạt động; parity hiện chỉ bao phủ 53 baseline. Không hứa mọi bài local đều đã được publish hoặc xác nhận XP server.

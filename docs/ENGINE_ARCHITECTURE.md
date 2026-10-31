@@ -64,6 +64,30 @@ cũ vẫn hoạt động. Menu có thêm **Engine học tập**.
 
 ## EngineRegistry
 
+### Gia sư mặc định cho người dùng đã đăng nhập
+
+Bản mobile có cấu hình Supabase dùng `tutor-chat` làm gia sư mặc định khi chưa
+chọn engine cá nhân. Không cần người dùng nhập API key. `main.dart` truyền factory
+repository cho `EngineHost`; repository gửi JWT hiện tại và kiểm tra đúng tài khoản
+trước/sau request. Engine cá nhân đang dùng vẫn được ưu tiên. Đăng xuất/đổi tài khoản
+đóng request cũ và không nhận phản hồi trễ vào phiên mới.
+
+Provider key chỉ nằm trong Supabase Edge secrets `GEMINI_API_KEY`; `GEMINI_MODEL`
+chọn model server (mặc định `gemini-3.5-flash-lite`). Không đưa provider key vào
+`config/app.mobile.json`, dart defines hoặc APK. Hàm xác thực với Auth và kiểm tra
+`get_my_access()` có trạng thái active trước khi gọi Gemini. Không lưu lịch sử chat
+ở server, không ghi XP, không cần migration. Model, endpoint và system instruction
+do server quyết định; client chỉ gửi messages/canvas.
+
+Triển khai riêng `tutor-chat` bằng CLI với `--no-verify-jwt --use-api`; handler tự
+xác thực JWT qua Auth, tương tự `learning-api`. Cấu hình secrets qua Dashboard hoặc
+`supabase secrets set --env-file` với file ngoài Git. Không deploy các stub retired.
+Giới hạn payload 300 KB, 60 messages/50.000 ký tự, 2.048 output tokens và timeout
+Gemini 35 giây. Giới hạn burst 10 request/phút/tài khoản chỉ có hiệu lực trong từng
+isolate; đây không phải quota phân tán. Quota/budget chung cần cấu hình trên Google
+Cloud cho project dùng khóa. Test mock: `test/default_tutor_test.dart` và
+`supabase/tests/tutor_handler_test.ts`.
+
 - `initialize()`: đọc snapshot bảo mật version 1. Nếu hỏng hoặc thiết bị khóa,
   báo lỗi và khóa mutation; không tự ghi đè dữ liệu cũ.
 - `register(config, credential: ...)`: thêm engine, từ chối ID trùng.

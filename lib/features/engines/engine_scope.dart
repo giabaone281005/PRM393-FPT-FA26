@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
-import '../../data/models/engine_config.dart';
+import '../../data/engines/engine_contracts.dart';
 import '../../data/models/learning_modules.dart';
 import '../../data/repositories/engine_registry.dart';
 import '../../data/repositories/engine_runtime.dart';
@@ -17,8 +17,7 @@ class EngineScope extends InheritedNotifier<EngineRegistry> {
   static EngineScope? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<EngineScope>();
   ChatResponder? get chatResponder {
-    if (!runtime.registry.loaded ||
-        runtime.registry.active(EngineKind.tutor) == null) {
+    if (!runtime.registry.loaded || !runtime.hasTutor) {
       return null;
     }
     return (messages) async => (await runtime.respond(
@@ -56,8 +55,9 @@ class EngineScope extends InheritedNotifier<EngineRegistry> {
 /// Leaves the existing LearnApp/CloudScope intact; switches device credentials
 /// with the authenticated account and closes outstanding work on account change.
 class EngineHost extends StatefulWidget {
-  const EngineHost({super.key, required this.child});
+  const EngineHost({super.key, required this.child, this.createDefaultTutor});
   final Widget child;
+  final AiEngine Function(String account)? createDefaultTutor;
   @override
   State<EngineHost> createState() => _EngineHostState();
 }
@@ -75,7 +75,13 @@ class _EngineHostState extends State<EngineHost> {
     _runtime?.registry.dispose();
     _account = account;
     final registry = EngineRegistry(SecureEngineStorage(account));
-    _runtime = EngineRuntime(registry);
+    _runtime = EngineRuntime(
+      registry,
+      createDefaultTutor:
+          cloud?.signedIn == true && widget.createDefaultTutor != null
+          ? () => widget.createDefaultTutor!(account)
+          : null,
+    );
     unawaited(registry.initialize());
   }
 

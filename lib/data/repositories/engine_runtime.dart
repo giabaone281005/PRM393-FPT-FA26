@@ -10,7 +10,7 @@ import 'engine_registry.dart';
 /// Resolve at request time: switching engines affects the next request without
 /// rebuilding the app. In-flight work keeps its original engine and credential.
 class EngineRuntime {
-  EngineRuntime(this.registry) {
+  EngineRuntime(this.registry, {this.createDefaultTutor}) {
     for (final provider in EngineProvider.values) {
       if (provider.kind == EngineKind.tutor) {
         _ai[provider] = (selection) => HttpAiEngine(selection);
@@ -20,6 +20,9 @@ class EngineRuntime {
     }
   }
   final EngineRegistry registry;
+  final AiEngine Function()? createDefaultTutor;
+  bool get hasTutor =>
+      registry.active(EngineKind.tutor) != null || createDefaultTutor != null;
   final _ai = <EngineProvider, AiEngineFactory>{};
   final _code = <EngineProvider, CodeEngineFactory>{};
   final _running = <void Function()>{};
@@ -80,6 +83,11 @@ class EngineRuntime {
   }
 
   Future<TutorReply> respond(TutorRequest request) {
+    if (registry.active(EngineKind.tutor) == null &&
+        createDefaultTutor != null) {
+      final engine = createDefaultTutor!();
+      return _request(() => engine.respond(request), engine.dispose, 60);
+    }
     final selection = registry.resolve(EngineKind.tutor);
     final factory = _ai[selection.config.provider];
     if (factory == null) {
