@@ -11,6 +11,7 @@ import 'package:brilliant_mobile/learning_catalog.dart';
 import 'package:brilliant_mobile/learning_store.dart';
 
 import 'deep_solutions.dart';
+import 'curriculum_solutions.dart';
 
 void main() {
   test(
@@ -66,7 +67,8 @@ void main() {
           'step': 2,
           'states': {
             for (final spec in topic.experiments)
-              spec.id: deepSolutions[spec.id],
+              spec.id:
+                  deepSolutions[spec.id] ?? curriculumSolutionStates[spec.id],
           },
           'touched': topic.experiments.map((s) => s.id).toList(),
           'checked': topic.experiments.map((s) => s.id).toList(),

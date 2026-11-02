@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:brilliant_mobile/experiments/curriculum_engine.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:brilliant_mobile/learning_catalog.dart';
 
@@ -20,7 +22,10 @@ void main() {
       for (final spec in topic.experiments) {
         // This corpus targets the 53 published server activities. New local
         // lessons have separate exhaustive tests until a server release exists.
-        if (spec.mechanism == 'reasonedChoice') continue;
+        if (spec.mechanism == 'reasonedChoice' ||
+            supportsCurriculum(spec.mechanism)) {
+          continue;
+        }
         expect(solutions.containsKey(spec.id), true, reason: spec.id);
         expect(spec.isCorrect(solutions[spec.id]!), true, reason: spec.id);
         final candidates = [

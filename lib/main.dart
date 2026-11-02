@@ -40,7 +40,8 @@ void main() async {
         const bool.fromEnvironment('PASSWORD_RECOVERY_ENABLED')
         ? () => SupabasePasswordRecoveryRepository(url, key)
         : null,
-    repository: SupabaseBackupRepository(client),
+    repository: SupabaseAccountProgressRepository(client),
+    singleProfile: true,
   );
   final sync = LearningSyncController(
     store: store,

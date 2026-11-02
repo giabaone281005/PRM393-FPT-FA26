@@ -54,3 +54,53 @@ class SupabaseBackupRepository implements BackupRepository {
     }
   }
 }
+
+/// New clients use one server-pinned progress record; legacy backups remain readable.
+class SupabaseAccountProgressRepository implements BackupRepository {
+  SupabaseAccountProgressRepository(this.client);
+  final SupabaseClient client;
+  void _check(String owner) {
+    if (client.auth.currentUser?.id != owner) {
+      throw const AuthException('Account changed');
+    }
+  }
+
+  @override
+  Future<List<CloudBackup>> list(String owner) async {
+    _check(owner);
+    final row = await client
+        .rpc('load_account_progress', params: {'expected_owner': owner})
+        .timeout(const Duration(seconds: 20));
+    _check(owner);
+    return row == null
+        ? []
+        : [CloudBackup.fromJson(Map<String, dynamic>.from(row as Map))];
+  }
+
+  @override
+  Future<CloudBackup> save(
+    String owner,
+    String key,
+    int revision,
+    Map<String, dynamic> payload,
+  ) async {
+    _check(owner);
+    try {
+      final row = await client
+          .rpc(
+            'save_account_progress',
+            params: {
+              'expected_owner': owner,
+              'expected_revision': revision,
+              'backup_payload': payload,
+            },
+          )
+          .timeout(const Duration(seconds: 20));
+      _check(owner);
+      return CloudBackup.fromJson(Map<String, dynamic>.from(row as Map));
+    } on PostgrestException catch (error) {
+      if (['PT409', '40001'].contains(error.code)) throw const BackupConflict();
+      rethrow;
+    }
+  }
+}

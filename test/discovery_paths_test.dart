@@ -1,4 +1,5 @@
 import 'extended_solutions.dart';
+import 'curriculum_solutions.dart';
 
 import 'package:brilliant_mobile/discovery_paths.dart';
 import 'package:brilliant_mobile/main.dart';
@@ -90,7 +91,10 @@ void main() {
           draft: {
             'states': {
               for (final s in topic.experiments)
-                s.id: (mathSolutionStates[s.id] ?? extendedSolutions[s.id]),
+                s.id:
+                    (mathSolutionStates[s.id] ??
+                    extendedSolutions[s.id] ??
+                    curriculumSolutionStates[s.id]),
             },
             'attempts': 8,
             'hints': [topic.experiments[0].id, topic.experiments[1].id],

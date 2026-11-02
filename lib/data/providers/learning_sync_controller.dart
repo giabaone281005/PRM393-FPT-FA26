@@ -152,7 +152,8 @@ class LearningSyncController extends ChangeNotifier {
       hasProfileConflict = false;
     }
     _timer?.cancel();
-    if (cloud.userId == null ||
+    if (cloud.preparingProfile ||
+        cloud.userId == null ||
         store.profile == null ||
         !cloud.canUseProfile(store.profile!.id)) {
       return;
@@ -168,6 +169,7 @@ class LearningSyncController extends ChangeNotifier {
 
   void _guard(String owner, String localId, int generation) {
     if (_disposed ||
+        cloud.preparingProfile ||
         cloud.userId != owner ||
         _generation != generation ||
         store.profile?.id != localId ||
@@ -205,6 +207,7 @@ class LearningSyncController extends ChangeNotifier {
     final owner = cloud.userId;
     final localId = store.profile?.id;
     if (_disposed ||
+        cloud.preparingProfile ||
         owner == null ||
         localId == null ||
         !cloud.canUseProfile(localId)) {
@@ -346,13 +349,28 @@ class LearningSyncController extends ChangeNotifier {
           row = _row(localId, id);
         }
         final versions = learningMap(row['versions']);
-        final localActivities = topic.experiments
-            .map((spec) => spec.id)
-            .toSet();
-        if (localActivities.length != versions.length ||
-            topic.experiments.any(
-              (spec) => versions[spec.id] != spec.contentVersion,
-            )) {
+        final localActivities = {
+          for (final spec in topic.experiments) spec.id: spec,
+        };
+        final pinnedSnapshot = learningMap(row['snapshot']);
+        final pinnedStep = ((pinnedSnapshot['step'] as num?)?.toInt() ?? 0)
+            .clamp(0, topic.experiments.length - 1);
+        final pinnedActivity =
+            pinnedSnapshot['activeActivityId'] ??
+            topic.experiments[pinnedStep].id;
+        // An older session stays pinned to its release when new local lessons
+        // are appended. Never send a new activity to that older release.
+        if (versions.isEmpty ||
+            versions.entries.any(
+              (entry) =>
+                  localActivities[entry.key]?.contentVersion != entry.value,
+            ) ||
+            !versions.containsKey(pinnedActivity) ||
+            (row['attempts'] as List? ?? [])
+                .map(learningMap)
+                .any(
+                  (attempt) => !versions.containsKey(attempt['activity_id']),
+                )) {
           deferredLessons++;
           continue;
         }
@@ -510,6 +528,20 @@ class LearningSyncController extends ChangeNotifier {
     } finally {
       busy = false;
       if (!_disposed) notifyListeners();
+      if (!_disposed && cloud.singleProfile && hasProfileConflict) {
+        unawaited(() async {
+          try {
+            final remote = await loadConflictProfile();
+            if (!_disposed &&
+                cloud.userId == owner &&
+                store.profile?.id == localId) {
+              await resolveProfileConflict(remote, useDevice: false);
+            }
+          } catch (_) {
+            /* Retain the durable journal and retry later. */
+          }
+        }());
+      }
     }
   }
 

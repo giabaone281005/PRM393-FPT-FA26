@@ -1,5 +1,8 @@
 import 'extended_solutions.dart';
 import 'deep_solutions.dart';
+import 'curriculum_solutions.dart';
+
+import 'package:brilliant_mobile/experiments/curriculum_engine.dart';
 
 import 'dart:convert';
 
@@ -15,6 +18,7 @@ import 'math_experiments_test.dart' show mathSolutionStates;
 import 'discovery_experiments_test.dart' show discoverySolutionStates;
 
 final solutions = {
+  ...curriculumSolutionStates,
   ...deepSolutions,
   ...mathSolutionStates,
   ...discoverySolutionStates,
@@ -72,12 +76,12 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
   }
 
-  test('Catalog has thirteen topics, 71 activities and 31 mechanisms', () {
+  test('Catalog has twenty topics, 139 activities and 40 mechanisms', () {
     final specs = experimentCatalog.values.expand((e) => e).toList();
-    expect(topics.length, 13);
-    expect(specs.length, 71);
-    expect(specs.map((e) => e.id).toSet().length, 71);
-    expect(specs.map((e) => e.mechanism).toSet().length, 31);
+    expect(topics.length, 20);
+    expect(specs.length, 139);
+    expect(specs.map((e) => e.id).toSet().length, 139);
+    expect(specs.map((e) => e.mechanism).toSet().length, 40);
     for (final spec in specs) {
       expect(spec.isCorrect(spec.initialData()), false, reason: spec.id);
       expect(spec.isCorrect(solutions[spec.id]!), true, reason: spec.id);
@@ -400,11 +404,13 @@ void main() {
           );
           await tester.pumpAndSettle();
           expect(find.byType(ExperimentWorkspace), findsOneWidget);
-          expect(find.byType(TextField), findsNothing);
+          if (topic.experiments[step].mechanism != 'speechPractice') {
+            expect(find.byType(TextField), findsNothing);
+          }
           if (topic.experiments[step].mechanism == 'reasonedChoice') {
             expect(find.byKey(const ValueKey('answer-0')), findsOneWidget);
             expect(find.byKey(const ValueKey('reason-0')), findsOneWidget);
-          } else {
+          } else if (!supportsCurriculum(topic.experiments[step].mechanism)) {
             expect(find.byIcon(Icons.radio_button_off), findsNothing);
           }
           expect(tester.takeException(), isNull, reason: '${topic.id}:$step');

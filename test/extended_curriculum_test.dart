@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'extended_solutions.dart';
+import 'curriculum_solutions.dart';
 import 'math_experiments_test.dart' show mathSolutionStates;
 
 void main() {
@@ -91,7 +92,10 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('4/6'), findsOneWidget);
+      expect(
+        find.text('4/${topicById('logic').experiments.length}'),
+        findsOneWidget,
+      );
       expect(find.text('x + 5 = 9'), findsOneWidget);
       final button = find.byKey(const ValueKey('remove-pair'));
       for (int i = 0; i < 5; i++) {
@@ -156,6 +160,7 @@ void main() {
             'logic-invariant': extendedSolutions['logic-invariant'],
             'logic-hidden': extendedSolutions['logic-hidden'],
             'logic-counterexample': extendedSolutions['logic-counterexample'],
+            ...curriculumSolutionStates,
           },
         },
       ),
@@ -168,7 +173,10 @@ void main() {
     final restored = (await tester.runAsync(
       () async => LearningStore(await SharedPreferences.getInstance()),
     ))!;
-    expect(restored.completedExperimentIds('logic'), hasLength(6));
+    expect(
+      restored.completedExperimentIds('logic'),
+      hasLength(topic.experiments.length),
+    );
     restored.dispose();
     store.dispose();
   });

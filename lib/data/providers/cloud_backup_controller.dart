@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../learning_store.dart';
 import '../models/cloud_backup.dart';
+import '../models/account_progress.dart';
 import '../models/app_failure.dart';
 import '../repositories/auth_repository.dart';
 import '../repositories/backup_repository.dart';
@@ -17,6 +18,7 @@ class CloudBackupController extends ChangeNotifier {
     required this.auth,
     required this.repository,
     this.createPasswordRecovery,
+    this.singleProfile = false,
     DateTime Function()? clock,
   }) : _now = clock ?? DateTime.now {
     _links = _bindings();
@@ -38,11 +40,17 @@ class CloudBackupController extends ChangeNotifier {
       const Duration(seconds: 30),
       (_) => _localChanged(),
     );
-    if (_owner != null) unawaited(refresh());
+    if (_owner != null) unawaited(singleProfile ? prepareAccount() : refresh());
   }
   final LearningStore store;
   final AuthRepository auth;
   final BackupRepository repository;
+  final bool singleProfile;
+  bool preparingProfile = false, accountLoaded = false;
+  int _profileGeneration = 0;
+  bool _reloadAfterSave = false;
+  Future<void>? _preparing;
+  String? _prepareOwner;
   final PasswordRecoveryRepository Function()? createPasswordRecovery;
   final DateTime Function() _now;
   StreamSubscription<String?>? _subscription;
@@ -111,6 +119,19 @@ class CloudBackupController extends ChangeNotifier {
     conflict = false;
     message = null;
     noticeKind = NoticeKind.info;
+    if (singleProfile) {
+      accountLoaded = false;
+      preparingProfile = owner != null;
+      _profileGeneration++;
+      unawaited(() async {
+        await store.signOut();
+        if (!_disposed && _owner == owner && owner != null) {
+          await prepareAccount();
+        }
+      }());
+      _emit();
+      return;
+    }
     if (previousOwner != null ||
         (store.profile != null && !canUseProfile(store.profile!.id))) {
       unawaited(store.signOut());
@@ -122,13 +143,18 @@ class CloudBackupController extends ChangeNotifier {
   void _localChanged() {
     _debounce?.cancel();
     if (_disposed ||
+        (singleProfile && (!accountLoaded || preparingProfile)) ||
         store.profile == null ||
         !canUseProfile(store.profile!.id)) {
       return;
     }
     final id = store.profile!.id;
     if (currentBinding == null) {
-      _links[id] = {'owner': _owner, 'key': id, 'revision': 0};
+      _links[id] = {
+        'owner': _owner,
+        'key': singleProfile ? 'account-$_owner' : id,
+        'revision': 0,
+      };
       // Claim ownership before uploading, including when the network is offline.
       unawaited(
         _persistLinks().catchError((Object _) {
@@ -136,6 +162,11 @@ class CloudBackupController extends ChangeNotifier {
           message = 'Chưa lưu được liên kết tài khoản. Hãy thử lưu lại.';
           _emit();
         }),
+      );
+    }
+    if (singleProfile) {
+      unawaited(
+        store.preferences.setString('matlingo:account-local:$_owner', id),
       );
     }
     if (busy || conflict) return;
@@ -167,14 +198,24 @@ class CloudBackupController extends ChangeNotifier {
       return true;
     } on BackupConflict {
       noticeKind = NoticeKind.error;
-      conflict = true;
-      message = 'Bản cloud đã thay đổi trên máy khác. Tải lại danh sách và khôi phục thành hồ sơ riêng để giữ cả hai bản.';
+      conflict = !singleProfile;
+      _reloadAfterSave = singleProfile;
+      message = singleProfile ? 'Đang lấy tiến độ mới nhất của tài khoản…' : 'Bản cloud đã thay đổi trên máy khác. Tải lại danh sách và khôi phục thành hồ sơ riêng để giữ cả hai bản.';
     } catch (error) {
       noticeKind = NoticeKind.error;
+      if (singleProfile &&
+          error is PostgrestException &&
+          error.code == '42501') {
+        accountLoaded = false;
+      }
       message = friendlyError(error, fallback: failureMessage);
     } finally {
       busy = false;
       _emit();
+      if (_reloadAfterSave && singleProfile) {
+        _reloadAfterSave = false;
+        unawaited(prepareAccount());
+      }
       if (completed) {
         _localChanged();
       }
@@ -214,6 +255,7 @@ class CloudBackupController extends ChangeNotifier {
         if (_owner == owner) backups = rows;
       }
     });
+    if (success && signedIn && singleProfile) await prepareAccount();
     if (success && signedIn && store.profile != null) {
       await saveCurrent(automatic: true);
     }
@@ -284,6 +326,7 @@ class CloudBackupController extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
+    if (singleProfile && !busy) await saveCurrent(automatic: true);
     if (busy) {
       message = 'Đang xử lý yêu cầu trước đó. Chờ một chút rồi chọn Đăng xuất lại nhé.';
       noticeKind = NoticeKind.info;
@@ -297,6 +340,10 @@ class CloudBackupController extends ChangeNotifier {
   }
 
   Future<void> refresh() async {
+    if (singleProfile) {
+      await prepareAccount();
+      return;
+    }
     await _run(() async {
       final owner = _owner;
       if (owner == null) return;
@@ -311,8 +358,130 @@ class CloudBackupController extends ChangeNotifier {
       'key': backup.key,
       'revision': backup.revision,
       'updatedAt': backup.updatedAt.toUtc().toIso8601String(),
+      'contentHash': accountProgressHash(backup.payload),
     };
     await _persistLinks();
+  }
+
+  /// One account opens one saved learning state automatically on every login.
+  Future<void> prepareAccount() {
+    if (_preparing != null && _prepareOwner == _owner) return _preparing!;
+    _prepareOwner = _owner;
+    final task = _prepareAccount();
+    _preparing = task;
+    unawaited(
+      task.whenComplete(() {
+        if (identical(_preparing, task)) _preparing = null;
+      }),
+    );
+    return task;
+  }
+
+  Future<void> _prepareAccount() async {
+    final owner = _owner;
+    if (!singleProfile || owner == null || _disposed || busy) return;
+    final generation = ++_profileGeneration;
+    bool current() =>
+        !_disposed && _owner == owner && generation == _profileGeneration;
+    preparingProfile = true;
+    _emit();
+    try {
+      final rows = await repository.list(owner);
+      if (!current()) return;
+      backups = rows;
+      final remote = rows.firstOrNull;
+      final preferred = store.preferences.getString(
+        'matlingo:account-local:$owner',
+      );
+      final owned = store.profiles
+          .where(
+            (p) =>
+                _links[p.id] is Map && (_links[p.id] as Map)['owner'] == owner,
+          )
+          .toList();
+      String? localId;
+      if (remote != null) {
+        final matches = owned
+            .where((p) => (_links[p.id] as Map)['key'] == remote.key)
+            .toList();
+        localId =
+            matches.where((p) => p.id == preferred).firstOrNull?.id ??
+            matches.firstOrNull?.id;
+        if (localId == null) {
+          localId = await store.restoreProfile(remote.payload);
+        } else {
+          final binding = _links[localId] as Map;
+          if (remote.revision > ((binding['revision'] as num?)?.toInt() ?? 0)) {
+            final local = store.exportProfile(localId);
+            final dirty = binding['contentHash'] != accountProgressHash(local);
+            await store.applyAccountProgress(
+              localId,
+              dirty
+                  ? mergeAccountProgress(local, remote.payload)
+                  : remote.payload,
+              fork: !dirty,
+            );
+          }
+        }
+        if (!current()) return;
+        await _bind(localId, owner, remote);
+        _lastSaved.remove('$owner/$localId');
+        if (accountProgressHash(store.exportProfile(localId)) ==
+            accountProgressHash(remote.payload)) {
+          _lastSaved['$owner/$localId'] = jsonEncode(
+            store.exportProfile(localId),
+          );
+        }
+      } else {
+        localId =
+            owned.where((p) => p.id == preferred).firstOrNull?.id ??
+            owned.firstOrNull?.id;
+        if (localId == null &&
+            store.profile != null &&
+            _links[store.profile!.id] == null) {
+          localId = store.profile!.id;
+        }
+      }
+      if (!current()) return;
+      if (localId != null) {
+        await store.preferences.setString(
+          'matlingo:account-local:$owner',
+          localId,
+        );
+        if (!current()) return;
+        await store.activateProfile(localId);
+      }
+      accountLoaded = true;
+      conflict = false;
+      message = null;
+    } catch (error) {
+      if (!current()) return;
+      if (error is PostgrestException && error.code == '42501') {
+        accountLoaded = false;
+        message = 'Tài khoản hiện không được phép học. Liên hệ quản trị viên hoặc đăng xuất.';
+        noticeKind = NoticeKind.error;
+        return;
+      }
+      final cached = store.preferences.getString(
+        'matlingo:account-local:$owner',
+      );
+      if (cached != null &&
+          store.profiles.any((p) => p.id == cached) &&
+          canUseProfile(cached)) {
+        await store.activateProfile(cached);
+        accountLoaded = true;
+      }
+      message = accountLoaded
+          ? 'Đang dùng tiến độ trên máy. Sẽ tự lưu khi có mạng.'
+          : 'Chưa tải được tiến độ tài khoản. Kiểm tra mạng rồi thử lại.';
+      noticeKind = NoticeKind.error;
+    } finally {
+      if (current()) {
+        preparingProfile = false;
+        _emit();
+        _localChanged();
+      }
+    }
   }
 
   Future<void> _persistLinks() async {
@@ -324,7 +493,8 @@ class CloudBackupController extends ChangeNotifier {
   }
 
   Future<void> saveCurrent({bool automatic = false}) async {
-    if (conflict ||
+    if ((singleProfile && (!accountLoaded || preparingProfile)) ||
+        conflict ||
         store.profile == null ||
         !canUseProfile(store.profile!.id)) {
       return;
@@ -334,7 +504,11 @@ class CloudBackupController extends ChangeNotifier {
         final owner = _owner;
         final localId = store.profile?.id;
         if (owner == null || localId == null) return;
-        _links[localId] ??= {'owner': owner, 'key': localId, 'revision': 0};
+        _links[localId] ??= {
+          'owner': owner,
+          'key': singleProfile ? 'account-$owner' : localId,
+          'revision': 0,
+        };
         final binding = Map<String, dynamic>.from(_links[localId] as Map);
         await _persistLinks();
         await store.flush();

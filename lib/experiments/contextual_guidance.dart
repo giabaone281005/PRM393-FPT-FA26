@@ -1,8 +1,10 @@
 import 'experiment_model.dart';
+import 'curriculum_engine.dart';
 
 /// Offline observations of the learner's model, without changing it.
 /// These are deterministic rules, not a chat or AI service.
 String contextualHint(ExperimentSpec spec, ExperimentData data) {
+  if (supportsCurriculum(spec.mechanism)) return curriculumFeedback(spec, data);
   if (spec.mechanism == 'reasonedChoice') {
     final result = spec.evaluate(data);
     if (result.feedbackKey == 'invalid-state') {

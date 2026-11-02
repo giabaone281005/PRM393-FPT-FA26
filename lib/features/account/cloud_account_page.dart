@@ -73,7 +73,9 @@ class CloudAccountButton extends StatelessWidget {
       leading: Icon(
         controller.signedIn ? Icons.cloud_outlined : Icons.cloud_off_outlined,
       ),
-      title: const Text('Tài khoản & sao lưu'),
+      title: Text(
+        controller.singleProfile ? 'Tài khoản' : 'Tài khoản & sao lưu',
+      ),
       subtitle: Text(
         controller.busy
             ? 'Đang xử lý…'
@@ -379,7 +381,9 @@ class _CloudAccountPageState extends State<CloudAccountPage> {
         appBar: AppPageHeader(
           title: Text(
             controller.signedIn
-                ? 'Tài khoản & sao lưu'
+                ? controller.singleProfile
+                      ? 'Tài khoản'
+                      : 'Tài khoản & sao lưu'
                 : verifying
                 ? 'Xác nhận email'
                 : _register
@@ -668,7 +672,25 @@ class _CloudAccountPageState extends State<CloudAccountPage> {
                   ),
                 ),
               )
-            else ...[
+            else if (controller.singleProfile) ...[
+              Text(
+                controller.email ?? 'Tài khoản của bạn',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Một tài khoản, một tiến độ học. App tự lưu khi bạn học và tự mở lại tiến độ khi đăng nhập trên thiết bị khác.',
+              ),
+              const SizedBox(height: 12),
+              Text(
+                controller.busy ? 'Đang lưu…' : controller.message ?? 'Tiến độ được lưu tự động. Khi mất mạng, bản trên máy được giữ và sẽ tự gửi lại.',
+              ),
+              const SizedBox(height: 24),
+              TextButton(
+                onPressed: controller.busy ? null : controller.signOut,
+                child: const Text('Đăng xuất'),
+              ),
+            ] else ...[
               const LearningSyncStatus(),
               Text(
                 controller.email ?? 'Đã đăng nhập',

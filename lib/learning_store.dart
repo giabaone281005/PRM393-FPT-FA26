@@ -371,6 +371,35 @@ class LearningStore extends ChangeNotifier {
     await _persist();
   }
 
+  /// Update this account's existing local profile without creating a picker entry.
+  Future<void> applyAccountProgress(
+    String id,
+    Map<String, dynamic> payload, {
+    bool fork = false,
+  }) async {
+    final source = LearnerProfile.fromJson(_map(payload['profile']));
+    if (!_profiles.containsKey(id) ||
+        source.name.trim().isEmpty ||
+        source.name.length > 40 ||
+        payload['learning'] is! Map) {
+      throw const BackupFormatFailure(
+        'Tiến độ tài khoản chưa hợp lệ. Dữ liệu trên máy được giữ.',
+      );
+    }
+    final oldProfile = _profiles[id], oldLearning = _learning[id];
+    _profiles[id] = LearnerProfile.fromJson({...source.toJson(), 'id': id});
+    _learning[id] = _clone(_map(payload['learning']));
+    if (fork) LearningJournal.fork(_learning[id]!);
+    if (!await _persist()) {
+      _profiles[id] = oldProfile!;
+      _learning[id] = oldLearning!;
+      throw LocalLearningFailure(
+        'Chưa lưu được tiến độ vừa tải. Dữ liệu cũ trên máy được giữ.',
+      );
+    }
+    _emit();
+  }
+
   Future<void> activateProfile(String id) async {
     if (!_profiles.containsKey(id)) throw ArgumentError('Hồ sơ không tồn tại.');
     _activeId = id;

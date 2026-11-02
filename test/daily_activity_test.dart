@@ -1,4 +1,5 @@
 import 'extended_solutions.dart';
+import 'curriculum_solutions.dart';
 
 import 'package:brilliant_mobile/learning_activity.dart';
 import 'package:brilliant_mobile/main.dart';
@@ -72,7 +73,10 @@ void main() {
     Map<String, dynamic> draft(int ms) => {
       'states': {
         for (final spec in topicById('logic').experiments)
-          spec.id: (mathSolutionStates[spec.id] ?? extendedSolutions[spec.id]),
+          spec.id:
+              (mathSolutionStates[spec.id] ??
+              extendedSolutions[spec.id] ??
+              curriculumSolutionStates[spec.id]),
       },
       'activeMsByDay': {day: ms},
       'seconds': ms ~/ 1000,
@@ -122,7 +126,9 @@ void main() {
         'states': {
           for (final spec in topicById('logic').experiments)
             spec.id:
-                (mathSolutionStates[spec.id] ?? extendedSolutions[spec.id]),
+                (mathSolutionStates[spec.id] ??
+                extendedSolutions[spec.id] ??
+                curriculumSolutionStates[spec.id]),
         },
         'activeMsByDay': {activityDay(now): 60000},
       };

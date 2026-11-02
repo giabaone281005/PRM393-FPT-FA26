@@ -57,7 +57,9 @@ class _EntryPageState extends State<EntryPage> {
   @override
   Widget build(BuildContext context) {
     final cloud = CloudScope.maybeOf(context);
-    final profiles = cloud?.profiles ?? widget.store.profiles;
+    final profiles = cloud?.singleProfile == true
+        ? <LearnerProfile>[]
+        : cloud?.profiles ?? widget.store.profiles;
     return Scaffold(
       body: SafeArea(
         child: Center(
