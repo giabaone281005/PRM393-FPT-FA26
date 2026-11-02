@@ -31,6 +31,17 @@ class LearningSyncStatus extends StatelessWidget {
     if (sync == null || !sync.cloud.signedIn || sync.store.profile == null) {
       return const SizedBox.shrink();
     }
+    if (sync.cloud.singleProfile) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: Text(
+          sync.cloud.busy
+              ? 'Đang lưu tiến độ vào tài khoản…'
+              : sync.cloud.message ?? 'Tiến độ tự động lưu vào tài khoản.',
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

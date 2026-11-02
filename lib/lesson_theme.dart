@@ -28,6 +28,13 @@ class LessonTheme {
     'geography': Color(0xFF26745C),
     'marxism': Color(0xFFA12D40),
     'painting': Color(0xFFA03A91),
+    'english': Color(0xFF006DAB),
+    'vietnamese': Color(0xFF945329),
+    'biology': Color(0xFF327249),
+    'chemistry': Color(0xFF89309B),
+    'astronomy': Color(0xFF444E94),
+    'finance': Color(0xFF9B6500),
+    'digital': Color(0xFF276E7E),
   };
 
   late final ThemeData theme, canvasTheme;

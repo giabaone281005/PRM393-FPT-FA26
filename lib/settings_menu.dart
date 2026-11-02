@@ -8,10 +8,8 @@ import 'learning_store.dart';
 import 'learning_catalog.dart';
 import 'data/repositories/app_info_repository.dart';
 import 'features/account/cloud_account_page.dart';
-import 'features/engines/engine_scope.dart';
-import 'features/engines/engine_settings_page.dart';
 
-enum _MenuDestination { appearance, cloud, engines, gift, about, help, logout }
+enum _MenuDestination { appearance, cloud, gift, about, help, logout }
 
 class SettingsMenuButton extends StatelessWidget {
   const SettingsMenuButton({super.key, required this.store});
@@ -43,9 +41,6 @@ class SettingsMenuButton extends StatelessWidget {
         _MenuDestination.cloud => CloudAccountPage(
           controller: CloudScope.maybeOf(context)!,
         ),
-        _MenuDestination.engines => EngineSettingsPage(
-          runtime: EngineScope.maybeOf(context)!.runtime,
-        ),
         _MenuDestination.gift => const GiftPremiumPage(),
         _MenuDestination.about => const AboutMatlingoPage(),
         _MenuDestination.help => const HelpMatlingoPage(),
@@ -56,16 +51,14 @@ class SettingsMenuButton extends StatelessWidget {
       }
     },
     itemBuilder: (_) => [
-      if (EngineScope.maybeOf(context) != null)
-        const PopupMenuItem(
-          value: _MenuDestination.engines,
-          key: ValueKey('menu-engines'),
-          child: Text('Engine học tập'),
-        ),
       if (CloudScope.maybeOf(context) != null)
-        const PopupMenuItem(
+        PopupMenuItem(
           value: _MenuDestination.cloud,
-          child: Text('Tài khoản & sao lưu'),
+          child: Text(
+            CloudScope.maybeOf(context)?.singleProfile == true
+                ? 'Tài khoản'
+                : 'Tài khoản & sao lưu',
+          ),
         ),
       const PopupMenuItem(
         value: _MenuDestination.appearance,
@@ -193,13 +186,13 @@ class _AboutMatlingoPageState extends State<AboutMatlingoPage> {
       const ListTile(
         contentPadding: EdgeInsets.zero,
         leading: Icon(Icons.person_outline),
-        title: Text('Hồ sơ riêng trên thiết bị'),
+        title: Text('Tiến độ riêng cho tài khoản'),
       ),
       const Divider(height: 36),
       Text('Dữ liệu của bạn', style: Theme.of(context).textTheme.titleLarge),
       const SizedBox(height: 12),
       const Text(
-        'Hồ sơ và tiến độ được lưu trên thiết bị. Với bản có cloud, hồ sơ đang mở tự sao lưu sau khi đăng nhập khi có mạng. Mở Tài khoản & sao lưu để kiểm tra bản cloud hoặc khôi phục thành hồ sơ riêng trên điện thoại khác. Đăng xuất không xóa hồ sơ; hãy kiểm tra bản sao lưu trước khi gỡ ứng dụng.',
+        'Mỗi tài khoản dùng một hồ sơ học. Tiến độ tự lưu lên server khi có mạng và tự tải lại khi đăng nhập trên máy khác. Khi mất mạng, bản trên thiết bị được giữ để gửi lại sau. Không cần chọn hồ sơ hay đồng bộ thủ công; hãy chờ lưu xong trước khi đổi máy hoặc gỡ ứng dụng.',
         style: TextStyle(height: 1.6),
       ),
       const SizedBox(height: 24),
@@ -234,7 +227,7 @@ class _HelpMatlingoPageState extends State<HelpMatlingoPage> {
       'Hoàn thành các hoạt động bắt buộc của một chủ đề để nhận 30 XP lần đầu. Ôn lại vẫn lưu lịch sử nhưng không cộng trùng XP. XP học cá nhân và XP server đã xác nhận được hiển thị riêng.',
     ),
     (
-      'Đổi hồ sơ hoặc đăng xuất có mất bài không?',
+      'Đăng xuất có mất bài không?',
       'Đăng xuất không xóa hồ sơ đã lưu. Nếu app báo lỗi lưu, giữ app mở và thử lưu lại trước. Bản có cloud yêu cầu đăng nhập lại đúng tài khoản để mở hồ sơ đã liên kết.',
     ),
     (
@@ -243,15 +236,15 @@ class _HelpMatlingoPageState extends State<HelpMatlingoPage> {
     ),
     (
       'Vì sao chat chưa gửi được?',
-      'Mở menu → Engine học tập, thêm kết nối AI và chọn engine đang dùng. Kiểm tra endpoint, model, khóa truy cập và mạng. Khi gửi lỗi, câu hỏi vẫn được giữ để thử lại.',
+      'Gemini đã được cài sẵn trong bản có cloud. Đăng nhập, kiểm tra mạng và thử gửi lại. Bạn không cần nhập API key. Khi gửi lỗi, câu hỏi vẫn được giữ để thử lại.',
     ),
     (
       'Đổi nền, màu và cỡ chữ ở đâu?',
       'Mở menu ở góc trên bên phải, chọn Cài đặt. Thay đổi được áp dụng ngay và lưu trên thiết bị.',
     ),
     (
-      'Khôi phục trên máy khác có gộp tiến độ không?',
-      'Chưa. Khôi phục tạo một hồ sơ riêng và giữ hồ sơ cũ cùng bài chưa gửi. Kiểm tra tài khoản và thời gian bản sao lưu trước khi chọn khôi phục.',
+      'Đổi máy có học tiếp tiến độ cũ được không?',
+      'Có. Dùng cùng tài khoản và có Internet, app tự tải tiến độ cũ để học tiếp. Không cần tạo thêm hồ sơ hoặc bấm khôi phục. Nếu học offline, chờ app tự lưu xong trên máy cũ trước khi đổi máy.',
     ),
   ];
   @override

@@ -179,6 +179,12 @@ void main() {
         await tester.tap(find.text('Chủ đề'));
         await tester.pumpAndSettle();
         for (final id in ['math', 'logic', 'geometry']) {
+          await tester.scrollUntilVisible(
+            find.byKey(ValueKey('topic-$id')),
+            150,
+            scrollable: find.byType(Scrollable).first,
+          );
+          await tester.pumpAndSettle();
           final rect = tester.getRect(find.byKey(ValueKey('topic-$id')));
           expect(rect.left, greaterThanOrEqualTo(20));
           expect(rect.right, lessThanOrEqualTo(width - 20));

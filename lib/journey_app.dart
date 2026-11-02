@@ -33,6 +33,8 @@ import 'experiments/space_guidance.dart';
 import 'experiments/lesson_guidance.dart';
 import 'experiments/math_experiments.dart';
 import 'experiments/discovery_experiments.dart';
+import 'experiments/curriculum_engine.dart';
+import 'experiments/curriculum_workspace.dart';
 
 class LearnApp extends StatefulWidget {
   const LearnApp({super.key, required this.store, this.chatResponder});
@@ -55,6 +57,14 @@ class _LearnAppState extends State<LearnApp> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) unawaited(widget.store.flush());
+    final cloud = CloudScope.maybeOf(context);
+    if (cloud?.singleProfile == true) {
+      if (state == AppLifecycleState.resumed) {
+        unawaited(cloud!.refresh());
+      } else {
+        unawaited(cloud!.saveCurrent(automatic: true));
+      }
+    }
   }
 
   @override
@@ -94,6 +104,41 @@ class _LearnAppState extends State<LearnApp> with WidgetsBindingObserver {
             builder: (context, _) {
               if (cloud != null && !cloud.signedIn) {
                 return CloudAccountPage(controller: cloud);
+              }
+              if (cloud?.singleProfile == true &&
+                  (cloud!.preparingProfile || !cloud.accountLoaded)) {
+                return Scaffold(
+                  body: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (cloud.preparingProfile)
+                            const CircularProgressIndicator(),
+                          const SizedBox(height: 20),
+                          Text(
+                            cloud.preparingProfile
+                                ? 'Đang mở tiến độ của bạn…'
+                                : cloud.message ??
+                                      'Chưa tải được tiến độ tài khoản.',
+                          ),
+                          if (!cloud.preparingProfile) ...[
+                            const SizedBox(height: 16),
+                            FilledButton(
+                              onPressed: cloud.refresh,
+                              child: const Text('Thử lại'),
+                            ),
+                            TextButton(
+                              onPressed: cloud.signOut,
+                              child: const Text('Đăng xuất'),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                );
               }
               if (cloud != null &&
                   widget.store.profile != null &&
@@ -389,6 +434,7 @@ class ExplorePage extends StatefulWidget {
 
 class _ExplorePageState extends State<ExplorePage> {
   String query = '', filter = 'all';
+  int? suggestedAge;
   final _search = TextEditingController();
   @override
   void dispose() {
@@ -397,7 +443,8 @@ class _ExplorePageState extends State<ExplorePage> {
   }
 
   bool matches(LearningTopic t) =>
-      '${t.title} ${t.subtitle} ${t.subject}'.toLowerCase().contains(
+      (suggestedAge == null || t.suggestedAge <= suggestedAge!) &&
+      '${t.id} ${t.title} ${t.subtitle} ${t.subject}'.toLowerCase().contains(
         query.toLowerCase(),
       ) &&
       (filter == 'all' ||
@@ -463,6 +510,35 @@ class _ExplorePageState extends State<ExplorePage> {
             ],
           ),
           const SizedBox(height: 26),
+          Text(
+            'Khởi đầu phù hợp',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final entry in <int?, String>{
+                null: 'Mọi lứa tuổi',
+                9: '6–9 tuổi',
+                13: '10–13 tuổi',
+                18: '14+ tuổi',
+              }.entries)
+                ChoiceChip(
+                  key: ValueKey('age-filter-${entry.key}'),
+                  label: Text(entry.value),
+                  selected: suggestedAge == entry.key,
+                  onSelected: (_) => setState(() => suggestedAge = entry.key),
+                ),
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.only(top: 8, bottom: 22),
+            child: Text(
+              'Độ tuổi chỉ là gợi ý khởi đầu. Mỗi chủ đề đi từ nền tảng đến thử thách; bạn có thể chọn theo kiến thức đang có.',
+            ),
+          ),
           if (!topics.any(matches))
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 24),
@@ -749,6 +825,11 @@ class TopicPage extends StatelessWidget {
               Text(
                 topic.subtitle,
                 style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                topic.audience,
+                style: Theme.of(context).textTheme.labelLarge,
               ),
               const SizedBox(height: 28),
               TopicRoadmap(topic: topic, store: store),
@@ -1138,7 +1219,9 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: spec.mechanism == 'reasonedChoice'
+                        color:
+                            spec.mechanism == 'reasonedChoice' ||
+                                supportsCurriculum(spec.mechanism)
                             ? visual.theme.colorScheme.surface
                             : visual.canvasTheme.colorScheme.surface,
                         borderRadius: BorderRadius.circular(
@@ -1156,7 +1239,9 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
                         ],
                       ),
                       child: Theme(
-                        data: spec.mechanism == 'reasonedChoice'
+                        data:
+                            spec.mechanism == 'reasonedChoice' ||
+                                supportsCurriculum(spec.mechanism)
                             ? visual.theme
                             : visual.canvasTheme,
                         child: RepaintBoundary(
@@ -1409,6 +1494,14 @@ class ExperimentWorkspace extends StatelessWidget {
   final ValueChanged<ExperimentData> onChanged;
   @override
   Widget build(BuildContext context) {
+    if (supportsCurriculum(spec.mechanism)) {
+      return CurriculumWorkspace(
+        spec: spec,
+        data: data,
+        locked: locked,
+        onChanged: onChanged,
+      );
+    }
     if (spec.mechanism == 'reasonedChoice') {
       return ReasoningWorkspace(
         spec: spec,
@@ -1774,32 +1867,34 @@ class _ProfilePageState extends State<ProfilePage> {
                 ],
                 const SizedBox(height: 24),
                 const CloudAccountButton(),
-                TextButton.icon(
-                  onPressed: () async {
-                    await widget.store.flush();
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            widget.store.saveError ??
-                                'Đã lưu tiến độ trên thiết bị.',
+                if (CloudScope.maybeOf(context)?.singleProfile != true)
+                  TextButton.icon(
+                    onPressed: () async {
+                      await widget.store.flush();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              widget.store.saveError ??
+                                  'Đã lưu tiến độ trên thiết bị.',
+                            ),
                           ),
-                        ),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.save_outlined, size: 18),
-                  label: const Text('Lưu ngay'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    await widget.store.signOut();
-                    if (context.mounted) {
-                      Navigator.popUntil(context, (route) => route.isFirst);
-                    }
-                  },
-                  child: const Text('Đóng phiên & đổi hồ sơ'),
-                ),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.save_outlined, size: 18),
+                    label: const Text('Lưu ngay'),
+                  ),
+                if (CloudScope.maybeOf(context)?.singleProfile != true)
+                  TextButton(
+                    onPressed: () async {
+                      await widget.store.signOut();
+                      if (context.mounted) {
+                        Navigator.popUntil(context, (route) => route.isFirst);
+                      }
+                    },
+                    child: const Text('Đóng phiên & đổi hồ sơ'),
+                  ),
               ],
             ),
           ),
@@ -1872,9 +1967,55 @@ class TopicArtwork extends StatelessWidget {
   final LearningTopic topic;
   final double height;
   @override
-  Widget build(BuildContext context) => TopicIllustration(
-    topicId: topic.id,
-    label: 'Minh họa ${topic.subject}',
-    height: height,
-  );
+  Widget build(BuildContext context) =>
+      const {
+        'english',
+        'vietnamese',
+        'biology',
+        'chemistry',
+        'astronomy',
+        'finance',
+        'digital',
+      }.contains(topic.id)
+      ? Semantics(
+          image: true,
+          label: 'Minh họa ${topic.subject}',
+          child: SizedBox(
+            height: height,
+            width: double.infinity,
+            child: Center(
+              child: Container(
+                width: height * .78,
+                height: height * .78,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(height * .23),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.primary
+                        .withValues(alpha: .2),
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).colorScheme.primary
+                          .withValues(alpha: .12),
+                      offset: const Offset(3, 5),
+                      blurRadius: 0,
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  topic.icon,
+                  size: height * .46,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
+          ),
+        )
+      : TopicIllustration(
+          topicId: topic.id,
+          label: 'Minh họa ${topic.subject}',
+          height: height,
+        );
 }

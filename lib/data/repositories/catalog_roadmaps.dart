@@ -5,10 +5,28 @@ import '../models/learning_modules.dart';
 List<CourseRoadmap> catalogRoadmaps() {
   final domains = <CourseDomain, Set<String>>{
     CourseDomain.math: {'math', 'geometry', 'probability', 'algebra'},
-    CourseDomain.computerScienceAndAi: {'logic', 'coding', 'optimization'},
-    CourseDomain.generalScience: {'science', 'circuits', 'geography'},
+    CourseDomain.computerScienceAndAi: {
+      'logic',
+      'coding',
+      'optimization',
+      'digital',
+    },
+    CourseDomain.generalScience: {
+      'science',
+      'circuits',
+      'geography',
+      'biology',
+      'chemistry',
+      'astronomy',
+    },
     CourseDomain.dataAnalysis: {'data'},
-    CourseDomain.artsAndHumanities: {'painting', 'marxism'},
+    CourseDomain.artsAndHumanities: {
+      'painting',
+      'marxism',
+      'english',
+      'vietnamese',
+      'finance',
+    },
   };
   return [
     for (final domain in domains.entries)

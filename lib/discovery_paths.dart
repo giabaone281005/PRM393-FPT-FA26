@@ -34,13 +34,25 @@ const discoveryPaths = [
     'Khám phá thế giới vật lý',
     'Thử chuyển động, khám phá mạch điện và xoay quả địa cầu.',
     Icons.bolt_outlined,
-    ['science', 'circuits', 'geography'],
+    ['science', 'circuits', 'geography', 'biology', 'chemistry', 'astronomy'],
   ),
   DiscoveryPath(
     'Nghệ thuật & tư duy xã hội',
     'Quan sát tranh, đọc học thuyết và luyện giải thích bằng bằng chứng.',
     Icons.menu_book_outlined,
     ['painting', 'marxism'],
+  ),
+  DiscoveryPath(
+    'Ngôn ngữ & giao tiếp',
+    'Từ lời chào, nghe và nói đến kể chuyện và lập luận.',
+    Icons.record_voice_over_outlined,
+    ['english', 'vietnamese'],
+  ),
+  DiscoveryPath(
+    'Tự tin trong cuộc sống số',
+    'Phân bổ nguồn lực, bảo vệ thông tin và kiểm chứng điều bạn đọc.',
+    Icons.verified_user_outlined,
+    ['finance', 'digital'],
   ),
 ];
 
@@ -196,8 +208,8 @@ class PathsInvitation extends StatelessWidget {
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 8),
-        const Text(
-          '3 lộ trình kết nối 10 chủ đề. Luôn có thể chọn cách đi riêng.',
+        Text(
+          '${discoveryPaths.length} lộ trình kết nối ${topics.length} chủ đề. Luôn có thể chọn cách đi riêng.',
           style: TextStyle(height: 1.5),
         ),
         const SizedBox(height: 8),

@@ -15,6 +15,9 @@ import 'package:brilliant_mobile/learning_store.dart';
 
 import 'math_experiments_test.dart' show mathSolutionStates;
 import 'extended_solutions.dart';
+import 'curriculum_solutions.dart';
+
+import 'package:brilliant_mobile/experiments/curriculum_engine.dart';
 
 class SyncTestAuth implements AuthRepository {
   String? owner = 'owner-a';
@@ -58,6 +61,7 @@ class SyncTestBackups implements BackupRepository {
 }
 
 class SyncTestRepository implements LearningRepository {
+  final additionallyPublishedTopics = <String>{};
   final receipts = <String, Map<String, dynamic>>{};
   final payloads = <String, String>{};
   final operations = <String>[];
@@ -82,7 +86,10 @@ class SyncTestRepository implements LearningRepository {
     'activities': [
       for (final t in topics)
         for (final s in t.experiments)
-          if (!baselineOnly || s.mechanism != 'reasonedChoice')
+          if (!baselineOnly ||
+              additionallyPublishedTopics.contains(t.id) ||
+              s.mechanism != 'reasonedChoice' &&
+                  !supportsCurriculum(s.mechanism))
             {
               'topic_id': t.id,
               'activity_id': s.id,
@@ -172,7 +179,11 @@ void main() {
   late LearningSyncController sync;
   late SyncTestRepository repository;
   final topic = topics.first;
-  final solutions = {...mathSolutionStates, ...extendedSolutions};
+  final solutions = {
+    ...mathSolutionStates,
+    ...extendedSolutions,
+    ...curriculumSolutionStates,
+  };
   Map<String, dynamic> draft() => {
     'version': 3,
     'step': 0,
@@ -214,8 +225,77 @@ void main() {
     await auth.events.close();
   });
 
+  test('a completed older pinned release still syncs after local activities are appended', () async {
+    repository.baselineOnly = true;
+    final older = topic.experiments
+        .where((s) => !supportsCurriculum(s.mechanism))
+        .toList();
+    await store.finish(topic.id, experiments: older, draft: draft());
+    final root = store.serverSyncFor(store.profile!.id);
+    final sessions = learningMap(root['sessions']);
+    final id = sessions.keys.single;
+    sessions[id] = {
+      ...learningMap(sessions[id]),
+      'releaseId': '33333333-3333-4333-8333-333333333333',
+      'versions': {for (final s in older) s.id: s.contentVersion},
+    };
+    await store.updateServerSync(store.profile!.id, {
+      ...root,
+      'sessions': sessions,
+    });
+    await sync.syncNow();
+    expect(repository.completions, 1);
+    expect(store.verifiedPoints, 30);
+    expect(store.pendingServerSessions, 0);
+    expect(
+      repository.payloads.values
+          .map((v) => jsonDecode(v) as Map)
+          .where((v) => v['activity_id'] != null)
+          .every((v) => older.any((s) => s.id == v['activity_id'])),
+      true,
+    );
+  });
+
+  test(
+    'a pinned older release never receives a new unpublished activity',
+    () async {
+      repository.baselineOnly = true;
+      final newActivity = topic.experiments.last;
+      await store.saveProgress(topic.id, {
+        ...draft(),
+        'activeActivityId': newActivity.id,
+        'states': {newActivity.id: curriculumSolutionStates[newActivity.id]},
+      });
+      final root = store.serverSyncFor(store.profile!.id);
+      final sessions = learningMap(root['sessions']);
+      final id = sessions.keys.single;
+      sessions[id] = {
+        ...learningMap(sessions[id]),
+        'releaseId': '33333333-3333-4333-8333-333333333333',
+        'versions': {
+          for (final s in topic.experiments.where(
+            (s) => !supportsCurriculum(s.mechanism),
+          ))
+            s.id: s.contentVersion,
+        },
+      };
+      await store.updateServerSync(store.profile!.id, {
+        ...root,
+        'sessions': sessions,
+      });
+      await sync.syncNow();
+      expect(
+        repository.operations.where((op) => op.endsWith('/session.start')),
+        isEmpty,
+      );
+      expect(store.pendingServerSessions, 1);
+      expect(store.verifiedPoints, 0);
+    },
+  );
+
   test('unpublished lessons preserve their queue without blocking supported lessons', () async {
     repository.baselineOnly = true;
+    repository.additionallyPublishedTopics.add(topic.id);
     final painting = topicById('painting').experiments.first;
     await store.saveProgress('painting', {
       'version': 3,

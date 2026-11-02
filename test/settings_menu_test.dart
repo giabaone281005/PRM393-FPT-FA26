@@ -60,7 +60,7 @@ void main() {
         expect(find.byType(entry.value), findsOneWidget);
         if (entry.key == 'about') {
           expect(find.text('Phiên bản 2.0.3 (42)'), findsOneWidget);
-          expect(find.text('13 chủ đề · 71 hoạt động'), findsOneWidget);
+          expect(find.text('20 chủ đề · 139 hoạt động'), findsOneWidget);
         }
         Navigator.pop(tester.element(find.byType(entry.value)));
         await tester.pumpAndSettle();

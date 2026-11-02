@@ -8,6 +8,7 @@ import 'experiments/extended_catalog.dart';
 import 'experiments/diverse_catalog.dart';
 import 'experiments/solid_catalog.dart';
 import 'experiments/deep_catalog.dart';
+import 'experiments/curriculum_catalog.dart';
 
 class LearningTopic {
   const LearningTopic(
@@ -22,10 +23,35 @@ class LearningTopic {
   final String id, title, subtitle, subject, action;
   final IconData icon;
   final Color color;
+  int get suggestedAge =>
+      const {
+        'math': 6,
+        'english': 6,
+        'vietnamese': 6,
+        'biology': 8,
+        'logic': 8,
+        'science': 8,
+        'geometry': 8,
+        'painting': 8,
+        'astronomy': 8,
+        'data': 10,
+        'coding': 10,
+        'circuits': 10,
+        'probability': 10,
+        'geography': 10,
+        'finance': 10,
+        'digital': 10,
+        'algebra': 12,
+        'chemistry': 12,
+        'optimization': 14,
+        'marxism': 16,
+      }[id] ??
+      10;
+  String get audience => 'Gợi ý từ $suggestedAge tuổi • Cơ bản → nâng cao';
   List<ExperimentSpec> get experiments => experimentCatalog[id]!;
 }
 
-final experimentCatalog = <String, List<ExperimentSpec>>{
+final _existingCatalog = <String, List<ExperimentSpec>>{
   for (final entry in {...mathExperiments, ...discoveryExperiments}.entries)
     entry.key: [
       ...entry.value,
@@ -42,6 +68,11 @@ final experimentCatalog = <String, List<ExperimentSpec>>{
   'optimization': extensionExperiments['optimization']!,
   'marxism': deepExperiments['marxism']!,
   'painting': deepExperiments['painting']!,
+};
+final experimentCatalog = <String, List<ExperimentSpec>>{
+  for (final entry in _existingCatalog.entries)
+    entry.key: [...entry.value, ...?curriculumExtensions[entry.key]],
+  ...expandedCurriculum,
 };
 const topics = [
   LearningTopic(
@@ -160,6 +191,69 @@ const topics = [
     Icons.palette_outlined,
     BrilliantPalette.successSurface,
     'Quan sát để hiểu một bức tranh',
+  ),
+  LearningTopic(
+    'english',
+    'Tiếng Anh trong cuộc sống',
+    'Nghe, ghép câu và luyện nói từ lời chào đến yêu cầu lịch sự.',
+    'Ngôn ngữ',
+    Icons.record_voice_over_outlined,
+    BrilliantPalette.successSurface,
+    'Nghe và nói một câu mới',
+  ),
+  LearningTopic(
+    'vietnamese',
+    'Tiếng Việt & giao tiếp',
+    'Kể chuyện, nối ý, viết rõ ràng và lập luận bằng bằng chứng.',
+    'Ngôn ngữ',
+    Icons.chat_bubble_outline,
+    BrilliantPalette.successSurface,
+    'Biến ý tưởng thành lời',
+  ),
+  LearningTopic(
+    'biology',
+    'Sự sống quanh ta',
+    'Từ bộ phận cây đến hệ sinh thái và thiết kế thí nghiệm.',
+    'Sinh học',
+    Icons.eco_outlined,
+    BrilliantPalette.successSurface,
+    'Khám phá một hệ sống',
+  ),
+  LearningTopic(
+    'chemistry',
+    'Vật chất & biến đổi',
+    'Phân loại vật chất, đếm nguyên tử và kiểm tra giả thuyết.',
+    'Hóa học',
+    Icons.science_outlined,
+    BrilliantPalette.successSurface,
+    'Thử trong phòng lab số',
+  ),
+  LearningTopic(
+    'astronomy',
+    'Bầu trời & vũ trụ',
+    'Khám phá ngày đêm, pha Mặt Trăng và lập kế hoạch thám hiểm.',
+    'Thiên văn',
+    Icons.nightlight_round,
+    BrilliantPalette.successSurface,
+    'Theo dấu một thiên thể',
+  ),
+  LearningTopic(
+    'finance',
+    'Tiền & lựa chọn',
+    'Từ nhu cầu, tiết kiệm đến phân bổ nguồn lực và đọc lời hứa.',
+    'Kỹ năng sống',
+    Icons.savings_outlined,
+    BrilliantPalette.successSurface,
+    'Lập ngân sách bằng mô hình',
+  ),
+  LearningTopic(
+    'digital',
+    'Công dân số thông minh',
+    'Bảo vệ thông tin, kiểm chứng tin và dùng AI có trách nhiệm.',
+    'Kỹ năng số',
+    Icons.verified_user_outlined,
+    BrilliantPalette.successSurface,
+    'Điều tra một thông tin',
   ),
 ];
 LearningTopic topicById(String id) =>

@@ -41,7 +41,13 @@ void main() {
           final visual = LessonTheme(topic.id, i, base);
           final scheme = visual.theme.colorScheme;
           lessonColors.add(scheme.primary);
-          if (i == 0) topicColors.add(scheme.primary);
+          if (i == 0) {
+            expect(
+              topicColors.add(scheme.primary),
+              true,
+              reason: 'Duplicate palette: ${topic.id} $brightness',
+            );
+          }
           for (final (text, surface) in [
             (scheme.onSurface, scheme.surface),
             (scheme.onSurface, scheme.surfaceContainerLow),
