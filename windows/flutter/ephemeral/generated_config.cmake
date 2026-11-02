@@ -1,0 +1,24 @@
+# Generated code do not commit.
+file(TO_CMAKE_PATH "C:\\Users\\NHIM\\AppData\\Local\\Programs\\flutter_windows_3.47.7-stable\\flutter" FLUTTER_ROOT)
+file(TO_CMAKE_PATH "D:\\3.FPT\\PRM\\New folder\\PRM393-FPT-FA26" PROJECT_DIR)
+
+set(FLUTTER_VERSION "1.0.0+1" PARENT_SCOPE)
+set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)
+set(FLUTTER_VERSION_MINOR 0 PARENT_SCOPE)
+set(FLUTTER_VERSION_PATCH 0 PARENT_SCOPE)
+set(FLUTTER_VERSION_BUILD 1 PARENT_SCOPE)
+
+# Environment variables to pass to tool_backend.sh
+list(APPEND FLUTTER_TOOL_ENVIRONMENT
+  "FLUTTER_ROOT=C:\\Users\\NHIM\\AppData\\Local\\Programs\\flutter_windows_3.47.7-stable\\flutter"
+  "PROJECT_DIR=D:\\3.FPT\\PRM\\New folder\\PRM393-FPT-FA26"
+  "FLUTTER_ROOT=C:\\Users\\NHIM\\AppData\\Local\\Programs\\flutter_windows_3.47.7-stable\\flutter"
+  "FLUTTER_EPHEMERAL_DIR=D:\\3.FPT\\PRM\\New folder\\PRM393-FPT-FA26\\windows\\flutter\\ephemeral"
+  "PROJECT_DIR=D:\\3.FPT\\PRM\\New folder\\PRM393-FPT-FA26"
+  "FLUTTER_TARGET=D:\\3.FPT\\PRM\\New folder\\PRM393-FPT-FA26\\lib\\main.dart"
+  "DART_DEFINES=RkxVVFRFUl9CVUlMRF9OQU1FPTEuMC4w,RkxVVFRFUl9CVUlMRF9OVU1CRVI9MQ==,RkxVVFRFUl9WRVJTSU9OPTMuNDcuNw==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049YWJhZjljNTIzNw==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049ZGViMjg3NDgxZQ==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My4xMy41"
+  "DART_OBFUSCATION=false"
+  "TRACK_WIDGET_CREATION=true"
+  "TREE_SHAKE_ICONS=false"
+  "PACKAGE_CONFIG=D:\\3.FPT\\PRM\\New folder\\PRM393-FPT-FA26\\.dart_tool\\package_config.json"
+)
