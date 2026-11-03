@@ -1,0 +1,18 @@
+{
+  "status": "completed",
+  "conclusion": "success",
+  "headSha": "9c17c2d740a02bd86a67a65ad59ee915e3bea3c7",
+  "url": "https://github.com/giabaone281005/PRM393-FPT-FA26/actions/runs/41640899204",
+  "jobs": [
+    {
+      "name": "flutter",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "edge",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ]
+}

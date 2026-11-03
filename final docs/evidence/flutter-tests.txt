@@ -1,0 +1,245 @@
+00:00 +0: loading D:/Brilliant Clone/brilliant_mobile/repo-history/test/admin_dashboard_test.dart
+00:00 +0: D:/Brilliant Clone/brilliant_mobile/repo-history/test/app_messages_test.dart: unknown errors use neutral guidance and never invent a network or password cause
+00:00 +1: D:/Brilliant Clone/brilliant_mobile/repo-history/test/admin_dashboard_test.dart: denied role renders safely
+00:00 +2: D:/Brilliant Clone/brilliant_mobile/repo-history/test/admin_dashboard_test.dart: denied role renders safely
+00:00 +3: D:/Brilliant Clone/brilliant_mobile/repo-history/test/admin_dashboard_test.dart: denied role renders safely
+00:00 +4: D:/Brilliant Clone/brilliant_mobile/repo-history/test/admin_dashboard_test.dart: denied role renders safely
+00:00 +5: D:/Brilliant Clone/brilliant_mobile/repo-history/test/admin_dashboard_test.dart: denied role renders safely
+00:00 +6: D:/Brilliant Clone/brilliant_mobile/repo-history/test/admin_dashboard_test.dart: denied role renders safely
+00:00 +7: D:/Brilliant Clone/brilliant_mobile/repo-history/test/admin_dashboard_test.dart: denied role renders safely
+00:00 +8: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: chat explains a known engine failure while preserving the draft
+00:00 +9: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: chat explains a known engine failure while preserving the draft
+00:00 +10: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: chat explains a known engine failure while preserving the draft
+00:00 +11: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: chat explains a known engine failure while preserving the draft
+00:00 +12: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: chat explains a known engine failure while preserving the draft
+00:00 +13: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: chat explains a known engine failure while preserving the draft
+00:00 +14: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: chat explains a known engine failure while preserving the draft
+00:00 +15: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: chat explains a known engine failure while preserving the draft
+00:00 +16: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: chat explains a known engine failure while preserving the draft
+00:00 +17: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: chat explains a known engine failure while preserving the draft
+00:00 +18: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: chat explains a known engine failure while preserving the draft
+00:00 +19: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: chat explains a known engine failure while preserving the draft
+00:00 +20: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: chat explains a known engine failure while preserving the draft
+00:01 +21: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: chat explains a known engine failure while preserving the draft
+00:01 +22: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: chat explains a known engine failure while preserving the draft
+00:01 +23: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: chat explains a known engine failure while preserving the draft
+00:01 +24: D:/Brilliant Clone/brilliant_mobile/repo-history/test/cloud_backup_test.dart: invalid auth form reveals the first error and keyboard Next reaches password
+00:01 +25: D:/Brilliant Clone/brilliant_mobile/repo-history/test/cloud_backup_test.dart: invalid auth form reveals the first error and keyboard Next reaches password
+00:02 +26: D:/Brilliant Clone/brilliant_mobile/repo-history/test/cloud_backup_test.dart: invalid auth form reveals the first error and keyboard Next reaches password
+00:02 +27: D:/Brilliant Clone/brilliant_mobile/repo-history/test/daily_activity_test.dart: Simple profile switches daily totals and fits a small screen
+00:02 +28: D:/Brilliant Clone/brilliant_mobile/repo-history/test/daily_activity_test.dart: Simple profile switches daily totals and fits a small screen
+00:02 +29: D:/Brilliant Clone/brilliant_mobile/repo-history/test/daily_activity_test.dart: Simple profile switches daily totals and fits a small screen
+00:02 +30: D:/Brilliant Clone/brilliant_mobile/repo-history/test/daily_activity_test.dart: Simple profile switches daily totals and fits a small screen
+00:03 +31: D:/Brilliant Clone/brilliant_mobile/repo-history/test/daily_activity_test.dart: Simple profile switches daily totals and fits a small screen
+00:03 +32: D:/Brilliant Clone/brilliant_mobile/repo-history/test/daily_activity_test.dart: Simple profile switches daily totals and fits a small screen
+00:03 +33: D:/Brilliant Clone/brilliant_mobile/repo-history/test/daily_activity_test.dart: Simple profile switches daily totals and fits a small screen
+00:03 +34: D:/Brilliant Clone/brilliant_mobile/repo-history/test/daily_activity_test.dart: Simple profile switches daily totals and fits a small screen
+00:03 +35: D:/Brilliant Clone/brilliant_mobile/repo-history/test/daily_activity_test.dart: Simple profile switches daily totals and fits a small screen
+00:03 +36: D:/Brilliant Clone/brilliant_mobile/repo-history/test/daily_activity_test.dart: Simple profile switches daily totals and fits a small screen
+00:03 +37: D:/Brilliant Clone/brilliant_mobile/repo-history/test/daily_activity_test.dart: Simple profile switches daily totals and fits a small screen
+00:03 +38: D:/Brilliant Clone/brilliant_mobile/repo-history/test/daily_activity_test.dart: Simple profile switches daily totals and fits a small screen
+00:03 +39: D:/Brilliant Clone/brilliant_mobile/repo-history/test/daily_activity_test.dart: Simple profile switches daily totals and fits a small screen
+00:03 +40: D:/Brilliant Clone/brilliant_mobile/repo-history/test/daily_activity_test.dart: Simple profile switches daily totals and fits a small screen
+00:03 +41: D:/Brilliant Clone/brilliant_mobile/repo-history/test/daily_activity_test.dart: Simple profile switches daily totals and fits a small screen
+00:03 +42: D:/Brilliant Clone/brilliant_mobile/repo-history/test/discovery_paths_test.dart: Path map opens an interactive topic and preserves its saved step at 320px
+00:03 +43: D:/Brilliant Clone/brilliant_mobile/repo-history/test/discovery_paths_test.dart: Path map opens an interactive topic and preserves its saved step at 320px
+00:03 +44: D:/Brilliant Clone/brilliant_mobile/repo-history/test/discovery_paths_test.dart: Path map opens an interactive topic and preserves its saved step at 320px
+00:03 +45: D:/Brilliant Clone/brilliant_mobile/repo-history/test/discovery_paths_test.dart: Path map opens an interactive topic and preserves its saved step at 320px
+00:03 +46: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:03 +47: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:03 +48: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +49: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +50: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +51: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +52: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +53: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +54: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +55: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +56: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +57: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +58: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +59: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +60: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +61: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +62: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +63: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +64: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +65: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +66: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +67: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +68: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +69: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +70: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +71: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +72: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +73: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:04 +74: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:05 +75: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:05 +76: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:05 +77: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:05 +78: D:/Brilliant Clone/brilliant_mobile/repo-history/test/chat_layout_test.dart: Topic tiles and chat controls stay inside 280px to desktop at large text
+00:05 +79: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_registry_test.dart: runtime timeout closes the request adapter
+00:05 +80: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:05 +81: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:05 +82: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:05 +83: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:05 +84: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:05 +85: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:05 +86: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:05 +87: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:05 +88: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:05 +89: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:05 +90: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:05 +91: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:05 +92: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:05 +93: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:05 +94: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:05 +95: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:05 +96: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:06 +97: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:06 +98: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:06 +99: D:/Brilliant Clone/brilliant_mobile/repo-history/test/engine_widgets_test.dart: engine UI saves, selects and edits without displaying stored credentials
+00:06 +100: D:/Brilliant Clone/brilliant_mobile/repo-history/test/cloud_backup_test.dart: profile created after login automatically saves without a manual link
+00:07 +101: D:/Brilliant Clone/brilliant_mobile/repo-history/test/extended_curriculum_test.dart: Configured equation can remove more than the original three pairs
+00:07 +102: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:07 +103: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:07 +104: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:07 +105: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:07 +106: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:07 +107: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:07 +108: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:07 +109: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:07 +110: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:07 +111: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:07 +112: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:07 +113: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:07 +114: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:08 +115: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:08 +116: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:08 +117: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:08 +118: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:08 +119: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:08 +120: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:08 +121: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:08 +122: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:08 +123: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:08 +124: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:08 +125: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:08 +126: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:08 +127: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:08 +128: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:08 +129: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:08 +130: D:/Brilliant Clone/brilliant_mobile/repo-history/test/home_navigation_test.dart: Empty home chooses a topic and profile is a main tab
+00:08 +131: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:08 +132: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:09 +133: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:09 +134: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:09 +135: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:09 +136: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:09 +137: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:09 +138: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:09 +139: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:10 +140: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:10 +141: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:10 +142: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:11 +143: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:11 +144: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:11 +145: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:11 +146: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:11 +147: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:11 +148: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:11 +149: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:11 +150: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:11 +151: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:11 +152: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:12 +153: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:12 +154: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:12 +155: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:12 +156: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:12 +157: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:12 +158: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:12 +159: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:12 +160: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:12 +161: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:12 +162: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:13 +163: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:13 +164: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:13 +165: D:/Brilliant Clone/brilliant_mobile/repo-history/test/icon_visual_preview_test.dart: Render home and the eight dimensional topic illustrations
+00:13 +166: D:/Brilliant Clone/brilliant_mobile/repo-history/test/expanded_learning_test.dart: new activities fit 320px at large text in both themes without forced audio
+00:13 +167: D:/Brilliant Clone/brilliant_mobile/repo-history/test/cloud_backup_test.dart: linked profile automatically saves subsequent learning changes
+00:13 +168: D:/Brilliant Clone/brilliant_mobile/repo-history/test/password_recovery_test.dart: forgot password route returns to the auth gate without opening a learning account
+00:13 +169: D:/Brilliant Clone/brilliant_mobile/repo-history/test/password_recovery_test.dart: forgot password route returns to the auth gate without opening a learning account
+00:13 +170: D:/Brilliant Clone/brilliant_mobile/repo-history/test/password_recovery_test.dart: forgot password route returns to the auth gate without opening a learning account
+00:13 +171: D:/Brilliant Clone/brilliant_mobile/repo-history/test/password_recovery_test.dart: forgot password route returns to the auth gate without opening a learning account
+00:13 +172: D:/Brilliant Clone/brilliant_mobile/repo-history/test/password_recovery_test.dart: forgot password route returns to the auth gate without opening a learning account
+00:13 +173: D:/Brilliant Clone/brilliant_mobile/repo-history/test/password_recovery_test.dart: forgot password route returns to the auth gate without opening a learning account
+00:13 +174: D:/Brilliant Clone/brilliant_mobile/repo-history/test/password_recovery_test.dart: forgot password route returns to the auth gate without opening a learning account
+00:14 +175: D:/Brilliant Clone/brilliant_mobile/repo-history/test/password_recovery_test.dart: forgot password route returns to the auth gate without opening a learning account
+00:14 +176: D:/Brilliant Clone/brilliant_mobile/repo-history/test/password_recovery_test.dart: forgot password route returns to the auth gate without opening a learning account
+00:14 +177: D:/Brilliant Clone/brilliant_mobile/repo-history/test/password_recovery_test.dart: forgot password route returns to the auth gate without opening a learning account
+00:14 +178: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:14 +179: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:14 +180: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:14 +181: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:14 +182: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:14 +183: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:14 +184: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:14 +185: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:14 +186: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:15 +187: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:15 +188: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:15 +189: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:15 +190: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:15 +191: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:15 +192: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:15 +193: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:15 +194: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:15 +195: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:16 +196: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:16 +197: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:16 +198: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:16 +199: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:16 +200: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:16 +201: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:16 +202: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:16 +203: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:16 +204: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:16 +205: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:16 +206: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:16 +207: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:16 +208: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:16 +209: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:16 +210: D:/Brilliant Clone/brilliant_mobile/repo-history/test/settings_menu_test.dart: Popup hides unavailable Premium and preserves the selected tab
+00:16 +211: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: Entry to onboarding to dashboard, logout and return
+00:17 +212: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: Entry to onboarding to dashboard, logout and return
+00:17 +213: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: Entry to onboarding to dashboard, logout and return
+00:17 +214: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: Entry to onboarding to dashboard, logout and return
+00:17 +215: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: Entry to onboarding to dashboard, logout and return
+00:17 +216: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: Entry to onboarding to dashboard, logout and return
+00:17 +217: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: Entry to onboarding to dashboard, logout and return
+00:18 +218: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: Entry to onboarding to dashboard, logout and return
+00:18 +219: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: logic: full lesson saves every step and completes with 30 XP
+00:20 +220: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: math: full lesson saves every step and completes with 30 XP
+00:21 +221: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: science: full lesson saves every step and completes with 30 XP
+00:22 +222: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: data: full lesson saves every step and completes with 30 XP
+00:23 +223: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: geometry: full lesson saves every step and completes with 30 XP
+00:24 +224: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: coding: full lesson saves every step and completes with 30 XP
+00:26 +225: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: circuits: full lesson saves every step and completes with 30 XP
+00:27 +226: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: probability: full lesson saves every step and completes with 30 XP
+00:28 +227: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: algebra: full lesson saves every step and completes with 30 XP
+00:28 +228: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: optimization: full lesson saves every step and completes with 30 XP
+00:29 +229: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: geography: full lesson saves every step and completes with 30 XP
+00:29 +230: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: marxism: full lesson saves every step and completes with 30 XP
+00:30 +231: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: painting: full lesson saves every step and completes with 30 XP
+00:31 +232: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: english: full lesson saves every step and completes with 30 XP
+00:32 +233: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: vietnamese: full lesson saves every step and completes with 30 XP
+00:32 +234: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: biology: full lesson saves every step and completes with 30 XP
+00:33 +235: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: chemistry: full lesson saves every step and completes with 30 XP
+00:33 +236: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: astronomy: full lesson saves every step and completes with 30 XP
+00:34 +237: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: finance: full lesson saves every step and completes with 30 XP
+00:34 +238: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: digital: full lesson saves every step and completes with 30 XP
+00:35 +239: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: Actual gestures, wrong retry, lifecycle save and exact resume
+00:35 +240: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: All lesson screens fit 320px and expose the correct interactive surfaces
+00:40 +241: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: Saved checked state is revalidated and an untouched lesson cannot complete
+00:40 +242: D:/Brilliant Clone/brilliant_mobile/repo-history/test/widget_test.dart: (tearDownAll)
+00:40 +242: All tests passed!

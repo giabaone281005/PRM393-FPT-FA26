@@ -1,0 +1,67 @@
+{
+  "baseline": {
+    "other_accounts": 8,
+    "topics": 20,
+    "other_backup_fingerprint": "842ed94722fdc5e8385ff6264f5afb94"
+  },
+  "sql_smokes": {
+    "admin_dashboard_smoke.sql": "PASS, ROLLBACK",
+    "learning_api_smoke.sql": "PASS, ROLLBACK",
+    "catalog_visibility_smoke.sql": "PASS, ROLLBACK"
+  },
+  "inventory": {
+    "public_tables": 16,
+    "private_tables": 8,
+    "public_tables_without_rls": 0,
+    "active_topics": 20,
+    "activities": 139,
+    "activity_versions": 140,
+    "published_releases": 2
+  },
+  "edge_functions": {
+    "learning-api": 6,
+    "tutor-chat": 4
+  },
+  "advisors": {
+    "private_rls_no_policy_info": 8,
+    "leaked_password_protection_disabled_warn": 1
+  },
+  "fixture_audit_before_cleanup": {
+    "profiles": 1,
+    "rewards": 20,
+    "verified_xp": 600,
+    "completions": 20,
+    "attempts": 156,
+    "temporary_topic_status": "archived"
+  },
+  "cleanup": {
+    "remaining_fixture_users": 0,
+    "remaining_fixture_topics": 0,
+    "accounts": 8,
+    "topics": 20,
+    "baseline_rows_fingerprint": "842ed94722fdc5e8385ff6264f5afb94",
+    "all_current_backups_fingerprint": "692254ac192ac242d40205e86d539b21",
+    "new_nonfixture_backup_created_at_utc": "2026-11-03 12:54:55.470139",
+    "baseline_rows_unchanged": true
+  },
+  "validation": {
+    "flutter_tests": 242,
+    "flutter_analyze": "PASS",
+    "edge_tests": 22,
+    "deno_check_exit": 0,
+    "deno_lint_exit": 0,
+    "expanded_parity": 1577,
+    "legacy_parity": 729,
+    "standalone_checks": [
+      50,
+      2491,
+      17552
+    ]
+  },
+  "emulator_restored": {
+    "wifi": 1,
+    "mobile_data": 1,
+    "record_audio_granted": false,
+    "normal_app_foreground": true
+  }
+}

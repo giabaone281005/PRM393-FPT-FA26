@@ -1,0 +1,25 @@
+{
+  "started": 1793710660.336198,
+  "success": false,
+  "run": "d60e3e90-4136-4c00-9d79-1067ca8a1de1",
+  "phases": [
+    "wrong_password_rejected",
+    "restore_previous_traversal_snapshot",
+    "live_faq_and_gemini",
+    "appearance_settings",
+    "account_snapshot_retry_and_conflict",
+    "real_canonical_attempts_verified_xp_idempotency",
+    "offline_draft_then_automatic_server_retry",
+    "profile_history",
+    "logout",
+    "fresh_native_namespace_login_restores_server_progress",
+    "owner_isolation_and_admin_rpc_denial"
+  ],
+  "activities": 0,
+  "gestureActivities": 0,
+  "answerFixtureActivities": 0,
+  "resumedAfterTraversal": true,
+  "failedPhase": "admin",
+  "exit_code": 1,
+  "seconds": 203.75
+}
