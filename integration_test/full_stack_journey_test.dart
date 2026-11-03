@@ -626,6 +626,11 @@ void main() {
 
         phase = 'offline_save_retry';
         await openLesson(topicById('english'));
+        // A resumed validation may already contain the previous offline edit.
+        // Make the next offline choice a real change through the controls.
+        await keyTap('connect-0-0');
+        await tester.pump(const Duration(seconds: 3));
+        await waitFor(() => !cloud!.busy);
         debugPrint('HEADED_NETWORK_OFF');
         await tester.pump(const Duration(seconds: 3));
         await keyTap('connect-0-2');
@@ -666,8 +671,15 @@ void main() {
         await tap(find.text('Hồ sơ').last);
         expect(store!.history.length, 20);
         passed('profile_history');
-        await keyTap('app-settings');
-        await keyTap('menu-logout');
+        phase = 'logout';
+        // The UI explicitly asks for another tap if an automatic backup is
+        // already in progress. Observe that state and retry the same UI action.
+        for (var attempt = 0; attempt < 3 && cloud!.signedIn; attempt++) {
+          await waitFor(() => !cloud!.busy && !sync!.busy);
+          await keyTap('app-settings');
+          await keyTap('menu-logout');
+          await waitFor(() => !cloud!.busy);
+        }
         await waitFor(
           () =>
               !cloud!.signedIn &&
