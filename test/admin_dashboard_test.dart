@@ -184,7 +184,57 @@ void main() {
     },
   );
 
-  for (final width in [375.0, 1440.0]) {
+  testWidgets('overview stays compact and reflects refreshed totals', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1440, 1000);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final auth = TestAdminAuth(), repo = TestAdminRepository();
+    final controller = AdminDashboardController(auth: auth, repository: repo);
+    await tester.pumpWidget(AdminApp(controller: controller));
+    await tester.pumpAndSettle();
+
+    final usersCard = find.byKey(const ValueKey('overview-Người dùng'));
+    expect(usersCard, findsOneWidget);
+    expect(find.byKey(const ValueKey('overview-Chủ đề')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('overview-Lượt hoàn thành')),
+      findsOneWidget,
+    );
+    expect(find.text('2 hoạt động · 0 tạm khóa'), findsOneWidget);
+    expect(find.text('user-1'), findsNothing);
+    expect(
+      tester.widget<DataTable>(find.byType(DataTable)).columns,
+      hasLength(2),
+    );
+
+    repo.users = 8;
+    repo.events.add(const AdminRealtimeEvent(connected: true, changed: true));
+    await tester.pump(const Duration(milliseconds: 350));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(of: usersCard, matching: find.text('8')),
+      findsOneWidget,
+    );
+    expect(find.text('8 hoạt động · 0 tạm khóa'), findsOneWidget);
+
+    controller.selectSection('topics');
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<DataTable>(find.byType(DataTable)).columns,
+      hasLength(4),
+    );
+    expect(find.text('Logic & quy luật'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+    controller.dispose();
+    await auth.events.close();
+    await repo.events.close();
+  });
+
+  for (final width in [320.0, 375.0, 1440.0]) {
     testWidgets('admin dashboard is usable at $width px and large text', (
       tester,
     ) async {

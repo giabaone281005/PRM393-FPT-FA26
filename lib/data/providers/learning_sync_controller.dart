@@ -9,6 +9,7 @@ import '../../learning_store.dart';
 import '../models/app_failure.dart';
 import '../models/learning_journal.dart';
 import '../repositories/learning_repository.dart';
+import '../repositories/catalog_cache_repository.dart';
 import 'cloud_backup_controller.dart';
 
 String learningStableId(String source) {
@@ -45,8 +46,10 @@ class LearningSyncController extends ChangeNotifier {
     required this.cloud,
     required this.repository,
     this.automatic = true,
+    this.catalogCache,
   }) {
     _owner = cloud.userId;
+    _restoreCatalog();
     store.addListener(_changed);
     cloud.addListener(_changed);
     if (automatic) {
@@ -61,6 +64,7 @@ class LearningSyncController extends ChangeNotifier {
   final CloudBackupController cloud;
   final LearningRepository repository;
   final bool automatic;
+  final CatalogCacheRepository? catalogCache;
   String? _owner;
   Timer? _timer, _retry;
   Future<void>? _running;
@@ -71,6 +75,15 @@ class LearningSyncController extends ChangeNotifier {
   NoticeKind noticeKind = NoticeKind.info;
   Map<String, dynamic>? _catalog;
   bool hasProfileConflict = false;
+
+  void _restoreCatalog() {
+    final cached = _owner == null ? null : catalogCache?.read(_owner!);
+    try {
+      store.applyCatalog(cached);
+    } catch (_) {
+      store.applyCatalog(null);
+    }
+  }
 
   Future<Map<String, dynamic>> loadConflictProfile() async {
     final owner = cloud.userId;
@@ -147,6 +160,7 @@ class LearningSyncController extends ChangeNotifier {
       _owner = cloud.userId;
       _generation++;
       _catalog = null;
+      _restoreCatalog();
       message = null;
       noticeKind = NoticeKind.info;
       hasProfileConflict = false;
@@ -233,6 +247,13 @@ class LearningSyncController extends ChangeNotifier {
       await store.flush();
       _guard(owner, localId, generation);
       if (store.saveError != null) throw LocalLearningFailure(store.saveError!);
+      // Refresh metadata/visibility even when there are no queued sessions.
+      final catalog = await repository.catalog(owner);
+      _guard(owner, localId, generation);
+      _catalog = catalog;
+      if (catalog['topics'] is List) store.applyCatalog(catalog);
+      await catalogCache?.write(owner, catalog);
+      _guard(owner, localId, generation);
       final sourceKey = cloud.currentBinding?['key'] as String? ?? localId;
       final profileId = learningStableId('$owner/profile/$sourceKey');
       var root = store.serverSyncFor(localId);
@@ -318,6 +339,15 @@ class LearningSyncController extends ChangeNotifier {
           _catalog ??= await repository.catalog(owner);
           _guard(owner, localId, generation);
           final release = learningMap(_catalog!['release']);
+          final remoteTopics = _catalog!['topics'];
+          if (remoteTopics is List &&
+              !remoteTopics.any(
+                (t) =>
+                    t is Map && t['id'] == topic.id && t['status'] == 'active',
+              )) {
+            deferredLessons++;
+            continue;
+          }
           final activities = (_catalog!['activities'] as List? ?? [])
               .map(learningMap)
               .where((x) => x['topic_id'] == topic.id)
@@ -363,7 +393,8 @@ class LearningSyncController extends ChangeNotifier {
         if (versions.isEmpty ||
             versions.entries.any(
               (entry) =>
-                  localActivities[entry.key]?.contentVersion != entry.value,
+                  localActivities[entry.key]?.contentVersion != entry.value &&
+                  !(entry.key == 'math-number-line' && entry.value == 1),
             ) ||
             !versions.containsKey(pinnedActivity) ||
             (row['attempts'] as List? ?? [])

@@ -9,6 +9,8 @@ function setup(
   role = "user",
   status = "active",
   failure?: { code: string; message: string },
+  evaluatorVersion = 1,
+  implementationHashes?: Record<number, string>,
 ) {
   const calls: {
     path: string;
@@ -20,11 +22,12 @@ function setup(
     publishableKey: "public-test-key",
     serviceKey: "server-test-key",
     implementationHash: "hash",
+    implementationHashes,
     evaluate: () =>
       JSON.stringify({
         is_correct: false,
         mechanism: "balanceBlocks",
-        evaluator_version: 1,
+        evaluator_version: evaluatorVersion,
       }),
     // deno-lint-ignore require-await -- Preserve the real fetch Promise contract.
     fetch: async (input, init) => {
@@ -107,6 +110,28 @@ Deno.test("normal mutations retain user JWT; admin cannot submit learner state",
     (await admin.handler(
       request("attempts", { operation_id: operation, payload: { state: {} } }),
     )).status === 403,
+  );
+});
+
+Deno.test("expanded evaluator uses its pinned hash and unknown versions cannot commit", async () => {
+  const body = { operation_id: operation, payload: { state: {} } };
+  const expanded = setup("user", "active", undefined, 2, {
+    1: "legacy",
+    2: "expanded",
+  });
+  assert((await expanded.handler(request("attempts", body))).status === 200);
+  const evaluation = expanded.calls.at(-1)!.body.evaluation as Record<
+    string,
+    unknown
+  >;
+  assert(evaluation.implementation_hash === "expanded");
+  const unknown = setup("user", "active", undefined, 3, {
+    1: "legacy",
+    2: "expanded",
+  });
+  assert((await unknown.handler(request("attempts", body))).status === 422);
+  assert(
+    unknown.calls.every((c) => !c.path.endsWith("record_learning_attempt")),
   );
 });
 Deno.test("reject oversized streamed bodies and deeply nested/large states", async () => {

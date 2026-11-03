@@ -1,3 +1,7 @@
 # Retain original capture/archive bytes, including intentional whitespace.
 docs/evidence/** -whitespace
 docs/legacy/** -whitespace
+
+# Evaluator registry hashes pin deployed bytes on every platform.
+supabase/functions/learning-api/evaluator*.js text eol=lf
+supabase/functions/learning-api/version*.ts text eol=lf

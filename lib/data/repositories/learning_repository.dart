@@ -134,7 +134,7 @@ class SupabaseLearningRepository implements LearningRepository {
 
   @override
   Future<Map<String, dynamic>> catalog(String owner) =>
-      _api(owner, 'catalog?app_version=1.3.1');
+      _api(owner, 'catalog?app_version=1.3.2');
   @override
   Future<Map<String, dynamic>> mutate(
     String owner,

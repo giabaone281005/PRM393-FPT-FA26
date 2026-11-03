@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'experiments/experiment_model.dart';
 import 'learning_activity.dart';
+import 'learning_catalog.dart';
+import 'data/models/mobile_catalog.dart';
 import 'data/models/app_failure.dart';
 import 'data/models/learning_journal.dart';
 
@@ -68,6 +70,46 @@ class LearningStore extends ChangeNotifier {
   Future<void>? _writes;
   bool _disposed = false;
   String? saveError;
+  List<LearningTopic>? _remoteTopics;
+  bool get hasRemoteCatalog => _remoteTopics != null;
+  List<LearningTopic> get availableTopics => _remoteTopics ?? topics;
+  LearningTopic topicForId(String id) =>
+      availableTopics.where((topic) => topic.id == id).firstOrNull ??
+      topicById(id);
+  bool topicAvailable(String id) =>
+      availableTopics.any((topic) => topic.id == id);
+
+  void applyCatalog(Map<String, dynamic>? catalog) {
+    final next = catalog == null ? null : decodeMobileCatalog(catalog);
+    final before = _remoteTopics
+        ?.map(
+          (t) => [
+            t.id,
+            t.title,
+            t.subtitle,
+            t.subject,
+            t.action,
+            t.icon.codePoint,
+          ],
+        )
+        .toList();
+    final after = next
+        ?.map(
+          (t) => [
+            t.id,
+            t.title,
+            t.subtitle,
+            t.subject,
+            t.action,
+            t.icon.codePoint,
+          ],
+        )
+        .toList();
+    if (jsonEncode(before) == jsonEncode(after)) return;
+    _remoteTopics = next;
+    _emit();
+  }
+
   List<LearnerProfile> get profiles => List.unmodifiable(_profiles.values);
   LearnerProfile? get profile => _profiles[_activeId];
   bool get hasSession => profile != null;

@@ -5,6 +5,7 @@ final diverseExperiments = <String, List<ExperimentSpec>>{
   'math': [
     ExperimentSpec(
       id: 'math-number-line',
+      contentVersion: 2,
       evaluator: evaluateFractionLine,
       skillIds: ['fractions.part-whole'],
       title: 'Phân số có một vị trí',

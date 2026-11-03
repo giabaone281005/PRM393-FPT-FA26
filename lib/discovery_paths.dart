@@ -56,6 +56,25 @@ const discoveryPaths = [
   ),
 ];
 
+List<DiscoveryPath> catalogPaths(LearningStore store) {
+  if (!store.hasRemoteCatalog) return discoveryPaths;
+  final order = {
+    for (final entry in store.availableTopics.indexed) entry.$2.id: entry.$1,
+  };
+  final paths = <DiscoveryPath>[];
+  for (final path in discoveryPaths) {
+    final ids = path.topicIds.where(order.containsKey).toList()
+      ..sort((a, b) => order[a]!.compareTo(order[b]!));
+    if (ids.isNotEmpty) {
+      paths.add(DiscoveryPath(path.title, path.subtitle, path.icon, ids));
+    }
+  }
+  paths.sort(
+    (a, b) => order[a.topicIds.first]!.compareTo(order[b.topicIds.first]!),
+  );
+  return paths;
+}
+
 /// Curated routes through existing experiments, not new course content.
 class LearningPathsPage extends StatelessWidget {
   const LearningPathsPage({
@@ -86,7 +105,7 @@ class LearningPathsPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          for (final path in discoveryPaths) ...[
+          for (final path in catalogPaths(store)) ...[
             _path(context, path),
             const SizedBox(height: 18),
           ],
@@ -96,6 +115,9 @@ class LearningPathsPage extends StatelessWidget {
   );
 
   Widget _path(BuildContext context, DiscoveryPath path) {
+    final ids = path.topicIds.where(store.topicAvailable).toList();
+    if (ids.isEmpty) return const SizedBox.shrink();
+    path = DiscoveryPath(path.title, path.subtitle, path.icon, ids);
     final completed = path.topicIds.where(store.completed.contains).length;
     return Container(
       padding: const EdgeInsets.all(18),
@@ -143,7 +165,7 @@ class LearningPathsPage extends StatelessWidget {
   }
 
   Widget _stop(BuildContext context, String id, int index) {
-    final topic = topicById(id);
+    final topic = store.topicForId(id);
     final done = store.completed.contains(id);
     final started = store.progress(id) != null;
     return Padding(
@@ -234,7 +256,7 @@ class PracticeInsights extends StatelessWidget {
   final OpenLearningTopic onOpen;
   @override
   Widget build(BuildContext context) {
-    final practiced = topics
+    final practiced = store.availableTopics
         .where((t) => store.completed.contains(t.id))
         .toList();
     practiced.sort((a, b) {

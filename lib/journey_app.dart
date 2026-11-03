@@ -277,16 +277,22 @@ class _HomeShellState extends State<HomeShell> {
   );
 }
 
-void openTopic(
-  BuildContext context,
-  LearningTopic topic,
-  LearningStore store,
-) => Navigator.push(
-  context,
-  DiscoveryRoute<void>(
-    builder: (_) => TopicPage(topic: topic, store: store),
-  ),
-);
+void openTopic(BuildContext context, LearningTopic topic, LearningStore store) {
+  if (!store.topicAvailable(topic.id)) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Chủ đề này hiện chưa mở để học.')),
+    );
+    return;
+  }
+  Navigator.push(
+    context,
+    DiscoveryRoute<void>(
+      builder: (_) =>
+          TopicPage(topic: store.topicForId(topic.id), store: store),
+    ),
+  );
+}
+
 void openLesson(
   BuildContext context,
   LearningTopic topic,
@@ -310,9 +316,7 @@ class TodayPage extends StatelessWidget {
   final ChatResponder? chatResponder;
   @override
   Widget build(BuildContext context) {
-    final draftIds = store.inProgress
-        .where((id) => topics.any((t) => t.id == id))
-        .toList();
+    final draftIds = store.inProgress.where(store.topicAvailable).toList();
     final resume = draftIds.isEmpty ? null : recommendNext(store).topic;
     final step = resume == null
         ? 0
@@ -464,7 +468,7 @@ class _ExplorePageState extends State<ExplorePage> {
           ),
           const SizedBox(height: 8),
           Text(
-            '${widget.store.completed.length}/${topics.length} hoàn thành • ${widget.store.points} XP',
+            '${widget.store.completed.length}/${widget.store.availableTopics.length} hoàn thành • ${widget.store.points} XP',
             style: const TextStyle(color: BrilliantPalette.secondaryText),
           ),
           const SizedBox(height: 24),
@@ -539,13 +543,16 @@ class _ExplorePageState extends State<ExplorePage> {
               'Độ tuổi chỉ là gợi ý khởi đầu. Mỗi chủ đề đi từ nền tảng đến thử thách; bạn có thể chọn theo kiến thức đang có.',
             ),
           ),
-          if (!topics.any(matches))
+          if (!widget.store.availableTopics.any(matches))
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 24),
               child: Text('Chưa có chủ đề phù hợp. Thử bộ lọc khác nhé.'),
             ),
-          for (final group in discoveryPaths)
-            if (group.topicIds.map(topicById).any(matches))
+          for (final group in catalogPaths(widget.store))
+            if (group.topicIds
+                .where(widget.store.topicAvailable)
+                .map(widget.store.topicForId)
+                .any(matches))
               _group(context, group),
           const SizedBox(height: 12),
           _achievements(context),
@@ -556,7 +563,18 @@ class _ExplorePageState extends State<ExplorePage> {
   );
 
   Widget _group(BuildContext context, DiscoveryPath group) {
-    final visible = group.topicIds.map(topicById).where(matches).toList();
+    final visible = group.topicIds
+        .where(widget.store.topicAvailable)
+        .map(widget.store.topicForId)
+        .where(matches)
+        .toList();
+    if (widget.store.hasRemoteCatalog) {
+      visible.sort(
+        (a, b) => widget.store.availableTopics
+            .indexOf(a)
+            .compareTo(widget.store.availableTopics.indexOf(b)),
+      );
+    }
     final completed = group.topicIds
         .where(widget.store.completed.contains)
         .length;
@@ -570,10 +588,7 @@ class _ExplorePageState extends State<ExplorePage> {
               SizedBox(
                 width: 58,
                 height: 64,
-                child: TopicArtwork(
-                  topic: topicById(group.topicIds.first),
-                  height: 64,
-                ),
+                child: TopicArtwork(topic: visible.first, height: 64),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -765,9 +780,10 @@ class _ExplorePageState extends State<ExplorePage> {
       for (final id in widget.store.completed)
         ListTile(
           leading: const Icon(Icons.verified_rounded, color: Color(0xFFE4AE25)),
-          title: Text(topicById(id).title),
+          title: Text(widget.store.topicForId(id).title),
           trailing: const Text('30 XP'),
-          onTap: () => openTopic(context, topicById(id), widget.store),
+          onTap: () =>
+              openTopic(context, widget.store.topicForId(id), widget.store),
         ),
       if (widget.store.history.isNotEmpty) ...[
         const Divider(),
@@ -775,14 +791,16 @@ class _ExplorePageState extends State<ExplorePage> {
           ListTile(
             key: ValueKey('history-${record['id'] ?? record['finishedAt']}'),
             leading: const Icon(Icons.history),
-            title: Text(topicById(record['course'] as String).title),
+            title: Text(
+              widget.store.topicForId(record['course'] as String).title,
+            ),
             subtitle: Text(
               '${_date(record['finishedAt'])} • ${record['attempts']} lần thử • ${record['hints']} gợi ý',
             ),
             trailing: Text(record['xp'] == 0 ? 'Ôn tập' : '+30 XP'),
             onTap: () => openTopic(
               context,
-              topicById(record['course'] as String),
+              widget.store.topicForId(record['course'] as String),
               widget.store,
             ),
           ),
@@ -1285,10 +1303,7 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
                         ),
                       ],
                     ),
-                    AnimatedSize(
-                      duration: AppMotion.duration(context, 240),
-                      curve: Curves.easeInOutCubic,
-                      alignment: Alignment.topCenter,
+                    MotionSize(
                       child: hintVisible
                           ? Container(
                               padding: const EdgeInsets.all(16),
@@ -1560,10 +1575,12 @@ class CompletionPage extends StatelessWidget {
   final bool awarded;
   @override
   Widget build(BuildContext context) {
-    final next = topics.firstWhere(
-      (t) => t.id != topic.id && !store.completed.contains(t.id),
-      orElse: () => topics.firstWhere((t) => t.id != topic.id),
-    );
+    final candidates = store.availableTopics
+        .where((t) => t.id != topic.id)
+        .toList();
+    final next =
+        candidates.where((t) => !store.completed.contains(t.id)).firstOrNull ??
+        candidates.firstOrNull;
     return Scaffold(
       appBar: const AppPageHeader(title: Text('Hoàn thành')),
       body: SafeArea(
@@ -1645,7 +1662,7 @@ class CompletionPage extends StatelessWidget {
               expand: true,
               onPressed: () {
                 Navigator.popUntil(context, (route) => route.isFirst);
-                openTopic(context, next, store);
+                if (next != null) openTopic(context, next, store);
               },
               child: const Text('Thử một chủ đề khác'),
             ),

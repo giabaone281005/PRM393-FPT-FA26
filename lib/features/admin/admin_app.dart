@@ -172,20 +172,21 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Tổng quan học tập',
-                    style: Theme.of(context).textTheme.headlineLarge,
+                    'Tổng quan',
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    controller.live
-                        ? 'Realtime đang kết nối'
-                        : 'Đang nối realtime · tự kiểm tra mỗi 30 giây',
-                  ),
-                  if (controller.updatedAt != null)
-                    Text(
-                      'Cập nhật ${TimeOfDay.fromDateTime(controller.updatedAt!).format(context)}',
-                      style: Theme.of(context).textTheme.bodySmall,
+                  Tooltip(
+                    message: controller.live
+                        ? 'Dữ liệu cập nhật trực tiếp'
+                        : 'Tự kiểm tra dữ liệu mỗi 30 giây',
+                    child: Text(
+                      '${controller.live ? 'Trực tiếp' : 'Cập nhật tự động'}'
+                      '${controller.updatedAt == null ? '' : ' · ${TimeOfDay.fromDateTime(controller.updatedAt!).format(context)}'}',
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: BrilliantPalette.secondaryText),
                     ),
+                  ),
                 ],
               ),
               OutlinedButton.icon(
@@ -196,41 +197,49 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             ],
           ),
           const SizedBox(height: 24),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              for (final metric in const {
-                'users': 'Người dùng',
-                'active_users': 'Đang hoạt động',
-                'suspended_users': 'Tạm khóa',
-                'topics': 'Chủ đề máy chủ',
-                'verified_completions': 'Lượt hoàn thành xác nhận',
-              }.entries)
-                SizedBox(
-                  width: wide ? 188 : (constraints.maxWidth - 44) / 2,
-                  child: Card(
-                    margin: EdgeInsets.zero,
-                    child: Padding(
-                      padding: const EdgeInsets.all(18),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            metric.value,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '${controller.overview[metric.key] ?? 0}',
-                            style: Theme.of(context).textTheme.headlineMedium,
-                          ),
-                        ],
-                      ),
+          LayoutBuilder(
+            builder: (context, size) {
+              final columns =
+                  size.maxWidth >=
+                      720 * MediaQuery.textScalerOf(context).scale(1)
+                  ? 3
+                  : 1;
+              final width = (size.maxWidth - 12 * (columns - 1)) / columns;
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  SizedBox(
+                    width: width,
+                    child: _OverviewCard(
+                      icon: Icons.people_outline,
+                      label: 'Người dùng',
+                      value: controller.overview['users'],
+                      detail:
+                          '${controller.overview['active_users'] ?? '—'} hoạt động · ${controller.overview['suspended_users'] ?? '—'} tạm khóa',
                     ),
                   ),
-                ),
-            ],
+                  SizedBox(
+                    width: width,
+                    child: _OverviewCard(
+                      icon: Icons.menu_book_outlined,
+                      label: 'Chủ đề',
+                      value: controller.overview['topics'],
+                      detail: 'Trong danh mục máy chủ',
+                    ),
+                  ),
+                  SizedBox(
+                    width: width,
+                    child: _OverviewCard(
+                      icon: Icons.task_alt,
+                      label: 'Lượt hoàn thành',
+                      value: controller.overview['verified_completions'],
+                      detail: 'Đã được xác nhận',
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
           const SizedBox(height: 32),
           Wrap(
@@ -282,6 +291,13 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             else
               ...controller.accounts.map(
                 (account) => Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  color: paper,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: const BorderSide(color: BrilliantPalette.track),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -292,10 +308,6 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         Text(account.email),
-                        SelectableText(
-                          account.id,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
                         const SizedBox(height: 12),
                         _accountAction(context, account),
                       ],
@@ -309,11 +321,24 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             else
               ...controller.topics.map(
                 (topic) => Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  color: paper,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: const BorderSide(color: BrilliantPalette.track),
+                  ),
                   child: ListTile(
-                    isThreeLine: true,
                     title: Text(topic.title),
-                    subtitle: Text(
-                      '${topic.subject} · ${topic.activityCount} hoạt động\n${_status(topic.status)} · ${topic.id}',
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${topic.subject} · ${topic.activityCount} hoạt động',
+                        ),
+                        const SizedBox(height: 8),
+                        _statusBadge(context, topic.status),
+                      ],
                     ),
                     trailing: IconButton(
                       tooltip: 'Sửa chủ đề',
@@ -358,6 +383,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         ],
       );
       final page = Scaffold(
+        backgroundColor: BrilliantPalette.surface,
         appBar: AppBar(
           title: const Text('Matlingo · Admin'),
           actions: [
@@ -494,11 +520,29 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     'archived' => 'Lưu trữ',
     _ => status,
   };
+  Widget _statusBadge(BuildContext context, String status) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    decoration: BoxDecoration(
+      color: status == 'active'
+          ? BrilliantPalette.successSurface
+          : BrilliantPalette.surface,
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Text(
+      _status(status),
+      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+        color: status == 'active'
+            ? BrilliantPalette.successInk
+            : BrilliantPalette.secondaryText,
+      ),
+    ),
+  );
+
   Widget _accountAction(BuildContext context, AdminAccount account) => Wrap(
     spacing: 8,
     crossAxisAlignment: WrapCrossAlignment.center,
     children: [
-      Text(_status(account.status)),
+      _statusBadge(context, account.status),
       TextButton(
         onPressed:
             controller.busy || !['active', 'suspended'].contains(account.status)
@@ -508,14 +552,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       ),
     ],
   );
-  Widget _accountsTable(BuildContext context) => SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
+  Widget _accountsTable(BuildContext context) => _TableSurface(
     child: DataTable(
       dataRowMinHeight: 76,
       dataRowMaxHeight: 110,
       columns: const [
         DataColumn(label: Text('Người dùng')),
-        DataColumn(label: Text('Email')),
         DataColumn(label: Text('Trạng thái / thao tác')),
       ],
       rows: controller.accounts
@@ -527,15 +569,17 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(account.name),
+                      Tooltip(
+                        message: 'ID: ${account.id}',
+                        child: Text(account.name),
+                      ),
                       Text(
-                        account.id,
+                        account.email,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
                   ),
                 ),
-                DataCell(Text(account.email)),
                 DataCell(_accountAction(context, account)),
               ],
             ),
@@ -543,28 +587,35 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           .toList(),
     ),
   );
-  Widget _topicsTable(BuildContext context) => SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
+  Widget _topicsTable(BuildContext context) => _TableSurface(
     child: DataTable(
       dataRowMinHeight: 64,
       dataRowMaxHeight: 100,
       columns: const [
         DataColumn(label: Text('Chủ đề')),
-        DataColumn(label: Text('Môn học')),
         DataColumn(label: Text('Hoạt động')),
         DataColumn(label: Text('Trạng thái')),
-        DataColumn(label: Text('Thứ tự')),
         DataColumn(label: Text('Thao tác')),
       ],
       rows: controller.topics
           .map(
             (topic) => DataRow(
               cells: [
-                DataCell(Text(topic.title)),
-                DataCell(Text(topic.subject)),
+                DataCell(
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(topic.title),
+                      Text(
+                        topic.subject,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
                 DataCell(Text('${topic.activityCount}')),
-                DataCell(Text(_status(topic.status))),
-                DataCell(Text('${topic.sortOrder}')),
+                DataCell(_statusBadge(context, topic.status)),
                 DataCell(
                   IconButton(
                     tooltip: 'Sửa ${topic.title}',
@@ -578,6 +629,89 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             ),
           )
           .toList(),
+    ),
+  );
+}
+
+class _OverviewCard extends StatelessWidget {
+  const _OverviewCard({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.detail,
+  });
+
+  final IconData icon;
+  final String label, detail;
+  final int? value;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    key: ValueKey('overview-$label'),
+    margin: EdgeInsets.zero,
+    color: paper,
+    elevation: 0,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+      side: const BorderSide(color: BrilliantPalette.track),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 22, color: BrilliantPalette.successInk),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '${value ?? '—'}',
+            style: Theme.of(context).textTheme.headlineMedium
+                ?.copyWith(fontSize: 32),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            detail,
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(color: BrilliantPalette.secondaryText),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _TableSurface extends StatelessWidget {
+  const _TableSurface({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    margin: EdgeInsets.zero,
+    color: paper,
+    elevation: 0,
+    clipBehavior: Clip.antiAlias,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+      side: const BorderSide(color: BrilliantPalette.track),
+    ),
+    child: LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minWidth: constraints.maxWidth),
+          child: child,
+        ),
+      ),
     ),
   );
 }
@@ -654,7 +788,7 @@ class _TopicEditorState extends State<_TopicEditor> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'Chỉnh sửa metadata máy chủ. Nội dung bài đã phát hành giữ nguyên phiên bản; ứng dụng mobile hiện dùng catalog đóng gói.',
+                'Tên và mô tả được đồng bộ tới mobile. Chủ đề đang hoạt động chỉ xuất hiện khi có bài đã phát hành tương thích; bản nháp và chủ đề lưu trữ được ẩn khỏi danh mục học.',
               ),
               const SizedBox(height: 16),
               TextFormField(

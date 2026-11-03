@@ -12,6 +12,7 @@ import 'features/account/cloud_account_page.dart';
 import 'features/engines/engine_scope.dart';
 import 'data/providers/learning_sync_controller.dart';
 import 'data/repositories/learning_repository.dart';
+import 'data/repositories/catalog_cache_repository.dart';
 import 'data/repositories/supabase_tutor_repository.dart';
 import 'features/account/learning_sync_scope.dart';
 
@@ -46,6 +47,7 @@ void main() async {
   final sync = LearningSyncController(
     store: store,
     cloud: cloud,
+    catalogCache: CatalogCacheRepository(store.preferences),
     repository: SupabaseLearningRepository(
       client: client,
       url: url,

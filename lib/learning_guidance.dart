@@ -78,6 +78,9 @@ TopicActivity topicActivity(
 /// Stable offline rules inspired by targeted review, not Brilliant's algorithm.
 /// Reading this function never changes saved progress, history or XP.
 GuidanceRecommendation recommendNext(LearningStore store, {DateTime? now}) {
+  final topics = store.availableTopics.isEmpty
+      ? <LearningTopic>[]
+      : store.availableTopics;
   final clock = now ?? DateTime.now();
   final known = {for (final topic in topics) topic.id: topic};
   final drafts = store.inProgress.where(known.containsKey).toList();
