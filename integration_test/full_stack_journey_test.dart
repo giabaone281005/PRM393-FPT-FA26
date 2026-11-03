@@ -59,6 +59,7 @@ void main() {
   const adminId = String.fromEnvironment('E2E_ADMIN_ID');
   const run = String.fromEnvironment('E2E_RUN');
   const temporaryTopic = String.fromEnvironment('E2E_TOPIC');
+  const resumeTraversal = bool.fromEnvironment('E2E_RESUME_AFTER_TRAVERSAL');
   final solutions = {
     ...mathSolutionStates,
     ...discoverySolutionStates,
@@ -82,6 +83,7 @@ void main() {
         'activities': 0,
         'gestureActivities': 0,
         'answerFixtureActivities': 0,
+        'resumedAfterTraversal': resumeTraversal,
       };
       final prefixes = [
         'matlingo.headed.$run.device1.',
@@ -446,16 +448,22 @@ void main() {
         await keyTap('cloud-auth-submit');
         expect(cloud!.signedIn, false);
         await login(wrong: true);
-        await type('entry-name', 'Headed Learner');
-        await keyTap('entry-create');
-        await waitFor(() => store!.profile != null);
-        await keyTap('interest-logic');
-        await keyTap('onboarding-continue');
-        await keyTap('minutes-10');
-        await keyTap('onboarding-continue');
-        await waitFor(() => find.byType(HomeShell).evaluate().isNotEmpty);
-        expect(store!.profiles.length, 1);
-        passed('auth_single_profile_onboarding');
+        if (resumeTraversal) {
+          await waitFor(() => find.byType(HomeShell).evaluate().isNotEmpty);
+          expect(store!.completed.length, 20);
+          passed('restore_previous_traversal_snapshot');
+        } else {
+          await type('entry-name', 'Headed Learner');
+          await keyTap('entry-create');
+          await waitFor(() => store!.profile != null);
+          await keyTap('interest-logic');
+          await keyTap('onboarding-continue');
+          await keyTap('minutes-10');
+          await keyTap('onboarding-continue');
+          await waitFor(() => find.byType(HomeShell).evaluate().isNotEmpty);
+          expect(store!.profiles.length, 1);
+          passed('auth_single_profile_onboarding');
+        }
 
         phase = 'real_tutor';
         await type('chat-input', 'App có bao nhiêu chủ đề?');
@@ -481,7 +489,7 @@ void main() {
         await settle();
         passed('appearance_settings');
 
-        for (final topic in topics) {
+        for (final topic in resumeTraversal ? <LearningTopic>[] : topics) {
           phase = 'topic_${topic.id}';
           debugPrint('HEADED_TOPIC ${topic.id} ${topic.experiments.length}');
           await openLesson(topic);
@@ -517,7 +525,7 @@ void main() {
           );
           passed('topic_${topic.id}');
         }
-        expect(report['activities'], 139);
+        expect(report['activities'], resumeTraversal ? 0 : 139);
         expect(store!.points, 600);
         expect(store!.completed.length, 20);
         await waitFor(() => !cloud!.busy);
