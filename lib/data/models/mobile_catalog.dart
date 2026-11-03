@@ -40,6 +40,10 @@ String _canonical(dynamic value) {
   return jsonEncode(value);
 }
 
+/// JSONB and Dart scene numbers may differ in integer/double representation.
+bool equivalentCatalogValue(dynamic first, dynamic second) =>
+    _canonical(first) == _canonical(second);
+
 /// Only published scenes supported by this app may enter its discovery catalog.
 /// Metadata and visibility come from the server; validators stay shipped code.
 List<LearningTopic> decodeMobileCatalog(Map<String, dynamic> catalog) {
@@ -61,8 +65,8 @@ List<LearningTopic> decodeMobileCatalog(Map<String, dynamic> catalog) {
       return remote['activity_id'] != spec.id ||
           remote['content_version'] != spec.contentVersion ||
           remote['mechanism'] != spec.mechanism ||
-          _canonical(remote['config']) != _canonical(spec.config) ||
-          _canonical(remote['initial_state']) != _canonical(spec.initial);
+          !equivalentCatalogValue(remote['config'], spec.config) ||
+          !equivalentCatalogValue(remote['initial_state'], spec.initial);
     })) {
       continue;
     }

@@ -8,6 +8,7 @@ import '../../learning_catalog.dart';
 import '../../learning_store.dart';
 import '../models/app_failure.dart';
 import '../models/learning_journal.dart';
+import '../models/mobile_catalog.dart';
 import '../repositories/learning_repository.dart';
 import '../repositories/catalog_cache_repository.dart';
 import 'cloud_backup_controller.dart';
@@ -361,8 +362,8 @@ class LearningSyncController extends ChangeNotifier {
                 return spec == null ||
                     a['content_version'] != spec.contentVersion ||
                     a['mechanism'] != spec.mechanism ||
-                    _canonical(a['config']) != _canonical(spec.config) ||
-                    _canonical(a['initial_state']) != _canonical(spec.initial);
+                    !equivalentCatalogValue(a['config'], spec.config) ||
+                    !equivalentCatalogValue(a['initial_state'], spec.initial);
               })) {
             // Keep unpublished/incompatible lessons durable without blocking
             // other sessions or sending content the release cannot evaluate.

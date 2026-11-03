@@ -15,6 +15,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'learning_sync_test.dart'
     show SyncTestAuth, SyncTestBackups, SyncTestRepository;
+import 'discovery_experiments_test.dart' show discoverySolutionStates;
+import 'extended_solutions.dart';
+import 'curriculum_solutions.dart';
 
 Map<String, dynamic> exportedCatalog() {
   final data = (jsonDecode(
@@ -41,6 +44,74 @@ class CatalogTestRepository extends SyncTestRepository {
 }
 
 void main() {
+  test(
+    'JSONB RGB numbers sync circuit completion once without deferring it',
+    () async {
+      SharedPreferences.setMockInitialValues({});
+      final store = LearningStore(
+        await SharedPreferences.getInstance(),
+        enableServerSync: true,
+      );
+      await store.createDeviceProfile('Test');
+      await store.finishOnboarding(['circuits'], 10);
+      final auth = SyncTestAuth();
+      final cloud = CloudBackupController(
+        store: store,
+        auth: auth,
+        repository: SyncTestBackups(),
+      );
+      final repo = CatalogTestRepository();
+      for (final activity in repo.current['activities'] as List) {
+        if (activity['initial_state']['rgb'] is List) {
+          activity['initial_state']['rgb'] =
+              (activity['initial_state']['rgb'] as List)
+                  .map((value) => (value as num).toInt())
+                  .toList();
+        }
+      }
+      final sync = LearningSyncController(
+        store: store,
+        cloud: cloud,
+        repository: repo,
+        automatic: false,
+      );
+      addTearDown(() async {
+        sync.dispose();
+        cloud.dispose();
+        store.dispose();
+        await auth.events.close();
+      });
+      await Future<void>.delayed(Duration.zero);
+      final topic = store.topicForId('circuits');
+      final solutions = {
+        ...discoverySolutionStates,
+        ...extendedSolutions,
+        ...curriculumSolutionStates,
+      };
+      await store.finish(
+        topic.id,
+        experiments: topic.experiments,
+        draft: {
+          'version': 3,
+          'step': 0,
+          'states': {
+            for (final spec in topic.experiments) spec.id: solutions[spec.id],
+          },
+          'attempts': 1,
+          'checked': [topic.experiments.first.id],
+          'hints': <String>[],
+          'activeActivityId': topic.experiments.first.id,
+        },
+      );
+      await sync.syncNow();
+      expect(store.pendingServerSessions, 0, reason: sync.message);
+      expect(store.verifiedPoints, 30);
+      expect(repo.completions, 1);
+      await sync.syncNow();
+      expect(repo.completions, 1);
+    },
+  );
+
   test('JSONB integer serialization preserves all published mobile topics', () {
     dynamic jsonbNumbers(dynamic value) {
       if (value is Map) {
