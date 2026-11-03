@@ -720,7 +720,12 @@ void main() {
           () => dashboard().allowed && !dashboard().loading && dashboard().live,
         );
         var events = 0;
-        realtime = SupabaseAdminRepository(adminClient)
+        final observerClient = newClient();
+        await observerClient.auth.signInWithPassword(
+          email: adminEmail,
+          password: adminPassword,
+        );
+        realtime = SupabaseAdminRepository(observerClient)
             .watch(adminId)
             .listen((e) {
               if (e.changed) events++;
@@ -778,7 +783,13 @@ void main() {
               dashboard().topics.length == 1 &&
               dashboard().topics.first.id == temporaryTopic,
         );
-        await tap(find.byTooltip('Sửa ${dashboard().topics.single.title}'));
+        await tap(
+          find.byTooltip(
+            RegExp(
+              '^Sửa (chủ đề|${RegExp.escape(dashboard().topics.single.title)})\$',
+            ),
+          ),
+        );
         await type('topic-title', 'Headed E2E updated $run');
         await tap(find.byType(DropdownButtonFormField<String>));
         await tap(find.text('Lưu trữ').last);
