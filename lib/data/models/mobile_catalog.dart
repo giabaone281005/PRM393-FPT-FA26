@@ -33,6 +33,10 @@ String _canonical(dynamic value) {
     return jsonEncode({for (final key in keys) key: _canonical(value[key])});
   }
   if (value is List) return jsonEncode(value.map(_canonical).toList());
+  // PostgreSQL JSONB may serialize 1.0 as 1; these are the same scene value.
+  if (value is double && value.isFinite && value == value.toInt()) {
+    return jsonEncode(value.toInt());
+  }
   return jsonEncode(value);
 }
 
