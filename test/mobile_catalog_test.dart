@@ -41,6 +41,39 @@ class CatalogTestRepository extends SyncTestRepository {
 }
 
 void main() {
+  test('JSONB integer serialization preserves all published mobile topics', () {
+    dynamic jsonbNumbers(dynamic value) {
+      if (value is Map) {
+        return value.map((key, item) => MapEntry(key, jsonbNumbers(item)));
+      }
+      if (value is List) return value.map(jsonbNumbers).toList();
+      if (value is double && value == value.toInt()) return value.toInt();
+      return value;
+    }
+
+    final catalog = Map<String, dynamic>.from(
+      jsonbNumbers(exportedCatalog()) as Map,
+    );
+    expect(decodeMobileCatalog(catalog), hasLength(20));
+    expect(
+      decodeMobileCatalog(catalog).expand((topic) => topic.experiments),
+      hasLength(139),
+    );
+    final light = (catalog['activities'] as List).firstWhere(
+      (activity) => activity['activity_id'] == 'circuits-light',
+    );
+    light['initial_state']['rgb'][2] = 0.5;
+    expect(
+      decodeMobileCatalog(catalog).map((topic) => topic.id),
+      isNot(contains('circuits')),
+    );
+    light['initial_state']['rgb'][2] = '1';
+    expect(
+      decodeMobileCatalog(catalog).map((topic) => topic.id),
+      isNot(contains('circuits')),
+    );
+  });
+
   test('published export matches every shipped activity; mismatched content is excluded', () {
     final catalog = exportedCatalog();
     expect(decodeMobileCatalog(catalog).length, 20);
