@@ -60,6 +60,7 @@ void main() {
   const run = String.fromEnvironment('E2E_RUN');
   const temporaryTopic = String.fromEnvironment('E2E_TOPIC');
   const resumeTraversal = bool.fromEnvironment('E2E_RESUME_AFTER_TRAVERSAL');
+  const adminOnly = bool.fromEnvironment('E2E_ADMIN_ONLY');
   final solutions = {
     ...mathSolutionStates,
     ...discoverySolutionStates,
@@ -84,6 +85,7 @@ void main() {
         'gestureActivities': 0,
         'answerFixtureActivities': 0,
         'resumedAfterTraversal': resumeTraversal,
+        'adminOnly': adminOnly,
       };
       final prefixes = [
         'matlingo.headed.$run.device1.',
@@ -443,286 +445,296 @@ void main() {
       }
 
       try {
-        await mountLearner(0);
-        phase = 'auth_onboarding';
-        await keyTap('cloud-auth-submit');
-        expect(cloud!.signedIn, false);
-        await login(wrong: true);
-        if (resumeTraversal) {
-          await waitFor(() => find.byType(HomeShell).evaluate().isNotEmpty);
-          expect(store!.completed.length, 20);
-          passed('restore_previous_traversal_snapshot');
-        } else {
-          await type('entry-name', 'Headed Learner');
-          await keyTap('entry-create');
-          await waitFor(() => store!.profile != null);
-          await keyTap('interest-logic');
-          await keyTap('onboarding-continue');
-          await keyTap('minutes-10');
-          await keyTap('onboarding-continue');
-          await waitFor(() => find.byType(HomeShell).evaluate().isNotEmpty);
-          expect(store!.profiles.length, 1);
-          passed('auth_single_profile_onboarding');
-        }
-
-        phase = 'real_tutor';
-        await type('chat-input', 'App có bao nhiêu chủ đề?');
-        await keyTap('chat-send');
-        await waitFor(() => replies.isNotEmpty, seconds: 70);
-        expect(replies.first, contains('20 chủ đề'));
-        await type(
-          'chat-input',
-          'Giải thích vì sao một nửa bằng hai phần tư bằng một ví dụ ngắn.',
-        );
-        await keyTap('chat-send');
-        await waitFor(() => replies.length == 2, seconds: 90);
-        expect(replies.last.trim().length, greaterThan(15));
-        passed('live_faq_and_gemini');
-
-        phase = 'settings';
-        await keyTap('app-settings');
-        await keyTap('menu-appearance');
-        await keyTap('accent-blue');
-        await keyTap('text-size-1.15');
-        await keyTap('reduce-motion');
-        await tester.binding.handlePopRoute();
-        await settle();
-        passed('appearance_settings');
-
-        for (final topic in resumeTraversal ? <LearningTopic>[] : topics) {
-          phase = 'topic_${topic.id}';
-          debugPrint('HEADED_TOPIC ${topic.id} ${topic.experiments.length}');
-          await openLesson(topic);
-          for (var step = 0; step < topic.experiments.length; step++) {
-            await solveCurrent(step, topic);
+        if (!adminOnly) {
+          await mountLearner(0);
+          phase = 'auth_onboarding';
+          await keyTap('cloud-auth-submit');
+          expect(cloud!.signedIn, false);
+          await login(wrong: true);
+          if (resumeTraversal) {
+            await waitFor(() => find.byType(HomeShell).evaluate().isNotEmpty);
+            expect(store!.completed.length, 20);
+            passed('restore_previous_traversal_snapshot');
+          } else {
+            await type('entry-name', 'Headed Learner');
+            await keyTap('entry-create');
+            await waitFor(() => store!.profile != null);
+            await keyTap('interest-logic');
+            await keyTap('onboarding-continue');
+            await keyTap('minutes-10');
+            await keyTap('onboarding-continue');
+            await waitFor(() => find.byType(HomeShell).evaluate().isNotEmpty);
+            expect(store!.profiles.length, 1);
+            passed('auth_single_profile_onboarding');
           }
-          expect(find.byType(CompletionPage), findsOneWidget);
-          expect(store!.completed, contains(topic.id));
-          await tap(find.text('Về trang chủ'));
-          await waitFor(() => !cloud!.busy, seconds: 35);
-          // Await an automatic save rather than adding a manual-sync UI action.
-          await tester.pump(const Duration(seconds: 3));
-          await waitFor(() => !cloud!.busy, seconds: 35);
-          var completed = learningMap(
-            learningMap(
-              learningMap((await readProgress())['payload'])['learning'],
-            )['completed'],
+
+          phase = 'real_tutor';
+          await type('chat-input', 'App có bao nhiêu chủ đề?');
+          await keyTap('chat-send');
+          await waitFor(() => replies.isNotEmpty, seconds: 70);
+          expect(replies.first, contains('20 chủ đề'));
+          await type(
+            'chat-input',
+            'Giải thích vì sao một nửa bằng hai phần tư bằng một ví dụ ngắn.',
           );
-          final saveDeadline = DateTime.now().add(const Duration(seconds: 40));
-          while (!completed.containsKey(topic.id) &&
-              DateTime.now().isBefore(saveDeadline)) {
-            await tester.pump(const Duration(seconds: 2));
-            completed = learningMap(
+          await keyTap('chat-send');
+          await waitFor(() => replies.length == 2, seconds: 90);
+          expect(replies.last.trim().length, greaterThan(15));
+          passed('live_faq_and_gemini');
+
+          phase = 'settings';
+          await keyTap('app-settings');
+          await keyTap('menu-appearance');
+          await keyTap('accent-blue');
+          await keyTap('text-size-1.15');
+          await keyTap('reduce-motion');
+          await tester.binding.handlePopRoute();
+          await settle();
+          passed('appearance_settings');
+
+          for (final topic in resumeTraversal ? <LearningTopic>[] : topics) {
+            phase = 'topic_${topic.id}';
+            debugPrint('HEADED_TOPIC ${topic.id} ${topic.experiments.length}');
+            await openLesson(topic);
+            for (var step = 0; step < topic.experiments.length; step++) {
+              await solveCurrent(step, topic);
+            }
+            expect(find.byType(CompletionPage), findsOneWidget);
+            expect(store!.completed, contains(topic.id));
+            await tap(find.text('Về trang chủ'));
+            await waitFor(() => !cloud!.busy, seconds: 35);
+            // Await an automatic save rather than adding a manual-sync UI action.
+            await tester.pump(const Duration(seconds: 3));
+            await waitFor(() => !cloud!.busy, seconds: 35);
+            var completed = learningMap(
               learningMap(
                 learningMap((await readProgress())['payload'])['learning'],
               )['completed'],
             );
+            final saveDeadline = DateTime.now().add(
+              const Duration(seconds: 40),
+            );
+            while (!completed.containsKey(topic.id) &&
+                DateTime.now().isBefore(saveDeadline)) {
+              await tester.pump(const Duration(seconds: 2));
+              completed = learningMap(
+                learningMap(
+                  learningMap((await readProgress())['payload'])['learning'],
+                )['completed'],
+              );
+            }
+            expect(
+              completed.containsKey(topic.id),
+              true,
+              reason: 'Automatic server save ${topic.id}',
+            );
+            passed('topic_${topic.id}');
           }
+          expect(report['activities'], resumeTraversal ? 0 : 139);
+          expect(store!.points, 600);
+          expect(store!.completed.length, 20);
+          await waitFor(() => !cloud!.busy);
+          await cloud!.saveCurrent(); // Backend assertion barrier; automatic UI saving is tested above.
+          final remote = await readProgress();
+          final payload = learningMap(remote['payload']);
           expect(
-            completed.containsKey(topic.id),
-            true,
-            reason: 'Automatic server save ${topic.id}',
+            learningMap(learningMap(payload['learning'])['completed']).length,
+            20,
           );
-          passed('topic_${topic.id}');
-        }
-        expect(report['activities'], resumeTraversal ? 0 : 139);
-        expect(store!.points, 600);
-        expect(store!.completed.length, 20);
-        await waitFor(() => !cloud!.busy);
-        await cloud!.saveCurrent(); // Backend assertion barrier; automatic UI saving is tested above.
-        final remote = await readProgress();
-        final payload = learningMap(remote['payload']);
-        expect(
-          learningMap(learningMap(payload['learning'])['completed']).length,
-          20,
-        );
-        final revision = (remote['revision'] as num).toInt();
-        final retry = Map<String, dynamic>.from(
-          await client.rpc(
-            'save_account_progress',
-            params: {
-              'expected_owner': owner,
-              'expected_revision': revision,
-              'backup_payload': payload,
-            },
-          ) as Map,
-        );
-        expect(retry['revision'], remote['revision']);
-        var conflictDenied = false;
-        try {
-          await client.rpc(
-            'save_account_progress',
-            params: {
-              'expected_owner': owner,
-              'expected_revision': revision - 1,
-              'backup_payload': {
-                ...payload,
-                'profile': {
-                  ...learningMap(payload['profile']),
-                  'name': 'Stale fixture write',
+          final revision = (remote['revision'] as num).toInt();
+          final retry = Map<String, dynamic>.from(
+            await client.rpc(
+              'save_account_progress',
+              params: {
+                'expected_owner': owner,
+                'expected_revision': revision,
+                'backup_payload': payload,
+              },
+            ) as Map,
+          );
+          expect(retry['revision'], remote['revision']);
+          var conflictDenied = false;
+          try {
+            await client.rpc(
+              'save_account_progress',
+              params: {
+                'expected_owner': owner,
+                'expected_revision': revision - 1,
+                'backup_payload': {
+                  ...payload,
+                  'profile': {
+                    ...learningMap(payload['profile']),
+                    'name': 'Stale fixture write',
+                  },
                 },
               },
-            },
-          );
-        } on PostgrestException catch (e) {
-          conflictDenied = e.code == 'PT409';
-        }
-        expect(conflictDenied, true);
-        passed('account_snapshot_retry_and_conflict');
+            );
+          } on PostgrestException catch (e) {
+            conflictDenied = e.code == 'PT409';
+          }
+          expect(conflictDenied, true);
+          passed('account_snapshot_retry_and_conflict');
 
-        phase = 'canonical_verified_xp';
-        await sync!.syncNow();
-        await waitFor(() => store!.verifiedPoints == 600, seconds: 180);
-        final remoteProfile =
-            learningMap(
-                  store!.serverSyncFor(store!.profile!.id)['profile'],
-                )['id']
-                as String;
-        final catalog = await learning!.catalog(owner);
-        final release = learningMap(catalog['release'])['id'];
-        final sessionId = learningUuid();
-        await learning!.mutate(owner, learningUuid(), 'session.start', {
-          'id': sessionId,
-          'profile_id': remoteProfile,
-          'topic_id': 'logic',
-          'release_id': release,
-          'started_at': DateTime.now().toUtc().toIso8601String(),
-        });
-        for (final s in topicById('logic').experiments) {
-          final result = await learning!.attempt(owner, learningUuid(), {
-            'session_id': sessionId,
-            'activity_id': s.id,
-            'content_version': s.contentVersion,
-            'state': solutions[s.id],
-            'hint_level': 0,
+          phase = 'canonical_verified_xp';
+          await sync!.syncNow();
+          await waitFor(() => store!.verifiedPoints == 600, seconds: 180);
+          final remoteProfile =
+              learningMap(
+                    store!.serverSyncFor(store!.profile!.id)['profile'],
+                  )['id']
+                  as String;
+          final catalog = await learning!.catalog(owner);
+          final release = learningMap(catalog['release'])['id'];
+          final sessionId = learningUuid();
+          await learning!.mutate(owner, learningUuid(), 'session.start', {
+            'id': sessionId,
+            'profile_id': remoteProfile,
+            'topic_id': 'logic',
+            'release_id': release,
+            'started_at': DateTime.now().toUtc().toIso8601String(),
           });
-          expect(
-            learningMap(
-              learningMap(result['result'])['attempt'],
-            )['evaluation_status'],
-            'verified',
+          for (final s in topicById('logic').experiments) {
+            final result = await learning!.attempt(owner, learningUuid(), {
+              'session_id': sessionId,
+              'activity_id': s.id,
+              'content_version': s.contentVersion,
+              'state': solutions[s.id],
+              'hint_level': 0,
+            });
+            expect(
+              learningMap(
+                learningMap(result['result'])['attempt'],
+              )['evaluation_status'],
+              'verified',
+            );
+          }
+          final completeId = learningUuid();
+          final completion = await learning!.mutate(
+            owner,
+            completeId,
+            'session.complete',
+            {'session_id': sessionId},
           );
-        }
-        final completeId = learningUuid();
-        final completion = await learning!.mutate(
-          owner,
-          completeId,
-          'session.complete',
-          {'session_id': sessionId},
-        );
-        // All topics were already verified by automatic sync during traversal.
-        // A second complete session must not award the topic reward again.
-        expect(learningMap(completion['result'])['xp_awarded'], 0);
-        final completionRetry = await learning!.mutate(
-          owner,
-          completeId,
-          'session.complete',
-          {'session_id': sessionId},
-        );
-        expect(completionRetry, completion);
-        await sync!.syncNow();
-        expect(store!.verifiedPoints, 600);
-        passed('real_canonical_attempts_verified_xp_idempotency');
+          // All topics were already verified by automatic sync during traversal.
+          // A second complete session must not award the topic reward again.
+          expect(learningMap(completion['result'])['xp_awarded'], 0);
+          final completionRetry = await learning!.mutate(
+            owner,
+            completeId,
+            'session.complete',
+            {'session_id': sessionId},
+          );
+          expect(completionRetry, completion);
+          await sync!.syncNow();
+          expect(store!.verifiedPoints, 600);
+          passed('real_canonical_attempts_verified_xp_idempotency');
 
-        phase = 'offline_save_retry';
-        await openLesson(topicById('english'));
-        // A resumed validation may already contain the previous offline edit.
-        // Make the next offline choice a real change through the controls.
-        await keyTap('connect-0-0');
-        await tester.pump(const Duration(seconds: 3));
-        await waitFor(() => !cloud!.busy);
-        debugPrint('HEADED_NETWORK_OFF');
-        await tester.pump(const Duration(seconds: 3));
-        await keyTap('connect-0-2');
-        await tester.pump(const Duration(seconds: 3));
-        await waitFor(
-          () =>
-              !cloud!.busy &&
-              cloud!.message != null &&
-              cloud!.noticeKind.name == 'error',
-          seconds: 40,
-        );
-        expect(store!.progress('english'), isNotNull);
-        debugPrint('HEADED_NETWORK_ON');
-        await tester.pump(const Duration(seconds: 4));
-        await waitFor(
-          () => !cloud!.busy && cloud!.noticeKind.name == 'success',
-          seconds: 75,
-        );
-        final offlineSaved = await readProgress();
-        final savedLearning = learningMap(
-          learningMap(offlineSaved['payload'])['learning'],
-        );
-        final savedEnglish = learningMap(
-          learningMap(savedLearning['drafts'])['english'],
-        );
-        expect(
-          (learningMap(savedEnglish['states'])['english-greetings']
-              as Map)['values'],
-          [2, -1, -1],
-        );
-        passed('offline_draft_then_automatic_server_retry');
-        await tester.binding.handlePopRoute();
-        await settle();
-        if (find.byType(HomeShell).evaluate().isEmpty) {
+          phase = 'offline_save_retry';
+          await openLesson(topicById('english'));
+          // A resumed validation may already contain the previous offline edit.
+          // Make the next offline choice a real change through the controls.
+          await keyTap('connect-0-0');
+          await tester.pump(const Duration(seconds: 3));
+          await waitFor(() => !cloud!.busy);
+          debugPrint('HEADED_NETWORK_OFF');
+          await tester.pump(const Duration(seconds: 3));
+          await keyTap('connect-0-2');
+          await tester.pump(const Duration(seconds: 3));
+          await waitFor(
+            () =>
+                !cloud!.busy &&
+                cloud!.message != null &&
+                cloud!.noticeKind.name == 'error',
+            seconds: 40,
+          );
+          expect(store!.progress('english'), isNotNull);
+          debugPrint('HEADED_NETWORK_ON');
+          await tester.pump(const Duration(seconds: 4));
+          await waitFor(
+            () => !cloud!.busy && cloud!.noticeKind.name == 'success',
+            seconds: 75,
+          );
+          final offlineSaved = await readProgress();
+          final savedLearning = learningMap(
+            learningMap(offlineSaved['payload'])['learning'],
+          );
+          final savedEnglish = learningMap(
+            learningMap(savedLearning['drafts'])['english'],
+          );
+          expect(
+            (learningMap(savedEnglish['states'])['english-greetings']
+                as Map)['values'],
+            [2, -1, -1],
+          );
+          passed('offline_draft_then_automatic_server_retry');
           await tester.binding.handlePopRoute();
           await settle();
-        }
-        await tap(find.text('Hồ sơ').last);
-        expect(store!.history.length, 20);
-        passed('profile_history');
-        phase = 'logout';
-        // The UI explicitly asks for another tap if an automatic backup is
-        // already in progress. Observe that state and retry the same UI action.
-        for (var attempt = 0; attempt < 3 && cloud!.signedIn; attempt++) {
-          await waitFor(() => !cloud!.busy && !sync!.busy);
-          await keyTap('app-settings');
-          await keyTap('menu-logout');
-          await waitFor(() => !cloud!.busy);
-        }
-        await waitFor(
-          () =>
-              !cloud!.signedIn &&
-              find.byType(CloudAccountPage).evaluate().isNotEmpty,
-        );
-        passed('logout');
+          if (find.byType(HomeShell).evaluate().isEmpty) {
+            await tester.binding.handlePopRoute();
+            await settle();
+          }
+          await tap(find.text('Hồ sơ').last);
+          expect(store!.history.length, 20);
+          passed('profile_history');
+          phase = 'logout';
+          // The UI explicitly asks for another tap if an automatic backup is
+          // already in progress. Observe that state and retry the same UI action.
+          for (var attempt = 0; attempt < 3 && cloud!.signedIn; attempt++) {
+            await waitFor(() => !cloud!.busy && !sync!.busy);
+            await keyTap('app-settings');
+            await keyTap('menu-logout');
+            await waitFor(() => !cloud!.busy);
+          }
+          await waitFor(
+            () =>
+                !cloud!.signedIn &&
+                find.byType(CloudAccountPage).evaluate().isNotEmpty,
+          );
+          passed('logout');
 
-        phase = 'fresh_device_restore';
-        await unmountLearner();
-        await client.dispose();
-        clients.remove(client);
-        client = newClient();
-        await mountLearner(1);
-        expect(store!.profiles, isEmpty);
-        await login();
-        await waitFor(() => find.byType(HomeShell).evaluate().isNotEmpty);
-        expect(store!.profiles.length, 1);
-        expect(store!.points, 600);
-        expect(store!.completed.length, 20);
-        await openLesson(topicById('english'));
-        expect(workspace().spec.id, 'english-greetings');
-        expect(workspace().data['values'], [2, -1, -1]);
-        passed('fresh_native_namespace_login_restores_server_progress');
-        var crossOwnerDenied = false, adminDenied = false;
-        try {
-          await client.rpc(
-            'load_account_progress',
-            params: {'expected_owner': adminId},
+          phase = 'fresh_device_restore';
+          await unmountLearner();
+          await client.dispose();
+          clients.remove(client);
+          client = newClient();
+          await mountLearner(1);
+          expect(store!.profiles, isEmpty);
+          await login();
+          await waitFor(() => find.byType(HomeShell).evaluate().isNotEmpty);
+          expect(store!.profiles.length, 1);
+          expect(store!.points, 600);
+          expect(store!.completed.length, 20);
+          await openLesson(topicById('english'));
+          expect(workspace().spec.id, 'english-greetings');
+          expect(workspace().data['values'], [2, -1, -1]);
+          passed('fresh_native_namespace_login_restores_server_progress');
+          var crossOwnerDenied = false, adminDenied = false;
+          try {
+            await client.rpc(
+              'load_account_progress',
+              params: {'expected_owner': adminId},
+            );
+          } on PostgrestException catch (e) {
+            crossOwnerDenied = e.code == '42501';
+          }
+          try {
+            await client.rpc(
+              'admin_dashboard_read',
+              params: {'section': 'overview'},
+            );
+          } on PostgrestException catch (e) {
+            adminDenied = e.code == '42501';
+          }
+          expect(crossOwnerDenied && adminDenied, true);
+          passed('owner_isolation_and_admin_rpc_denial');
+          await unmountLearner();
+        } else {
+          await client.auth.signInWithPassword(
+            email: email,
+            password: password,
           );
-        } on PostgrestException catch (e) {
-          crossOwnerDenied = e.code == '42501';
+          passed('fixture_learner_auth_for_admin_denial');
         }
-        try {
-          await client.rpc(
-            'admin_dashboard_read',
-            params: {'section': 'overview'},
-          );
-        } on PostgrestException catch (e) {
-          adminDenied = e.code == '42501';
-        }
-        expect(crossOwnerDenied && adminDenied, true);
-        passed('owner_isolation_and_admin_rpc_denial');
-        await unmountLearner();
 
         phase = 'admin';
         final adminClient = newClient();
@@ -753,6 +765,16 @@ void main() {
         await tester.pump(const Duration(seconds: 2));
         final initialEvents = events;
         await type('admin-search-accounts', email);
+        await tester.pump(const Duration(milliseconds: 500));
+        for (var attempt = 0; attempt < 3; attempt++) {
+          await waitFor(() => !dashboard().loading);
+          if (dashboard().accounts.length == 1 &&
+              dashboard().accounts.first.id == owner) {
+            break;
+          }
+          debugPrint('HEADED_ADMIN_READ_RETRY ${attempt + 1}');
+          await tap(find.widgetWithText(OutlinedButton, 'Tải lại'));
+        }
         await waitFor(
           () =>
               !dashboard().loading &&
