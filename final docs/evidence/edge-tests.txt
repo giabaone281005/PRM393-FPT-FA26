@@ -1,0 +1,27 @@
+running 13 tests from ./supabase/tests/learning_handler_test.ts
+requires Auth validation and active role before any business request ... ok (72ms)
+attempt ignores client correctness/owner and uses server evaluation and verified Auth owner ... ok (6ms)
+normal mutations retain user JWT; admin cannot submit learner state ... ok (1ms)
+expanded evaluator uses its pinned hash and unknown versions cannot commit ... ok (2ms)
+reject oversized streamed bodies and deeply nested/large states ... ok (3ms)
+returns accurate safe business errors without exposing SQL diagnostics ... ok (2ms)
+sync retains bigint cursor strings and stable high-water mark ... ok (1ms)
+OPTIONS works without credentials ... ok (288µs)
+application revision conflicts use PT409 without a transient SQL retry code ... ok (710µs)
+invalid Auth JWT reported as login failure even when Auth returns 403 ... ok (1ms)
+asset signing first requires RLS-visible metadata ... ok (967µs)
+rejects MIME spoofing before storage upload ... ok (1ms)
+uploads image bytes under verified owner path, hashes content and registers server metadata ... ok (2ms)
+running 6 tests from ./supabase/tests/tutor_handler_test.ts
+default tutor authenticates user, checks active account and sends provider key only to Google ... ok (53ms)
+missing, invalid, anonymous and suspended accounts never call Gemini ... ok (4ms)
+invalid and oversized conversations are rejected before provider call ... ok (6ms)
+provider quota and auth failures return safe errors without provider secrets ... ok (2ms)
+burst limiting blocks excess calls before Gemini ... ok (5ms)
+preflight and unsupported methods never call services ... ok (4ms)
+running 3 tests from ./supabase/tests/app_knowledge_test.ts
+app keywords support Vietnamese with accents, without accents and mixed case ... ok (2ms)
+normal learning questions and programming mentions stay with Gemini ... ok (364µs)
+authenticated app FAQ uses curated guidance without a Gemini request ... ok (45ms)
+
+ok | 22 passed | 0 failed (563ms)

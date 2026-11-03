@@ -1,0 +1,18 @@
+{
+  "started": 1793711005.5939593,
+  "success": true,
+  "run": "d60e3e90-4136-4c00-9d79-1067ca8a1de1",
+  "phases": [
+    "fixture_learner_auth_for_admin_denial",
+    "admin_suspend_restore_and_real_database_broadcast",
+    "admin_topic_create_edit_archive",
+    "learner_admin_ui_gate"
+  ],
+  "activities": 0,
+  "gestureActivities": 0,
+  "answerFixtureActivities": 0,
+  "resumedAfterTraversal": true,
+  "adminOnly": true,
+  "exit_code": 0,
+  "seconds": 79.24
+}

@@ -1,0 +1,23 @@
+{
+  "started": 1793708398.6861725,
+  "success": false,
+  "run": "1d3fecd2-4f8a-4278-b286-087d0166796e",
+  "phases": [
+    "wrong_password_rejected",
+    "auth_single_profile_onboarding",
+    "live_faq_and_gemini",
+    "appearance_settings",
+    "topic_logic",
+    "topic_math",
+    "topic_science",
+    "topic_data",
+    "topic_geometry",
+    "topic_coding"
+  ],
+  "activities": 52,
+  "gestureActivities": 24,
+  "answerFixtureActivities": 28,
+  "failedPhase": "topic_circuits",
+  "exit_code": 1,
+  "seconds": 330.22
+}
