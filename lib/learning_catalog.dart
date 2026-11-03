@@ -2,13 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'app_theme.dart';
 import 'experiments/experiment_model.dart';
-import 'experiments/math_catalog.dart';
-import 'experiments/discovery_catalog.dart';
-import 'experiments/extended_catalog.dart';
-import 'experiments/diverse_catalog.dart';
-import 'experiments/solid_catalog.dart';
-import 'experiments/deep_catalog.dart';
-import 'experiments/curriculum_catalog.dart';
+import 'experiments/activity_catalog.dart';
+export 'experiments/activity_catalog.dart' show experimentCatalog;
 
 class LearningTopic {
   const LearningTopic(
@@ -51,29 +46,6 @@ class LearningTopic {
   List<ExperimentSpec> get experiments => experimentCatalog[id]!;
 }
 
-final _existingCatalog = <String, List<ExperimentSpec>>{
-  for (final entry in {...mathExperiments, ...discoveryExperiments}.entries)
-    entry.key: [
-      ...entry.value,
-      ...(extensionExperiments[entry.key] ?? []),
-      ...(diverseExperiments[entry.key] ?? []),
-      ...(solidExperiments[entry.key] ?? []),
-      ...(deepExperiments[entry.key] ?? []),
-    ],
-  'algebra': [
-    ...extensionExperiments['algebra']!,
-    ...solidExperiments['algebra']!,
-  ],
-  'geography': solidExperiments['geography']!,
-  'optimization': extensionExperiments['optimization']!,
-  'marxism': deepExperiments['marxism']!,
-  'painting': deepExperiments['painting']!,
-};
-final experimentCatalog = <String, List<ExperimentSpec>>{
-  for (final entry in _existingCatalog.entries)
-    entry.key: [...entry.value, ...?curriculumExtensions[entry.key]],
-  ...expandedCurriculum,
-};
 const topics = [
   LearningTopic(
     'logic',

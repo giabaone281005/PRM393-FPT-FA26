@@ -1,11 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:brilliant_mobile/experiments/discovery_catalog.dart';
-import 'package:brilliant_mobile/experiments/diverse_catalog.dart';
-import 'package:brilliant_mobile/experiments/extended_catalog.dart';
-import 'package:brilliant_mobile/experiments/math_catalog.dart';
-import 'package:brilliant_mobile/experiments/solid_catalog.dart';
+import 'package:brilliant_mobile/experiments/activity_catalog.dart';
+import 'package:brilliant_mobile/experiments/curriculum_engine.dart';
 
 /// Export immutable scene data; Dart validators are not backend evaluators.
 void main() {
@@ -26,25 +23,10 @@ void main() {
         },
       )
       .toList();
-  if (topics.length != 11) throw StateError('Unexpected topic metadata');
-  final catalog = {
-    for (final e in {...mathExperiments, ...discoveryExperiments}.entries)
-      e.key: [
-        ...e.value,
-        ...?extensionExperiments[e.key],
-        ...?diverseExperiments[e.key],
-        ...?solidExperiments[e.key],
-      ],
-    'algebra': [
-      ...extensionExperiments['algebra']!,
-      ...solidExperiments['algebra']!,
-    ],
-    'optimization': extensionExperiments['optimization']!,
-    'geography': solidExperiments['geography']!,
-  };
+  if (topics.length != 20) throw StateError('Unexpected topic metadata');
   final activities = [
     for (final topic in topics)
-      for (final entry in catalog[topic['id']]!.indexed)
+      for (final entry in experimentCatalog[topic['id']]!.indexed)
         {
           'id': entry.$2.id,
           'topic_id': topic['id'],
@@ -57,14 +39,19 @@ void main() {
           'explanation': entry.$2.explanation,
           'mechanism': entry.$2.mechanism,
           'mechanism_version': entry.$2.mechanismVersion,
-          'evaluator_version': 1,
+          'evaluator_version':
+              entry.$2.contentVersion > 1 ||
+                  entry.$2.mechanism == 'reasonedChoice' ||
+                  supportsCurriculum(entry.$2.mechanism)
+              ? 2
+              : 1,
           'config': entry.$2.config,
           'initial_state': entry.$2.initialData(),
           'skill_ids': entry.$2.skillIds,
         },
   ];
-  if (activities.length != 53 ||
-      activities.map((a) => a['id']).toSet().length != 53) {
+  if (activities.length != 139 ||
+      activities.map((a) => a['id']).toSet().length != 139) {
     throw StateError('Unexpected activity catalog');
   }
   final output = File('supabase/catalog.json');
@@ -73,7 +60,7 @@ void main() {
     const JsonEncoder.withIndent('  ').convert({
       'topics': topics,
       'activities': activities,
-      'verification': 'backend_evaluators_not_deployed',
+      'verification': 'requires_evaluator_parity_and_release',
     }),
   );
   stdout.writeln(

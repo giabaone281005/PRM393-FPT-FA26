@@ -1,31 +1,27 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:brilliant_mobile/experiments/curriculum_engine.dart';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:brilliant_mobile/learning_catalog.dart';
 
 import 'math_experiments_test.dart' show mathSolutionStates;
 import 'discovery_experiments_test.dart' show discoverySolutionStates;
 import 'extended_solutions.dart';
+import 'deep_solutions.dart';
+import 'curriculum_solutions.dart';
 
 void main() {
-  test('export server parity corpus for all 53 activities', () {
+  test('export server parity corpus for all 139 activities', () {
     final solutions = {
       ...mathSolutionStates,
       ...discoverySolutionStates,
       ...extendedSolutions,
+      ...deepSolutions,
+      ...curriculumSolutionStates,
     };
     final cases = <Map<String, dynamic>>[];
     for (final topic in topics) {
       for (final spec in topic.experiments) {
-        // This corpus targets the 53 published server activities. New local
-        // lessons have separate exhaustive tests until a server release exists.
-        if (spec.mechanism == 'reasonedChoice' ||
-            supportsCurriculum(spec.mechanism)) {
-          continue;
-        }
         expect(solutions.containsKey(spec.id), true, reason: spec.id);
         expect(spec.isCorrect(solutions[spec.id]!), true, reason: spec.id);
         final candidates = [
@@ -58,7 +54,7 @@ void main() {
               'satisfied_constraints': result.satisfiedConstraints,
               'feedback_key': result.feedbackKey,
               'mechanism': spec.mechanism,
-              'evaluator_version': 1,
+              'evaluator_version': 2,
               'config': spec.config,
               'initial_state': spec.initial,
             },
@@ -66,7 +62,7 @@ void main() {
         }
       }
     }
-    expect(solutions.length, 53);
+    expect(solutions.length, 139);
     Directory('build').createSync(recursive: true);
     File('build/server_evaluator_cases.json')
         .writeAsStringSync(jsonEncode(cases));

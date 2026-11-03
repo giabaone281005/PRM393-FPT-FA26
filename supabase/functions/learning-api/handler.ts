@@ -11,6 +11,7 @@ type Options = {
   publishableKey: string;
   serviceKey: string;
   implementationHash: string;
+  implementationHashes?: Record<number, string>;
   evaluate: (input: string) => string;
   fetch?: typeof fetch;
 };
@@ -469,7 +470,16 @@ export function createHandler(options: Options) {
             "Phiên bản bài học này chưa được hỗ trợ. Hãy cập nhật ứng dụng.",
           );
         }
-        evaluation.implementation_hash = options.implementationHash;
+        evaluation.implementation_hash = options.implementationHashes
+          ? options.implementationHashes[evaluation.evaluator_version]
+          : options.implementationHash;
+        if (!evaluation.implementation_hash) {
+          throw new ApiError(
+            422,
+            "unsupported_activity",
+            "Unsupported evaluator version",
+          );
+        }
         return json(
           await rpc("record_learning_attempt", options.serviceKey, {
             owner_id: user.id,

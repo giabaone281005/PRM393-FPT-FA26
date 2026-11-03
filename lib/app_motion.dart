@@ -9,6 +9,22 @@ abstract final class AppMotion {
       reduced(context) ? Duration.zero : Duration(milliseconds: milliseconds);
 }
 
+/// Skip the render animation entirely for reduced motion. A zero-duration
+/// AnimatedSize can synchronously dirty itself from inside performLayout.
+class MotionSize extends StatelessWidget {
+  const MotionSize({super.key, required this.child});
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => AppMotion.reduced(context)
+      ? child
+      : AnimatedSize(
+          duration: const Duration(milliseconds: 240),
+          curve: Curves.easeInOutCubic,
+          alignment: Alignment.topCenter,
+          child: child,
+        );
+}
+
 /// Forward and reverse share one spatial path, adapted from Flutter Samples.
 class DiscoveryRoute<T> extends MaterialPageRoute<T> {
   DiscoveryRoute({required super.builder});
