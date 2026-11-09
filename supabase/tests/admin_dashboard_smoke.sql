@@ -69,7 +69,7 @@ RESET ROLE;
 DO $$ BEGIN
   IF NOT EXISTS(SELECT 1 FROM pg_policies WHERE schemaname='realtime' AND tablename='messages' AND policyname='matlingo_admin_receive') THEN
     RAISE EXCEPTION 'Realtime policy missing'; END IF;
-  IF (SELECT count(*) FROM pg_trigger WHERE tgname='admin_dashboard_changed')<>6 THEN
+  IF (SELECT count(*) FROM pg_trigger WHERE tgname='admin_dashboard_changed')<>7 THEN
     RAISE EXCEPTION 'Realtime triggers missing'; END IF;
 END $$;
 SELECT 'Admin read/search/pagination, CRUD, authority and realtime schema checks passed' AS result;

@@ -1,3 +1,5 @@
+import 'data/models/lesson_icon.dart';
+
 import 'package:flutter/material.dart';
 
 import 'app_motion.dart';
@@ -111,6 +113,9 @@ class _TopicRoadmapState extends State<TopicRoadmap> {
                               message: 'Xem checkpoint ${i + 1}',
                               child: _CheckpointIsland(
                                 key: ValueKey('checkpoint-${specs[i].id}'),
+                                icon: specs[i].mechanism == 'slideLesson'
+                                    ? lessonIcon(specs[i].config)
+                                    : null,
                                 colors: palette,
                                 completed: completed,
                                 current: i == current,
@@ -240,8 +245,10 @@ class _CheckpointIsland extends StatefulWidget {
     required this.current,
     required this.selected,
     required this.number,
+    this.icon,
     required this.onTap,
   });
+  final IconData? icon;
   final ColorScheme colors;
   final bool completed, current, selected;
   final int number;
@@ -346,6 +353,15 @@ class _CheckpointIslandState extends State<_CheckpointIsland> {
                                 Icons.check_rounded,
                                 color: colors.onPrimary,
                                 size: 32,
+                              )
+                            : widget.icon != null
+                            ? Icon(
+                                widget.icon,
+                                key: ValueKey('lesson-icon-${widget.number}'),
+                                size: 32,
+                                color: bright
+                                    ? colors.onPrimary
+                                    : colors.onSurfaceVariant,
                               )
                             : widget.current
                             ? Icon(

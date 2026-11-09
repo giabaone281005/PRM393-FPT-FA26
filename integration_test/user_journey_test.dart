@@ -1,6 +1,7 @@
 import 'package:brilliant_mobile/entry_flow.dart';
 import 'package:brilliant_mobile/journey_app.dart';
 import 'package:brilliant_mobile/learning_store.dart';
+import 'package:brilliant_mobile/learning_catalog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -50,7 +51,8 @@ void main() {
 
       Future<void> solveLogic({bool retryWrong = false}) async {
         // Exercise controls through taps/drags; never inject solution state.
-        for (var step = 0; step < 6; step++) {
+        final steps = topicById('logic').experiments.length;
+        for (var step = 0; step < steps; step++) {
           debugPrint('E2E Logic step ${step + 1}; review=${!retryWrong}');
           switch (step) {
             case 0:
@@ -86,6 +88,14 @@ void main() {
               }
             case 5:
               await key('condition-a');
+            case 6:
+              await key('move-up-1');
+              await key('move-up-2');
+            case 7:
+              await key('evidence-0');
+              await key('evidence-2');
+            default:
+              fail('Add UI interactions for Logic step ${step + 1}');
           }
           await tap(find.text('Kiểm tra'));
           expect(
@@ -94,7 +104,9 @@ void main() {
             reason: 'Logic step ${step + 1}: ${store.progress('logic')}',
           );
           await tap(
-            find.text(step == 5 ? 'Hoàn thành hành trình' : 'Khám phá tiếp'),
+            find.text(
+              step == steps - 1 ? 'Hoàn thành hành trình' : 'Khám phá tiếp',
+            ),
           );
         }
         expect(find.byType(CompletionPage), findsOneWidget);

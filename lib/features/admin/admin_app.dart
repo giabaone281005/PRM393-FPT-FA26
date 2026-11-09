@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../app_theme.dart';
 import '../../data/models/admin_dashboard.dart';
+import '../../data/models/learning_journal.dart';
 import '../../data/providers/admin_dashboard_controller.dart';
 import 'role_ui.dart';
+import 'admin_lesson_editor.dart';
+import 'admin_slide_composer.dart';
 
 class AdminApp extends StatelessWidget {
   const AdminApp({super.key, required this.controller});
@@ -142,6 +145,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   bool _editing = false;
   AdminTopic? _topic;
   AdminAccount? _account;
+  AdminTopic? _contentTopic;
 
   Future<void> _changeStatus(BuildContext context, AdminAccount account) async {
     setState(() => _account = account);
@@ -154,11 +158,117 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     });
   }
 
+  Future<void> _viewTopic(AdminTopic topic) => showDialog<void>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(topic.title),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _statusBadge(context, topic.status),
+            const SizedBox(height: 16),
+            SelectableText('ID: ${topic.id}'),
+            Text('Môn học: ${topic.subject}'),
+            Text('Thứ tự: ${topic.sortOrder}'),
+            const SizedBox(height: 16),
+            Text(topic.subtitle.isEmpty ? 'Chưa có mô tả.' : topic.subtitle),
+            const SizedBox(height: 16),
+            Text(
+              topic.activityCount == 0
+                  ? 'Chọn Bài học để thêm nội dung tương tác. Chủ đề sẽ xuất hiện trên mobile khi đang hoạt động và có bài học.'
+                  : '${topic.activityCount} hoạt động. Chọn Bài học để biên tập nội dung, xem thử hoặc lưu trữ.',
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Đóng'),
+        ),
+      ],
+    ),
+  );
+
+  Future<void> _archiveTopic(AdminTopic topic) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Xóa khỏi danh mục học?'),
+        content: Text(
+          '“${topic.title}” sẽ được lưu trữ và ẩn khỏi danh mục học. Lịch sử học và nội dung được giữ lại. Bạn có thể khôi phục bằng cách sửa trạng thái.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Hủy'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Lưu trữ chủ đề'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    final success = await controller.saveTopic(
+      AdminTopic(
+        id: topic.id,
+        title: topic.title,
+        subtitle: topic.subtitle,
+        subject: topic.subject,
+        status: 'archived',
+        sortOrder: topic.sortOrder,
+        actionLabel: topic.actionLabel,
+        iconKey: topic.iconKey,
+      ),
+    );
+    if (mounted && success) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Đã lưu trữ chủ đề.')));
+    }
+  }
+
+  Widget _topicActions(AdminTopic topic) => Wrap(
+    spacing: 4,
+    children: [
+      FilledButton.tonalIcon(
+        key: ValueKey('lessons-${topic.id}'),
+        onPressed: () => setState(() => _contentTopic = topic),
+        icon: const Icon(Icons.auto_stories_outlined, size: 18),
+        label: const Text('Bài học'),
+      ),
+      TextButton.icon(
+        onPressed: () => _viewTopic(topic),
+        icon: const Icon(Icons.visibility_outlined, size: 18),
+        label: const Text('Xem'),
+      ),
+      TextButton.icon(
+        onPressed: controller.busy ? null : () => _editTopic(context, topic),
+        icon: const Icon(Icons.edit_outlined, size: 18),
+        label: const Text('Sửa'),
+      ),
+      TextButton.icon(
+        onPressed: controller.busy || topic.status == 'archived'
+            ? null
+            : () => _archiveTopic(topic),
+        icon: const Icon(Icons.archive_outlined, size: 18),
+        label: const Text('Xóa / lưu trữ'),
+      ),
+    ],
+  );
+
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
       final wide = constraints.maxWidth >= 1000;
-      final selected = controller.section == 'accounts' ? 0 : 1;
+      final selected = controller.section == 'accounts'
+          ? 0
+          : controller.section == 'builder'
+          ? 2
+          : 1;
       final body = ListView(
         padding: EdgeInsets.all(wide ? 32 : 16),
         children: [
@@ -172,7 +282,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Tổng quan',
+                    selected == 0
+                        ? 'Quản lý người dùng'
+                        : 'Quản lý nội dung học',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 8),
@@ -249,7 +361,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             runSpacing: 12,
             children: [
               Text(
-                selected == 0 ? 'Người dùng' : 'Chủ đề hiện có',
+                selected == 0 ? 'Người dùng' : 'Thư viện chủ đề',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               if (selected == 1)
@@ -261,6 +373,19 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 ),
             ],
           ),
+          if (selected == 1) ...[
+            const SizedBox(height: 16),
+            const Card(
+              elevation: 0,
+              color: BrilliantPalette.successSurface,
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: Text(
+                  '1. Tạo chủ đề  →  2. Thêm và xem thử bài học  →  3. Bật trạng thái hoạt động. Nội dung đã lưu được phát hành tới mobile đang kết nối. Bản nháp và nội dung lưu trữ được ẩn.',
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           TextFormField(
             key: ValueKey('admin-search-${controller.section}'),
@@ -328,32 +453,46 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                     borderRadius: BorderRadius.circular(16),
                     side: const BorderSide(color: BrilliantPalette.track),
                   ),
-                  child: ListTile(
-                    title: Text(topic.title),
-                    subtitle: Column(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '${topic.subject} · ${topic.activityCount} hoạt động',
+                          topic.title,
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const SizedBox(height: 8),
+                        Text(
+                          '${topic.subject} · ${topic.activityCount} hoạt động',
+                        ),
+                        const SizedBox(height: 12),
                         _statusBadge(context, topic.status),
+                        const Divider(height: 28),
+                        _topicActions(topic),
                       ],
-                    ),
-                    trailing: IconButton(
-                      tooltip: 'Sửa chủ đề',
-                      onPressed: controller.busy
-                          ? null
-                          : () => _editTopic(context, topic),
-                      icon: const Icon(Icons.edit_outlined),
                     ),
                   ),
                 ),
               )
           else if (!controller.loading)
-            const Padding(
+            Padding(
               padding: EdgeInsets.all(32),
-              child: Text('Không có dữ liệu phù hợp.'),
+              child: Column(
+                children: [
+                  const Icon(Icons.menu_book_outlined, size: 40),
+                  const SizedBox(height: 16),
+                  Text(
+                    controller.search.isEmpty
+                        ? 'Chưa có dữ liệu.'
+                        : 'Không có dữ liệu phù hợp.',
+                  ),
+                  if (selected == 1 && controller.search.isEmpty) ...[
+                    const SizedBox(height: 8),
+                    const Text('Chọn Thêm chủ đề để tạo bản nháp đầu tiên.'),
+                  ],
+                ],
+              ),
             ),
           const SizedBox(height: 16),
           Wrap(
@@ -404,7 +543,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 extended: true,
                 selectedIndex: selected,
                 onDestinationSelected: (index) => controller.selectSection(
-                  index == 0 ? 'accounts' : 'topics',
+                  ['accounts', 'topics', 'builder'][index],
                 ),
                 destinations: const [
                   NavigationRailDestination(
@@ -415,10 +554,24 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                     icon: Icon(Icons.menu_book_outlined),
                     label: Text('Chủ đề'),
                   ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.dashboard_customize_outlined),
+                    label: Text('Tạo bài học'),
+                  ),
                 ],
               ),
             if (wide) const VerticalDivider(width: 1),
-            Expanded(child: body),
+            Expanded(
+              child: selected == 2
+                  ? AdminLessonStudio(controller: controller)
+                  : _contentTopic != null && selected == 1
+                  ? AdminLessonLibrary(
+                      controller: controller,
+                      topic: _contentTopic!,
+                      onBack: () => setState(() => _contentTopic = null),
+                    )
+                  : body,
+            ),
           ],
         ),
         bottomNavigationBar: wide
@@ -426,7 +579,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             : NavigationBar(
                 selectedIndex: selected,
                 onDestinationSelected: (index) => controller.selectSection(
-                  index == 0 ? 'accounts' : 'topics',
+                  ['accounts', 'topics', 'builder'][index],
                 ),
                 destinations: const [
                   NavigationDestination(
@@ -436,6 +589,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                   NavigationDestination(
                     icon: Icon(Icons.menu_book_outlined),
                     label: 'Chủ đề',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.dashboard_customize_outlined),
+                    label: 'Tạo bài học',
                   ),
                 ],
               ),
@@ -590,7 +747,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   Widget _topicsTable(BuildContext context) => _TableSurface(
     child: DataTable(
       dataRowMinHeight: 64,
-      dataRowMaxHeight: 100,
+      dataRowMaxHeight: 130,
       columns: const [
         DataColumn(label: Text('Chủ đề')),
         DataColumn(label: Text('Hoạt động')),
@@ -616,15 +773,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 ),
                 DataCell(Text('${topic.activityCount}')),
                 DataCell(_statusBadge(context, topic.status)),
-                DataCell(
-                  IconButton(
-                    tooltip: 'Sửa ${topic.title}',
-                    onPressed: controller.busy
-                        ? null
-                        : () => _editTopic(context, topic),
-                    icon: const Icon(Icons.edit_outlined),
-                  ),
-                ),
+                DataCell(_topicActions(topic)),
               ],
             ),
           )
@@ -731,17 +880,31 @@ class _TopicEditor extends StatefulWidget {
 
 class _TopicEditorState extends State<_TopicEditor> {
   final _form = GlobalKey<FormState>();
-  late final _id = TextEditingController(text: widget.topic?.id ?? ''),
+  late final _id = TextEditingController(
+        text: widget.topic?.id ?? 'topic-${learningUuid()}',
+      ),
       _title = TextEditingController(text: widget.topic?.title ?? ''),
       _subtitle = TextEditingController(text: widget.topic?.subtitle ?? ''),
       _subject = TextEditingController(text: widget.topic?.subject ?? ''),
+      _action = TextEditingController(
+        text: widget.topic?.actionLabel ?? 'Khám phá bài học',
+      ),
       _sort = TextEditingController(text: '${widget.topic?.sortOrder ?? 0}');
   late String _status = widget.topic?.status ?? 'draft';
+  late String _iconKey = widget.topic?.iconKey ?? 'menu_book_outlined';
+  static const _icons = <String, (IconData, String)>{
+    'menu_book_outlined': (Icons.menu_book_outlined, 'Tổng quát'),
+    'pie_chart_outline': (Icons.pie_chart_outline, 'Toán học'),
+    'hub_outlined': (Icons.hub_outlined, 'Tư duy'),
+    'science_outlined': (Icons.science_outlined, 'Khoa học'),
+    'palette_outlined': (Icons.palette_outlined, 'Nghệ thuật'),
+    'terminal': (Icons.terminal, 'Lập trình'),
+  };
   bool _saving = false;
   String? _error;
   @override
   void dispose() {
-    for (final field in [_id, _title, _subtitle, _subject, _sort]) {
+    for (final field in [_id, _title, _subtitle, _subject, _action, _sort]) {
       field.dispose();
     }
     super.dispose();
@@ -761,8 +924,8 @@ class _TopicEditorState extends State<_TopicEditor> {
         subject: _subject.text.trim(),
         status: _status,
         sortOrder: int.parse(_sort.text),
-        iconKey: widget.topic?.iconKey ?? 'menu_book_outlined',
-        actionLabel: widget.topic?.actionLabel ?? '',
+        iconKey: _iconKey,
+        actionLabel: _action.text.trim(),
       ),
     );
     if (!mounted) return;
@@ -791,13 +954,48 @@ class _TopicEditorState extends State<_TopicEditor> {
                 'Tên và mô tả được đồng bộ tới mobile. Chủ đề đang hoạt động chỉ xuất hiện khi có bài đã phát hành tương thích; bản nháp và chủ đề lưu trữ được ẩn khỏi danh mục học.',
               ),
               const SizedBox(height: 16),
+              Card(
+                color: BrilliantPalette.successSurface,
+                elevation: 0,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _icons[_iconKey]?.$1 ?? Icons.menu_book_outlined,
+                        size: 32,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _title.text.trim().isEmpty
+                                  ? 'Tên chủ đề của bạn'
+                                  : _title.text,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            Text(
+                              _subtitle.text.trim().isEmpty
+                                  ? 'Bản xem trước trên mobile'
+                                  : _subtitle.text,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 key: const ValueKey('topic-id'),
                 controller: _id,
                 readOnly: widget.topic != null,
                 maxLength: 80,
                 decoration: const InputDecoration(
-                  labelText: 'ID (chữ thường và dấu gạch ngang)',
+                  labelText: 'Mã chủ đề (tự tạo, có thể đổi)',
                 ),
                 validator: (v) =>
                     RegExp(r'^[a-z][a-z0-9-]*$').hasMatch(v?.trim() ?? '')
@@ -807,6 +1005,7 @@ class _TopicEditorState extends State<_TopicEditor> {
               TextFormField(
                 key: const ValueKey('topic-title'),
                 controller: _title,
+                onChanged: (_) => setState(() {}),
                 maxLength: 160,
                 decoration: const InputDecoration(labelText: 'Tên chủ đề'),
                 validator: (v) =>
@@ -814,6 +1013,7 @@ class _TopicEditorState extends State<_TopicEditor> {
               ),
               TextFormField(
                 controller: _subtitle,
+                onChanged: (_) => setState(() {}),
                 maxLength: 500,
                 decoration: const InputDecoration(labelText: 'Mô tả ngắn'),
               ),
@@ -825,6 +1025,34 @@ class _TopicEditorState extends State<_TopicEditor> {
                 validator: (v) =>
                     v?.trim().isNotEmpty == true ? null : 'Nhập môn học.',
               ),
+              TextFormField(
+                controller: _action,
+                maxLength: 160,
+                decoration: const InputDecoration(
+                  labelText: 'Lời mời khám phá trên mobile',
+                ),
+              ),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Biểu tượng chủ đề'),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final entry in _icons.entries)
+                    ChoiceChip(
+                      avatar: Icon(entry.value.$1, size: 18),
+                      label: Text(entry.value.$2),
+                      selected: _iconKey == entry.key,
+                      onSelected: _saving
+                          ? null
+                          : (_) => setState(() => _iconKey = entry.key),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _sort,
                 keyboardType: TextInputType.number,

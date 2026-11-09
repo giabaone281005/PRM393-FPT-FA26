@@ -66,13 +66,14 @@ class ReasoningWorkspace extends StatelessWidget {
         spec.config['reasons'] as List<String>,
       ),
       const SizedBox(height: 16),
-      Text(
-        'Nguồn học: ${spec.config['source']}',
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-          height: 1.5,
+      if ((spec.config['source'] as String? ?? '').isNotEmpty)
+        Text(
+          'Nguồn học: ${spec.config['source']}',
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            height: 1.5,
+          ),
         ),
-      ),
     ],
   );
 

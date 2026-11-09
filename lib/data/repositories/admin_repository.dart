@@ -27,9 +27,68 @@ abstract class AdminRepository {
   Stream<AdminRealtimeEvent> watch(String owner);
 }
 
-class SupabaseAdminRepository implements AdminRepository {
+abstract class AdminLessonGenerator {
+  Future<Map<String, dynamic>> generateLesson(
+    String owner,
+    String prompt,
+    String topic,
+  );
+}
+
+abstract class AdminSlideGenerator {
+  Future<List<Map<String, dynamic>>> generateSlides(
+    String owner,
+    String prompt,
+    String topic,
+    Map<String, dynamic> design,
+  );
+}
+
+class SupabaseAdminRepository
+    implements AdminRepository, AdminLessonGenerator, AdminSlideGenerator {
   SupabaseAdminRepository(this.client);
   final SupabaseClient client;
+
+  @override
+  Future<List<Map<String, dynamic>>> generateSlides(
+    String owner,
+    String prompt,
+    String topic,
+    Map<String, dynamic> design,
+  ) async {
+    _check(owner);
+    try {
+      final response = await client.functions
+          .invoke(
+            'author-lesson',
+            body: {'prompt': prompt, 'topic': topic, 'design': design},
+          )
+          .timeout(const Duration(seconds: 65));
+      _check(owner);
+      final data = response.data;
+      if (data is! Map ||
+          data['draft'] is! Map ||
+          data['draft']['slides'] is! List) {
+        throw const AdminFailure('Gemini chưa trả về cấu trúc slide hợp lệ.');
+      }
+      return (data['draft']['slides'] as List)
+          .map((s) => Map<String, dynamic>.from(s as Map))
+          .toList();
+    } on AdminFailure {
+      rethrow;
+    } on FunctionException catch (error) {
+      throw AdminFailure(
+        error.status == 429
+            ? 'Gemini đang giới hạn số lượt tạo. Chờ một phút rồi thử lại.'
+            : 'Chưa tạo được nội dung. Kiểm tra thiết kế và thử lại.',
+        accessDenied: error.status == 401 || error.status == 403,
+      );
+    } catch (_) {
+      throw const AdminFailure(
+        'Chưa kết nối được Gemini. Thiết kế của bạn vẫn được giữ.',
+      );
+    }
+  }
 
   void _check(String owner) {
     if (client.auth.currentUser?.id != owner ||
@@ -37,6 +96,44 @@ class SupabaseAdminRepository implements AdminRepository {
       throw const AdminFailure(
         'Phiên đăng nhập đã thay đổi. Hãy đăng nhập lại.',
         accessDenied: true,
+      );
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> generateLesson(
+    String owner,
+    String prompt,
+    String topic,
+  ) async {
+    _check(owner);
+    try {
+      final response = await client.functions
+          .invoke('author-lesson', body: {'prompt': prompt, 'topic': topic})
+          .timeout(const Duration(seconds: 55));
+      _check(owner);
+      final data = response.data;
+      if (data is! Map || data['draft'] is! Map) {
+        throw const AdminFailure(
+          'Gemini chưa trả về bản nháp hợp lệ. Hãy thử lại.',
+        );
+      }
+      return Map<String, dynamic>.from(data['draft'] as Map);
+    } on AdminFailure {
+      rethrow;
+    } on FunctionException catch (error) {
+      if (error.status == 401 || error.status == 403) {
+        throw const AdminFailure(
+          'Phiên đăng nhập hoặc quyền quản trị đã thay đổi.',
+          accessDenied: true,
+        );
+      }
+      throw const AdminFailure(
+        'Chưa tạo được bản nháp. Gemini có thể đang bận; hãy thử lại sau.',
+      );
+    } catch (_) {
+      throw const AdminFailure(
+        'Chưa kết nối được Gemini. Nội dung bạn đang soạn được giữ lại.',
       );
     }
   }
@@ -56,6 +153,11 @@ class SupabaseAdminRepository implements AdminRepository {
     } on AdminFailure {
       rethrow;
     } on PostgrestException catch (error) {
+      if (error.code == 'PT409') {
+        throw const AdminFailure(
+          'Nội dung đã được sửa ở nơi khác. Quay lại danh sách, tải lại bài học rồi cập nhật.',
+        );
+      }
       if (['42501', 'PGRST301', 'PGRST303'].contains(error.code)) {
         throw const AdminFailure(
           'Quyền quản trị hoặc phiên đăng nhập không còn hợp lệ.',
@@ -89,12 +191,24 @@ class SupabaseAdminRepository implements AdminRepository {
     String search = '',
     int offset = 0,
   }) async => Map<String, dynamic>.from(
-    await _rpc(owner, 'admin_dashboard_read', {
-      'section': section,
-      'search_text': search,
-      'page_offset': offset,
-      'page_size': 25,
-    }) as Map,
+    await _rpc(
+      owner,
+      section.startsWith('drafts:')
+          ? 'admin_builder_read'
+          : section.startsWith('lessons:')
+          ? 'admin_content_read'
+          : 'admin_dashboard_read',
+      section.startsWith('drafts:')
+          ? {'topic': section.substring(7)}
+          : section.startsWith('lessons:')
+          ? {'topic': section.substring(8)}
+          : {
+              'section': section,
+              'search_text': search,
+              'page_offset': offset,
+              'page_size': 25,
+            },
+    ) as Map,
   );
 
   @override
@@ -104,11 +218,20 @@ class SupabaseAdminRepository implements AdminRepository {
     String type,
     Map<String, dynamic> payload,
   ) async {
-    await _rpc(owner, 'admin_learning_mutate', {
-      'operation_id': operationId,
-      'operation_type': type,
-      'payload': payload,
-    });
+    await _rpc(
+      owner,
+      type == 'lesson.draft'
+          ? 'admin_builder_save'
+          : type == 'lesson.save'
+          ? 'admin_content_mutate'
+          : 'admin_learning_mutate',
+      {
+        'operation_id': operationId,
+        if (!['lesson.save', 'lesson.draft'].contains(type))
+          'operation_type': type,
+        'payload': payload,
+      },
+    );
   }
 
   @override

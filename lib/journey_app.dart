@@ -1,3 +1,4 @@
+import 'data/models/lesson_icon.dart';
 import 'app_layout.dart';
 import 'features/account/cloud_account_page.dart';
 import 'features/account/learning_sync_scope.dart';
@@ -24,6 +25,7 @@ import 'learning_store.dart';
 import 'learning_catalog.dart';
 import 'experiments/experiment_model.dart';
 import 'experiments/reasoning_workspace.dart';
+import 'experiments/slide_lesson_workspace.dart';
 import 'lesson_theme.dart';
 import 'topic_roadmap.dart';
 import 'home_owl_mascot.dart';
@@ -300,7 +302,8 @@ void openLesson(
 ) => Navigator.push(
   context,
   DiscoveryRoute<void>(
-    builder: (_) => LessonPage(topic: topic, store: store),
+    builder: (_) =>
+        LessonPage(topic: store.topicForLearning(topic.id), store: store),
   ),
 );
 
@@ -1214,6 +1217,15 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
                   controller: scroll,
                   padding: AppLayout.pagePadding,
                   children: [
+                    if (spec.mechanism == 'slideLesson') ...[
+                      Icon(
+                        lessonIcon(spec.config),
+                        key: const ValueKey('lesson-selected-icon'),
+                        size: 36,
+                        color: visual.theme.colorScheme.primary,
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     Text(
                       spec.stage.toUpperCase(),
                       style: Theme.of(context).textTheme.labelSmall!.copyWith(
@@ -1509,6 +1521,14 @@ class ExperimentWorkspace extends StatelessWidget {
   final ValueChanged<ExperimentData> onChanged;
   @override
   Widget build(BuildContext context) {
+    if (spec.mechanism == 'slideLesson') {
+      return SlideLessonWorkspace(
+        spec: spec,
+        data: data,
+        locked: locked,
+        onChanged: onChanged,
+      );
+    }
     if (supportsCurriculum(spec.mechanism)) {
       return CurriculumWorkspace(
         spec: spec,
@@ -1986,14 +2006,15 @@ class TopicArtwork extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       const {
-        'english',
-        'vietnamese',
-        'biology',
-        'chemistry',
-        'astronomy',
-        'finance',
-        'digital',
-      }.contains(topic.id)
+            'english',
+            'vietnamese',
+            'biology',
+            'chemistry',
+            'astronomy',
+            'finance',
+            'digital',
+          }.contains(topic.id) ||
+          !topics.any((known) => known.id == topic.id)
       ? Semantics(
           image: true,
           label: 'Minh họa ${topic.subject}',

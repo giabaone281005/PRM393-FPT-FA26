@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1400" viewBox="0 0 1600 1400" role="img" aria-labelledby="title desc"><title id="title">UML Use Case Diagram — Matlingo</title><desc id="desc">User và Admin ở ngoài boundary Matlingo; 19 use case ở bên trong.</desc><style>text{font-family:Arial,'Segoe UI',sans-serif;fill:#16202b}.title{font-size:30px;font-weight:bold}.subtitle{font-size:17px;fill:#526070}.uc{font-size:20px}.id{font-size:12px;fill:#657384}.actor{font-size:24px;font-weight:bold}.note{font-size:17px}.group{font-size:18px;font-weight:bold;fill:#526070}</style><rect width="1600" height="1400" fill="white"/><text x="800" y="48" text-anchor="middle" class="title">UML USE CASE DIAGRAM</text><text x="800" y="78" text-anchor="middle" class="subtitle">Tổng quan hệ thống · Đối chiếu mã nguồn ngày 04/11/2026</text><rect x="230" y="110" width="1140" height="1110" fill="white" stroke="#16202b" stroke-width="2.5"/><text x="800" y="153" text-anchor="middle" class="title">Matlingo</text><text x="490" y="194" text-anchor="middle" class="group">CHỨC NĂNG NGƯỜI DÙNG</text><text x="1110" y="194" text-anchor="middle" class="group">CHỨC NĂNG QUẢN TRỊ</text>
+<line x1="140" y1="675" x2="310" y2="250" stroke="#526070" stroke-width="1.3"/>
+<line x1="140" y1="675" x2="310" y2="338" stroke="#526070" stroke-width="1.3"/>
+<line x1="140" y1="675" x2="310" y2="426" stroke="#526070" stroke-width="1.3"/>
+<line x1="140" y1="675" x2="310" y2="514" stroke="#526070" stroke-width="1.3"/>
+<line x1="140" y1="675" x2="310" y2="602" stroke="#526070" stroke-width="1.3"/>
+<line x1="140" y1="675" x2="310" y2="690" stroke="#526070" stroke-width="1.3"/>
+<line x1="140" y1="675" x2="310" y2="778" stroke="#526070" stroke-width="1.3"/>
+<line x1="140" y1="675" x2="310" y2="866" stroke="#526070" stroke-width="1.3"/>
+<line x1="140" y1="675" x2="310" y2="954" stroke="#526070" stroke-width="1.3"/>
+<line x1="140" y1="675" x2="310" y2="1042" stroke="#526070" stroke-width="1.3"/>
+<line x1="140" y1="675" x2="310" y2="1130" stroke="#526070" stroke-width="1.3"/>
+<line x1="1460" y1="675" x2="1290" y2="250" stroke="#526070" stroke-width="1.3"/>
+<line x1="1460" y1="675" x2="1290" y2="375.7" stroke="#526070" stroke-width="1.3"/>
+<line x1="1460" y1="675" x2="1290" y2="501.4" stroke="#526070" stroke-width="1.3"/>
+<line x1="1460" y1="675" x2="1290" y2="627.1" stroke="#526070" stroke-width="1.3"/>
+<line x1="1460" y1="675" x2="1290" y2="752.8" stroke="#526070" stroke-width="1.3"/>
+<line x1="1460" y1="675" x2="1290" y2="878.5" stroke="#526070" stroke-width="1.3"/>
+<line x1="1460" y1="675" x2="1290" y2="1004.2" stroke="#526070" stroke-width="1.3"/>
+<line x1="1460" y1="675" x2="1290" y2="1129.9" stroke="#526070" stroke-width="1.3"/>
+<ellipse cx="490" cy="250" rx="180" ry="35" fill="white" stroke="#16202b" stroke-width="1.6"/>
+<text x="490" y="255" text-anchor="middle" class="uc">Quản lý phiên đăng nhập</text>
+<text x="490" y="207" text-anchor="middle" class="id">U01</text>
+<ellipse cx="490" cy="338" rx="180" ry="35" fill="white" stroke="#16202b" stroke-width="1.6"/>
+<text x="490" y="332" text-anchor="middle" class="uc">Đăng ký và khôi phục tài</text>
+<text x="490" y="355" text-anchor="middle" class="uc">khoản</text>
+<text x="490" y="295" text-anchor="middle" class="id">U02</text>
+<ellipse cx="490" cy="426" rx="180" ry="35" fill="white" stroke="#16202b" stroke-width="1.6"/>
+<text x="490" y="431" text-anchor="middle" class="uc">Thiết lập hồ sơ học tập</text>
+<text x="490" y="383" text-anchor="middle" class="id">U03</text>
+<ellipse cx="490" cy="514" rx="180" ry="35" fill="white" stroke="#16202b" stroke-width="1.6"/>
+<text x="490" y="519" text-anchor="middle" class="uc">Khám phá chủ đề học tập</text>
+<text x="490" y="471" text-anchor="middle" class="id">U04</text>
+<ellipse cx="490" cy="602" rx="180" ry="35" fill="white" stroke="#16202b" stroke-width="1.6"/>
+<text x="490" y="607" text-anchor="middle" class="uc">Học và ôn tập tương tác</text>
+<text x="490" y="559" text-anchor="middle" class="id">U05</text>
+<ellipse cx="490" cy="690" rx="180" ry="35" fill="white" stroke="#16202b" stroke-width="1.6"/>
+<text x="490" y="695" text-anchor="middle" class="uc">Theo dõi kết quả học tập</text>
+<text x="490" y="647" text-anchor="middle" class="id">U06</text>
+<ellipse cx="490" cy="778" rx="180" ry="35" fill="white" stroke="#16202b" stroke-width="1.6"/>
+<text x="490" y="772" text-anchor="middle" class="uc">Đồng bộ và khôi phục tiến</text>
+<text x="490" y="795" text-anchor="middle" class="uc">độ</text>
+<text x="490" y="735" text-anchor="middle" class="id">U07</text>
+<ellipse cx="490" cy="866" rx="180" ry="35" fill="white" stroke="#16202b" stroke-width="1.6"/>
+<text x="490" y="871" text-anchor="middle" class="uc">Trao đổi với trợ lý AI</text>
+<text x="490" y="823" text-anchor="middle" class="id">U08</text>
+<ellipse cx="490" cy="954" rx="180" ry="35" fill="white" stroke="#16202b" stroke-width="1.6"/>
+<text x="490" y="959" text-anchor="middle" class="uc">Thực hành lập trình</text>
+<text x="490" y="911" text-anchor="middle" class="id">U09</text>
+<ellipse cx="490" cy="1042" rx="180" ry="35" fill="white" stroke="#16202b" stroke-width="1.6"/>
+<text x="490" y="1036" text-anchor="middle" class="uc">Tùy chỉnh ứng dụng và</text>
+<text x="490" y="1059" text-anchor="middle" class="uc">engine</text>
+<text x="490" y="999" text-anchor="middle" class="id">U10</text>
+<ellipse cx="490" cy="1130" rx="180" ry="35" fill="white" stroke="#16202b" stroke-width="1.6"/>
+<text x="490" y="1135" text-anchor="middle" class="uc">Xem hướng dẫn sử dụng</text>
+<text x="490" y="1087" text-anchor="middle" class="id">U11</text>
+<ellipse cx="1110" cy="250" rx="180" ry="35" fill="white" stroke="#16202b" stroke-width="1.6"/>
+<text x="1110" y="255" text-anchor="middle" class="uc">Truy cập trang quản trị</text>
+<text x="1110" y="207" text-anchor="middle" class="id">A01</text>
+<ellipse cx="1110" cy="375.7" rx="180" ry="35" fill="white" stroke="#16202b" stroke-width="1.6"/>
+<text x="1110" y="380.7" text-anchor="middle" class="uc">Xem tổng quan hệ thống</text>
+<text x="1110" y="332.7" text-anchor="middle" class="id">A02</text>
+<ellipse cx="1110" cy="501.4" rx="180" ry="35" fill="white" stroke="#16202b" stroke-width="1.6"/>
+<text x="1110" y="495.4" text-anchor="middle" class="uc">Quản lý tài khoản người</text>
+<text x="1110" y="518.4" text-anchor="middle" class="uc">dùng</text>
+<text x="1110" y="458.4" text-anchor="middle" class="id">A03</text>
+<ellipse cx="1110" cy="627.1" rx="180" ry="35" fill="white" stroke="#16202b" stroke-width="1.6"/>
+<text x="1110" y="632.1" text-anchor="middle" class="uc">Quản lý chủ đề học tập</text>
+<text x="1110" y="584.1" text-anchor="middle" class="id">A04</text>
+<ellipse cx="1110" cy="752.8" rx="180" ry="35" fill="#f3f5f7" stroke="#16202b" stroke-width="1.6"/>
+<text x="1110" y="757.8" text-anchor="middle" class="uc">Quản lý phiên bản hoạt động</text>
+<text x="1110" y="709.8" text-anchor="middle" class="id">A05 · «API»</text>
+<ellipse cx="1110" cy="878.5" rx="180" ry="35" fill="#f3f5f7" stroke="#16202b" stroke-width="1.6"/>
+<text x="1110" y="872.5" text-anchor="middle" class="uc">Quản lý bản phát hành nội</text>
+<text x="1110" y="895.5" text-anchor="middle" class="uc">dung</text>
+<text x="1110" y="835.5" text-anchor="middle" class="id">A06 · «API»</text>
+<ellipse cx="1110" cy="1004.2" rx="180" ry="35" fill="#f3f5f7" stroke="#16202b" stroke-width="1.6"/>
+<text x="1110" y="1009.2" text-anchor="middle" class="uc">Quản lý tài nguyên nội dung</text>
+<text x="1110" y="961.2" text-anchor="middle" class="id">A07 · «API»</text>
+<ellipse cx="1110" cy="1129.9" rx="180" ry="35" fill="#f3f5f7" stroke="#16202b" stroke-width="1.6"/>
+<text x="1110" y="1134.9" text-anchor="middle" class="uc">Xem nhật ký quản trị</text>
+<text x="1110" y="1086.9" text-anchor="middle" class="id">A08 · «API»</text>
+<g fill="white" stroke="#16202b" stroke-width="2.5" stroke-linecap="round"><circle cx="105" cy="620" r="19"/><path fill="none" d="M 105 639 V 700 M 70 675 H 140 M 105 700 L 76 743 M 105 700 L 134 743"/></g><text x="105" y="783" text-anchor="middle" class="actor">User</text><text x="105" y="809" text-anchor="middle" class="subtitle">Người dùng</text>
+<g fill="white" stroke="#16202b" stroke-width="2.5" stroke-linecap="round"><circle cx="1495" cy="620" r="19"/><path fill="none" d="M 1495 639 V 700 M 1460 675 H 1530 M 1495 700 L 1466 743 M 1495 700 L 1524 743"/></g><text x="1495" y="783" text-anchor="middle" class="actor">Admin</text><text x="1495" y="809" text-anchor="middle" class="subtitle">Quản trị viên</text>
+<text x="230" y="1260" class="note">«API»: Đã có chức năng backend; chưa có màn hình tương ứng trong Admin web hiện tại.</text>
+<text x="230" y="1292" class="note">Đường liền: actor tham gia use case. User và Admin là hai vai trò độc lập, không biểu diễn kế thừa.</text>
+<text x="230" y="1324" class="note">Đăng nhập/quyền hợp lệ là tiền điều kiện. Khôi phục mật khẩu phụ thuộc cấu hình bật tính năng.</text>
+<text x="230" y="1356" class="note">Phạm vi: mobile + Admin web + backend Matlingo; không gồm parent/kid và commerce cũ.</text>
+</svg>

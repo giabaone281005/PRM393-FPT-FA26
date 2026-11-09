@@ -1,0 +1,14 @@
+{
+  "SUPABASE_URL": "https://YOUR-TEST-PROJECT.supabase.co",
+  "SUPABASE_PUBLISHABLE_KEY": "your-publishable-key",
+  "E2E_DISPOSABLE": true,
+  "E2E_EMAIL": "headed-learner@example.test",
+  "E2E_PASSWORD": "replace-with-test-password",
+  "E2E_ID": "replace-with-learner-auth-uuid",
+  "E2E_ADMIN_EMAIL": "headed-admin@example.test",
+  "E2E_ADMIN_PASSWORD": "replace-with-test-password",
+  "E2E_ADMIN_ID": "replace-with-admin-auth-uuid",
+  "E2E_PHONE_EMAIL": "headed-phone@example.test",
+  "E2E_PHONE_PASSWORD": "replace-with-test-password",
+  "E2E_PHONE_ID": "replace-with-phone-auth-uuid"
+}

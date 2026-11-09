@@ -1,0 +1,99 @@
+{
+  "project_ref": "seoswmcldwwytdrfrrrb",
+  "verified_on": "2026-11-10",
+  "note": "Reconciliation record only. Historical local timestamps differ from hosted timestamps; do not db push/reset this retained history. No remote history was rewritten.",
+  "migrations": [
+    {
+      "local_file": "20261110000000_admin_lesson_authoring.sql",
+      "name": "admin_lesson_authoring",
+      "remote_version": "20261107013041",
+      "sha256_utf8_lf": "4370f937a1045b22e61baeae67eca6b3b7d9afc1b48f098af35c02c943be631e"
+    },
+    {
+      "local_file": "20261111000000_authored_choice_validation.sql",
+      "name": "authored_choice_validation",
+      "remote_version": "20261107014332",
+      "sha256_utf8_lf": "8f0852980af7a83db3cf9a5cdf63aac93b5b180b2719de9cf28ed15997c0d3b3"
+    },
+    {
+      "local_file": "20261112000000_slide_cms_engines.sql",
+      "name": "slide_cms_engines",
+      "remote_version": "20261107021205",
+      "sha256_utf8_lf": "e4537028c2c13335970a49a2eacafbc7913a9730cb714e9cbff69783277f2f01"
+    },
+    {
+      "local_file": "20261113000000_builder_payload_authority.sql",
+      "name": "builder_payload_authority",
+      "remote_version": "20261107021352",
+      "sha256_utf8_lf": "8a2dc73c45bc332ee73b3ab0ce1d363024e7a85cd34641848aef16a31b0562dd"
+    },
+    {
+      "local_file": "20261114000000_studio_tinkercad_v2.sql",
+      "name": "studio_tinkercad_v2",
+      "remote_version": "20261109144821",
+      "sha256_utf8_lf": "b0a31a196b8975e00450ead8b3ea77e346da86d4dd7eced93f4178d7a846ebb9"
+    },
+    {
+      "local_file": "20261115000000_admin_existing_lesson_editing.sql",
+      "name": "admin_existing_lesson_editing",
+      "remote_version": "20261109145137",
+      "sha256_utf8_lf": "1bc2e2a6c330ddb412c91489c8d06cf835d02e41e3e781a7e435323e58db6541"
+    },
+    {
+      "local_file": "20261116000000_admin_metadata_compatibility.sql",
+      "name": "admin_metadata_compatibility",
+      "remote_version": "20261109145308",
+      "sha256_utf8_lf": "04e69f9634e4c9c2652bd2610869d1c25ff3d3762855c4a0d751b8d82db9d73b"
+    },
+    {
+      "local_file": "20261117000000_studio_mobile_engine_expansion.sql",
+      "name": "studio_mobile_engine_expansion",
+      "remote_version": "20261109160416",
+      "sha256_utf8_lf": "ff90252c1ea3beb4c457f2a4829eb689331958fe7efeada62962ff0ea05273a9"
+    },
+    {
+      "local_file": "20261118000000_studio_language_engines.sql",
+      "name": "studio_language_engines",
+      "remote_version": "20261109163000",
+      "sha256_utf8_lf": "12971cd06321993f29915c6b3da13843e91b0067536e23d0d05ac4f745157861"
+    }
+  ],
+  "verified_runtime_function_bodies": [
+    "private.studio_english",
+    "private.admin_content_read",
+    "public.admin_content_mutate",
+    "private.admin_content_mutate",
+    "public.admin_learning_mutate",
+    "private.admin_learning_mutate",
+    "public.authored_attempt",
+    "private.learning_catalog",
+    "private.admin_builder_save",
+    "private.valid_authored_choice",
+    "private.studio_numbers",
+    "private.slide_text",
+    "private.slide_integer",
+    "private.initial_slide_state",
+    "private.admin_builder_read",
+    "private.evaluate_slide_lesson",
+    "public.admin_builder_read",
+    "private.valid_slide_lesson",
+    "public.learning_catalog",
+    "public.admin_content_read",
+    "public.admin_builder_save",
+    "private.authored_attempt",
+    "private.studio_strings",
+    "private.valid_extended_slide",
+    "private.initial_extended_slide",
+    "private.evaluate_extended_slide"
+  ],
+  "author_edge_function": {
+    "version": 2,
+    "files": [
+      "functions/author-lesson/index.ts",
+      "functions/author-lesson/handler.ts",
+      "functions/_shared/http.ts",
+      "functions/author-lesson/slide_schema.ts"
+    ]
+  },
+  "published_snapshot": "content/published_catalog_20261110.json"
+}
