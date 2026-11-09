@@ -1,6 +1,6 @@
-import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -9,10 +9,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:brilliant_mobile/data/engines/engine_contracts.dart';
 import 'package:brilliant_mobile/data/models/learning_modules.dart';
 import 'package:brilliant_mobile/data/models/learning_journal.dart';
-import 'package:brilliant_mobile/data/providers/admin_dashboard_controller.dart';
 import 'package:brilliant_mobile/data/providers/cloud_backup_controller.dart';
 import 'package:brilliant_mobile/data/providers/learning_sync_controller.dart';
-import 'package:brilliant_mobile/data/repositories/admin_repository.dart';
 import 'package:brilliant_mobile/data/repositories/auth_repository.dart';
 import 'package:brilliant_mobile/data/repositories/backup_repository.dart';
 import 'package:brilliant_mobile/data/repositories/learning_repository.dart';
@@ -20,7 +18,6 @@ import 'package:brilliant_mobile/data/repositories/supabase_tutor_repository.dar
 import 'package:brilliant_mobile/experiments/curriculum_engine.dart';
 import 'package:brilliant_mobile/features/account/cloud_account_page.dart';
 import 'package:brilliant_mobile/features/account/learning_sync_scope.dart';
-import 'package:brilliant_mobile/features/admin/admin_app.dart';
 import 'package:brilliant_mobile/features/engines/engine_scope.dart';
 import 'package:brilliant_mobile/journey_app.dart';
 import 'package:brilliant_mobile/learning_catalog.dart';
@@ -54,13 +51,9 @@ void main() {
   const email = String.fromEnvironment('E2E_EMAIL');
   const password = String.fromEnvironment('E2E_PASSWORD');
   const owner = String.fromEnvironment('E2E_ID');
-  const adminEmail = String.fromEnvironment('E2E_ADMIN_EMAIL');
-  const adminPassword = String.fromEnvironment('E2E_ADMIN_PASSWORD');
   const adminId = String.fromEnvironment('E2E_ADMIN_ID');
   const run = String.fromEnvironment('E2E_RUN');
-  const temporaryTopic = String.fromEnvironment('E2E_TOPIC');
   const resumeTraversal = bool.fromEnvironment('E2E_RESUME_AFTER_TRAVERSAL');
-  const adminOnly = bool.fromEnvironment('E2E_ADMIN_ONLY');
   final solutions = {
     ...mathSolutionStates,
     ...discoverySolutionStates,
@@ -70,8 +63,13 @@ void main() {
   };
 
   testWidgets(
-    'Headed current mobile UI, real Auth/REST/Edge, account restore and Admin',
+    'Headed Android learner UI, real Auth/REST/Edge, full catalog and account restore',
     (tester) async {
+      expect(
+        kIsWeb,
+        false,
+        reason: 'Run learner on Android; use admin_web_journey_test.dart for Admin.',
+      );
       tester.testTextInput.register();
       expect(
         run.isNotEmpty && owner.isNotEmpty && adminId.isNotEmpty,
@@ -80,12 +78,13 @@ void main() {
       );
       final report = <String, dynamic>{
         'run': run,
+        'platform': 'android',
+        'role': 'learner',
         'phases': <String>[],
         'activities': 0,
         'gestureActivities': 0,
         'answerFixtureActivities': 0,
         'resumedAfterTraversal': resumeTraversal,
-        'adminOnly': adminOnly,
       };
       final prefixes = [
         'matlingo.headed.$run.device1.',
@@ -97,10 +96,7 @@ void main() {
       CloudBackupController? cloud;
       LearningSyncController? sync;
       SupabaseLearningRepository? learning;
-      AdminDashboardController? admin;
-      StreamSubscription<dynamic>? realtime;
       String phase = 'initialize';
-      AdminDashboardController dashboard() => admin!;
       SupabaseClient newClient() {
         final c = SupabaseClient(
           url,
@@ -135,7 +131,7 @@ void main() {
           ready(),
           true,
           reason:
-              'Timeout in $phase; cloud=${cloud?.message}; sync=${sync?.message}; admin=${admin?.message}',
+              'Timeout in $phase; cloud=${cloud?.message}; sync=${sync?.message}',
         );
         await settle();
       }
@@ -445,7 +441,8 @@ void main() {
       }
 
       try {
-        if (!adminOnly) {
+        {
+          // Learner journey; Admin is exercised separately in a web browser.
           await mountLearner(0);
           phase = 'auth_onboarding';
           await keyTap('cloud-auth-submit');
@@ -728,138 +725,7 @@ void main() {
           expect(crossOwnerDenied && adminDenied, true);
           passed('owner_isolation_and_admin_rpc_denial');
           await unmountLearner();
-        } else {
-          await client.auth.signInWithPassword(
-            email: email,
-            password: password,
-          );
-          passed('fixture_learner_auth_for_admin_denial');
         }
-
-        phase = 'admin';
-        final adminClient = newClient();
-        admin = AdminDashboardController(
-          auth: SupabaseAuthRepository(adminClient),
-          repository: SupabaseAdminRepository(adminClient),
-          pollInterval: const Duration(days: 1),
-        );
-        await tester.pumpWidget(AdminApp(controller: dashboard()));
-        await settle();
-        await type('admin-email', adminEmail);
-        await type('admin-password', adminPassword);
-        await tap(find.widgetWithText(FilledButton, 'Đăng nhập'));
-        await waitFor(
-          () => dashboard().allowed && !dashboard().loading && dashboard().live,
-        );
-        var events = 0;
-        final observerClient = newClient();
-        await observerClient.auth.signInWithPassword(
-          email: adminEmail,
-          password: adminPassword,
-        );
-        realtime = SupabaseAdminRepository(observerClient)
-            .watch(adminId)
-            .listen((e) {
-              if (e.changed) events++;
-            });
-        await tester.pump(const Duration(seconds: 2));
-        final initialEvents = events;
-        await type('admin-search-accounts', email);
-        await tester.pump(const Duration(milliseconds: 500));
-        for (var attempt = 0; attempt < 3; attempt++) {
-          await waitFor(() => !dashboard().loading);
-          if (dashboard().accounts.length == 1 &&
-              dashboard().accounts.first.id == owner) {
-            break;
-          }
-          debugPrint('HEADED_ADMIN_READ_RETRY ${attempt + 1}');
-          await tap(find.widgetWithText(OutlinedButton, 'Tải lại'));
-        }
-        await waitFor(
-          () =>
-              !dashboard().loading &&
-              dashboard().accounts.length == 1 &&
-              dashboard().accounts.first.id == owner,
-        );
-        await tap(find.text('Tạm khóa').last);
-        await tap(find.text('Xác nhận'));
-        await waitFor(
-          () =>
-              !dashboard().busy &&
-              dashboard().accounts.single.status == 'suspended',
-        );
-        var suspensionDenied = false;
-        try {
-          await client.rpc(
-            'load_account_progress',
-            params: {'expected_owner': owner},
-          );
-        } on PostgrestException catch (e) {
-          suspensionDenied = e.code == '42501';
-        }
-        expect(suspensionDenied, true);
-        await tap(find.text('Mở lại'));
-        await tap(find.text('Xác nhận'));
-        await waitFor(
-          () =>
-              !dashboard().busy &&
-              dashboard().accounts.single.status == 'active',
-        );
-        await client.rpc(
-          'load_account_progress',
-          params: {'expected_owner': owner},
-        );
-        await waitFor(() => events > initialEvents);
-        passed('admin_suspend_restore_and_real_database_broadcast');
-        await tap(find.text('Chủ đề').last);
-        await keyTap('admin-add-topic');
-        await type('topic-id', temporaryTopic);
-        await type('topic-title', 'Headed E2E $run');
-        await type('topic-subject', 'Kiểm thử');
-        await tap(find.text('Lưu chủ đề'));
-        await waitFor(() => !dashboard().busy && !dashboard().loading);
-        await type('admin-search-topics', temporaryTopic);
-        await waitFor(
-          () =>
-              !dashboard().loading &&
-              dashboard().topics.length == 1 &&
-              dashboard().topics.first.id == temporaryTopic,
-        );
-        await tap(
-          find.byTooltip(
-            RegExp(
-              '^Sửa (chủ đề|${RegExp.escape(dashboard().topics.single.title)})\$',
-            ),
-          ),
-        );
-        await type('topic-title', 'Headed E2E updated $run');
-        await tap(find.byType(DropdownButtonFormField<String>));
-        await tap(find.text('Lưu trữ').last);
-        await tap(find.text('Lưu chủ đề'));
-        await waitFor(
-          () =>
-              !dashboard().busy &&
-              !dashboard().loading &&
-              dashboard().topics.single.status == 'archived',
-        );
-        expect(
-          dashboard().topics.single.title,
-          startsWith('Headed E2E updated'),
-        );
-        passed('admin_topic_create_edit_archive');
-        await realtime.cancel();
-        realtime = null;
-        dashboard().dispose();
-        admin = null;
-        final deniedController = AdminDashboardController(
-          auth: SupabaseAuthRepository(client),
-          repository: SupabaseAdminRepository(client),
-        );
-        admin = deniedController;
-        await tester.pumpWidget(AdminApp(controller: dashboard()));
-        await waitFor(() => !dashboard().loading);
-        expect(find.text('Tài khoản chưa có quyền quản trị'), findsOneWidget);
-        passed('learner_admin_ui_gate');
         report['success'] = true;
         expect(tester.takeException(), isNull);
       } catch (e) {
@@ -870,8 +736,6 @@ void main() {
         debugPrint('HEADED_NETWORK_ON');
         await tester.pumpWidget(const SizedBox.shrink());
         await tester.pump();
-        await realtime?.cancel();
-        admin?.dispose();
         if (store != null) {
           await unmountLearner();
         }

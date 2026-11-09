@@ -69,6 +69,14 @@ List<DiscoveryPath> catalogPaths(LearningStore store) {
       paths.add(DiscoveryPath(path.title, path.subtitle, path.icon, ids));
     }
   }
+  final grouped = paths.expand((path) => path.topicIds).toSet();
+  for (final topic in store.availableTopics) {
+    if (!grouped.contains(topic.id)) {
+      paths.add(
+        DiscoveryPath(topic.title, topic.subtitle, topic.icon, [topic.id]),
+      );
+    }
+  }
   paths.sort(
     (a, b) => order[a.topicIds.first]!.compareTo(order[b.topicIds.first]!),
   );

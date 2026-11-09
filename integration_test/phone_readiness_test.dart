@@ -20,6 +20,7 @@ import 'package:brilliant_mobile/data/models/learning_journal.dart';
 // local config and must never be passed to the distributable release build.
 import '../test/math_experiments_test.dart' show mathSolutionStates;
 import '../test/extended_solutions.dart';
+import '../test/curriculum_solutions.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -158,7 +159,11 @@ void main() {
           final start = find.text('Vào phòng thí nghiệm');
           await tap(start);
         }
-        final solutions = {...mathSolutionStates, ...extendedSolutions};
+        final solutions = {
+          ...mathSolutionStates,
+          ...extendedSolutions,
+          ...curriculumSolutionStates,
+        };
         for (var i = 0; i < topic.experiments.length; i++) {
           final spec = topic.experiments[i];
           final workspace = tester.widget<ExperimentWorkspace>(
@@ -198,7 +203,12 @@ void main() {
         });
         await store.rename('Phone choice');
         await sync.syncNow();
-        expect(sync.hasProfileConflict, true, reason: 'notice=${sync.message}; pending=${learningMap(learningMap(store.serverSyncFor(store.profile!.id)['profile'])['pending'])['kind']}');
+        expect(
+          sync.hasProfileConflict,
+          true,
+          reason:
+              'notice=${sync.message}; pending=${learningMap(learningMap(store.serverSyncFor(store.profile!.id)['profile'])['pending'])['kind']}',
+        );
         await tester.pumpAndSettle();
         await tap(find.text('Xử lý thông tin hồ sơ khác nhau'));
         await waitFor(() => find.byType(AlertDialog).evaluate().isNotEmpty);

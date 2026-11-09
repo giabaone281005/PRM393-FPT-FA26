@@ -64,6 +64,14 @@ supabase/.branches/
 *.jks
 *.keystore
 
+# Local archives, generated exports and downloaded reference tools.
+/MathLingo-Headed-Tests-v3.zip
+/MathLingo-Headed-Tests-v3/
+/run_headed_tests.rar
+/codex-session-*.md
+/output/
+/ui-ux-pro-max-skill-main/
+
 # Local development notes and historical reports.
 /docs/ANDROID_BETA_PLAN.md
 /PROJECT_CONTEXT.md

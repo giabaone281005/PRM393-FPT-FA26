@@ -13,11 +13,13 @@ class LearningTopic {
     this.subject,
     this.icon,
     this.color,
-    this.action,
-  );
+    this.action, {
+    this.remoteExperiments,
+  });
   final String id, title, subtitle, subject, action;
   final IconData icon;
   final Color color;
+  final List<ExperimentSpec>? remoteExperiments;
   int get suggestedAge =>
       const {
         'math': 6,
@@ -43,7 +45,8 @@ class LearningTopic {
       }[id] ??
       10;
   String get audience => 'Gợi ý từ $suggestedAge tuổi • Cơ bản → nâng cao';
-  List<ExperimentSpec> get experiments => experimentCatalog[id]!;
+  List<ExperimentSpec> get experiments =>
+      remoteExperiments ?? experimentCatalog[id]!;
 }
 
 const topics = [

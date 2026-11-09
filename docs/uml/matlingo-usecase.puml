@@ -1,0 +1,71 @@
+@startuml Matlingo_UseCase
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam packageStyle rectangle
+actor "User\n(Người dùng)" as User
+rectangle "Matlingo" {
+  usecase "Quản lý phiên đăng nhập" as U01
+  usecase "Đăng ký và khôi phục tài khoản" as U02
+  usecase "Thiết lập hồ sơ học tập" as U03
+  usecase "Khám phá chủ đề học tập" as U04
+  usecase "Học và ôn tập tương tác" as U05
+  usecase "Theo dõi kết quả học tập" as U06
+  usecase "Đồng bộ và khôi phục tiến độ" as U07
+  usecase "Trao đổi với trợ lý AI" as U08
+  usecase "Thực hành lập trình" as U09
+  usecase "Tùy chỉnh ứng dụng và engine" as U10
+  usecase "Xem hướng dẫn sử dụng" as U11
+  usecase "Truy cập trang quản trị" as A01
+  usecase "Xem tổng quan hệ thống" as A02
+  usecase "Quản lý tài khoản người dùng" as A03
+  usecase "Quản lý chủ đề học tập" as A04
+  usecase "Quản lý phiên bản hoạt động" as A05 <<API>>
+  usecase "Quản lý bản phát hành nội dung" as A06 <<API>>
+  usecase "Quản lý tài nguyên nội dung" as A07 <<API>>
+  usecase "Xem nhật ký quản trị" as A08 <<API>>
+}
+User -- U01
+User -- U02
+User -- U03
+User -- U04
+User -- U05
+User -- U06
+User -- U07
+User -- U08
+User -- U09
+User -- U10
+User -- U11
+actor "Admin\n(Quản trị viên)" as Admin
+A01 -- Admin
+A02 -- Admin
+A03 -- Admin
+A04 -- Admin
+A05 -- Admin
+A06 -- Admin
+A07 -- Admin
+A08 -- Admin
+U01 -[hidden]down- U02
+U02 -[hidden]down- U03
+U03 -[hidden]down- U04
+U04 -[hidden]down- U05
+U05 -[hidden]down- U06
+U06 -[hidden]down- U07
+U07 -[hidden]down- U08
+U08 -[hidden]down- U09
+U09 -[hidden]down- U10
+U10 -[hidden]down- U11
+A01 -[hidden]down- A02
+A02 -[hidden]down- A03
+A03 -[hidden]down- A04
+A04 -[hidden]down- A05
+A05 -[hidden]down- A06
+A06 -[hidden]down- A07
+A07 -[hidden]down- A08
+legend bottom
+  <<API>>: Backend đã có; chưa có màn hình Admin tương ứng.
+  Đăng nhập/quyền hợp lệ là tiền điều kiện. Recovery phụ thuộc cấu hình.
+  User và Admin không có quan hệ kế thừa.
+endlegend
+@enduml

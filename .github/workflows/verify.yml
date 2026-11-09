@@ -3,6 +3,21 @@ on: [push, pull_request]
 permissions:
   contents: read
 jobs:
+  cms:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cms
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: cms/package-lock.json
+      - run: npm ci --no-fund
+      - run: npm test
+      - run: npm run build
   flutter:
     runs-on: ubuntu-latest
     steps:
@@ -37,3 +52,6 @@ jobs:
       - run: deno test supabase/tests/tutor_handler_test.ts
       - run: deno lint supabase/tests/app_knowledge_test.ts
       - run: deno test supabase/tests/app_knowledge_test.ts
+      - run: deno check supabase/functions/author-lesson/index.ts
+      - run: deno lint supabase/functions/author-lesson supabase/tests/author_handler_test.ts
+      - run: deno test supabase/tests/author_handler_test.ts

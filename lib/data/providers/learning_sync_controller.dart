@@ -51,6 +51,7 @@ class LearningSyncController extends ChangeNotifier {
   }) {
     _owner = cloud.userId;
     _restoreCatalog();
+    _watchCatalog();
     store.addListener(_changed);
     cloud.addListener(_changed);
     if (automatic) {
@@ -68,6 +69,7 @@ class LearningSyncController extends ChangeNotifier {
   final CatalogCacheRepository? catalogCache;
   String? _owner;
   Timer? _timer, _retry;
+  StreamSubscription<void>? _catalogEvents;
   Future<void>? _running;
   bool _disposed = false, _dirty = false;
   int _generation = 0;
@@ -84,6 +86,26 @@ class LearningSyncController extends ChangeNotifier {
     } catch (_) {
       store.applyCatalog(null);
     }
+  }
+
+  void _watchCatalog() {
+    unawaited(_catalogEvents?.cancel());
+    _catalogEvents = null;
+    final owner = _owner;
+    final source = repository;
+    if (!automatic || owner == null || source is! CatalogRealtimeRepository) {
+      return;
+    }
+    _catalogEvents = (source as CatalogRealtimeRepository)
+        .watchCatalog(owner)
+        .listen((_) {
+          if (_disposed || _owner != owner) return;
+          _timer?.cancel();
+          _timer = Timer(
+            const Duration(milliseconds: 300),
+            () => unawaited(syncNow()),
+          );
+        }, onError: (_) {});
   }
 
   Future<Map<String, dynamic>> loadConflictProfile() async {
@@ -162,6 +184,7 @@ class LearningSyncController extends ChangeNotifier {
       _generation++;
       _catalog = null;
       _restoreCatalog();
+      _watchCatalog();
       message = null;
       noticeKind = NoticeKind.info;
       hasProfileConflict = false;
@@ -331,7 +354,14 @@ class LearningSyncController extends ChangeNotifier {
         _guard(owner, localId, generation);
         var row = _row(localId, id);
         if (row['verified'] == true) continue;
-        final topic = topics.where((t) => t.id == row['topic']).firstOrNull;
+        final pinnedCatalog = row['catalog'] is Map
+            ? learningMap(row['catalog'])
+            : null;
+        final sessionCatalog = pinnedCatalog ?? _catalog;
+        final candidates = sessionCatalog?['topics'] is List
+            ? decodeMobileCatalog(sessionCatalog!)
+            : topics;
+        final topic = candidates.where((t) => t.id == row['topic']).firstOrNull;
         if (topic == null) {
           deferredLessons++;
           continue;
@@ -339,8 +369,9 @@ class LearningSyncController extends ChangeNotifier {
         if (row['releaseId'] == null) {
           _catalog ??= await repository.catalog(owner);
           _guard(owner, localId, generation);
-          final release = learningMap(_catalog!['release']);
-          final remoteTopics = _catalog!['topics'];
+          final sourceCatalog = pinnedCatalog ?? _catalog!;
+          final release = learningMap(sourceCatalog['release']);
+          final remoteTopics = sourceCatalog['topics'];
           if (remoteTopics is List &&
               !remoteTopics.any(
                 (t) =>
@@ -349,7 +380,7 @@ class LearningSyncController extends ChangeNotifier {
             deferredLessons++;
             continue;
           }
-          final activities = (_catalog!['activities'] as List? ?? [])
+          final activities = (sourceCatalog['activities'] as List? ?? [])
               .map(learningMap)
               .where((x) => x['topic_id'] == topic.id)
               .toList();
@@ -485,6 +516,12 @@ class LearningSyncController extends ChangeNotifier {
               )[attempt['activity_id']],
               'state': attempt['state'],
               'hint_level': attempt['hint_level'],
+              if ((sessionCatalog?['activities'] as List? ?? []).any(
+                (a) =>
+                    a['activity_id'] == attempt['activity_id'] &&
+                    [3, 4].contains(a['evaluator_version']),
+              ))
+                'authored': true,
             },
           );
           _guard(owner, localId, generation);
@@ -583,6 +620,7 @@ class LearningSyncController extends ChangeNotifier {
     _generation++;
     _timer?.cancel();
     _retry?.cancel();
+    unawaited(_catalogEvents?.cancel());
     store.removeListener(_changed);
     cloud.removeListener(_changed);
     super.dispose();

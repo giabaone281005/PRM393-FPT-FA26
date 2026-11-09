@@ -71,16 +71,42 @@ class LearningStore extends ChangeNotifier {
   bool _disposed = false;
   String? saveError;
   List<LearningTopic>? _remoteTopics;
+  Map<String, dynamic>? _remoteCatalog;
   bool get hasRemoteCatalog => _remoteTopics != null;
   List<LearningTopic> get availableTopics => _remoteTopics ?? topics;
-  LearningTopic topicForId(String id) =>
-      availableTopics.where((topic) => topic.id == id).firstOrNull ??
-      topicById(id);
+  LearningTopic topicForId(String id) {
+    final current = availableTopics
+        .where((topic) => topic.id == id)
+        .firstOrNull;
+    if (current != null) return current;
+    return _journalTopic(id) ?? topicById(id);
+  }
+
+  LearningTopic? _journalTopic(String id, {bool activeOnly = false}) {
+    if (profile == null) return null;
+    final root = serverSyncFor(profile!.id);
+    final sessions = learningMap(root['sessions']);
+    final active = learningMap(root['active'])[id];
+    for (final entry in sessions.entries.toList().reversed) {
+      if (activeOnly && entry.key != active) continue;
+      final catalog = learningMap(learningMap(entry.value)['catalog']);
+      if (catalog['topics'] is! List) continue;
+      final topic = decodeMobileCatalog(catalog)
+          .where((t) => t.id == id)
+          .firstOrNull;
+      if (topic != null) return topic;
+    }
+    return null;
+  }
+
+  LearningTopic topicForLearning(String id) =>
+      _journalTopic(id, activeOnly: true) ?? topicForId(id);
   bool topicAvailable(String id) =>
       availableTopics.any((topic) => topic.id == id);
 
   void applyCatalog(Map<String, dynamic>? catalog) {
     final next = catalog == null ? null : decodeMobileCatalog(catalog);
+    _remoteCatalog = catalog == null ? null : learningCopy(catalog);
     final before = _remoteTopics
         ?.map(
           (t) => [
@@ -90,6 +116,19 @@ class LearningStore extends ChangeNotifier {
             t.subject,
             t.action,
             t.icon.codePoint,
+            t.experiments
+                .map(
+                  (s) => [
+                    s.id,
+                    s.contentVersion,
+                    s.title,
+                    s.prompt,
+                    s.hint,
+                    s.explanation,
+                    s.config,
+                  ],
+                )
+                .toList(),
           ],
         )
         .toList();
@@ -102,6 +141,19 @@ class LearningStore extends ChangeNotifier {
             t.subject,
             t.action,
             t.icon.codePoint,
+            t.experiments
+                .map(
+                  (s) => [
+                    s.id,
+                    s.contentVersion,
+                    s.title,
+                    s.prompt,
+                    s.hint,
+                    s.explanation,
+                    s.config,
+                  ],
+                )
+                .toList(),
           ],
         )
         .toList();
@@ -489,7 +541,9 @@ class LearningStore extends ChangeNotifier {
     });
     data['drafts'] = drafts;
     data['lastCourse'] = courseId;
-    if (enableServerSync) LearningJournal.save(data, courseId, value);
+    if (enableServerSync) {
+      LearningJournal.save(data, courseId, value, catalog: _remoteCatalog);
+    }
     _emit();
     await _persist();
   }
@@ -547,6 +601,7 @@ class LearningStore extends ChangeNotifier {
         data,
         courseId,
         draft,
+        catalog: _remoteCatalog,
         complete: true,
         finalStates: {
           for (final spec in experiments)

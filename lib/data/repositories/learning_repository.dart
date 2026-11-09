@@ -28,7 +28,12 @@ abstract class LearningRepository {
   Future<Map<String, dynamic>> progress(String owner, String profileId);
 }
 
-class SupabaseLearningRepository implements LearningRepository {
+abstract class CatalogRealtimeRepository {
+  Stream<void> watchCatalog(String owner);
+}
+
+class SupabaseLearningRepository
+    implements LearningRepository, CatalogRealtimeRepository {
   SupabaseLearningRepository({
     required this.client,
     required this.url,
@@ -38,6 +43,51 @@ class SupabaseLearningRepository implements LearningRepository {
   final SupabaseClient client;
   final String url, publishableKey;
   final http.Client _http;
+
+  @override
+  Stream<void> watchCatalog(String owner) {
+    late StreamController<void> events;
+    RealtimeChannel? channel;
+    var cancelled = false;
+    events = StreamController<void>(
+      onListen: () async {
+        try {
+          if (client.auth.currentUser?.id != owner ||
+              client.auth.currentSession == null) {
+            return;
+          }
+          await client.realtime.setAuth(
+            client.auth.currentSession!.accessToken,
+          );
+          if (cancelled) return;
+          channel =
+              client.channel(
+                  'matlingo:catalog',
+                  opts: const RealtimeChannelConfig(private: true),
+                )
+                ..onBroadcast(
+                  event: 'changed',
+                  callback: (_) {
+                    if (!cancelled) events.add(null);
+                  },
+                )
+                ..subscribe((status, error) {
+                  if (!cancelled &&
+                      status == RealtimeSubscribeStatus.subscribed) {
+                    events.add(null);
+                  }
+                });
+        } catch (_) {
+          /* Periodic sync remains available. */
+        }
+      },
+      onCancel: () async {
+        cancelled = true;
+        if (channel != null) await client.removeChannel(channel!);
+      },
+    );
+    return events.stream;
+  }
 
   Future<dynamic> _request(
     String owner,
@@ -134,7 +184,7 @@ class SupabaseLearningRepository implements LearningRepository {
 
   @override
   Future<Map<String, dynamic>> catalog(String owner) =>
-      _api(owner, 'catalog?app_version=1.3.2');
+      _api(owner, 'catalog?app_version=1.3.8');
   @override
   Future<Map<String, dynamic>> mutate(
     String owner,
@@ -155,11 +205,24 @@ class SupabaseLearningRepository implements LearningRepository {
     String owner,
     String operation,
     Map<String, dynamic> payload,
-  ) => _api(
-    owner,
-    'attempts',
-    body: {'operation_id': operation, 'payload': payload},
-  );
+  ) async {
+    if (payload['authored'] == true) {
+      final clean = Map<String, dynamic>.from(payload)..remove('authored');
+      return Map<String, dynamic>.from(
+        await _request(
+          owner,
+          '/rest/v1/rpc/authored_attempt',
+          body: {'operation_id': operation, 'payload': clean},
+        ) as Map,
+      );
+    }
+    return _api(
+      owner,
+      'attempts',
+      body: {'operation_id': operation, 'payload': payload},
+    );
+  }
+
   @override
   Future<Map<String, dynamic>> progress(String owner, String profileId) =>
       _api(owner, 'progress?profile_id=$profileId');

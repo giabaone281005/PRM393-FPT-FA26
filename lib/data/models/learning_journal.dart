@@ -28,6 +28,7 @@ class LearningJournal {
     String topic,
     Map<String, dynamic> snapshot, {
     bool complete = false,
+    Map<String, dynamic>? catalog,
     Map<String, Map<String, dynamic>> finalStates = const {},
   }) {
     final sync = root(learning);
@@ -68,6 +69,16 @@ class LearningJournal {
       ...row,
       'id': id,
       'topic': topic,
+      if (row['catalog'] == null && catalog != null)
+        'catalog': learningCopy({
+          'release': catalog['release'],
+          'topics': (catalog['topics'] as List? ?? [])
+              .where((t) => t['id'] == topic)
+              .toList(),
+          'activities': (catalog['activities'] as List? ?? [])
+              .where((a) => a['topic_id'] == topic)
+              .toList(),
+        }),
       'startedAt':
           row['startedAt'] ??
           snapshot['startedAt'] ??
@@ -106,6 +117,7 @@ class LearningJournal {
         'topic': old['topic'],
         'startedAt': DateTime.now().toUtc().toIso8601String(),
         'snapshot': old['snapshot'],
+        if (old['catalog'] != null) 'catalog': old['catalog'],
         'draftVersion': 1,
         'lastAttemptCount': old['lastAttemptCount'] ?? 0,
         'complete': old['complete'] == true,

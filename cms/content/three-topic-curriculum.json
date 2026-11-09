@@ -1,0 +1,1285 @@
+{
+  "schema_version": 1,
+  "min_app_version": "1.3.7",
+  "topics": [
+    {
+      "id": "studio-math",
+      "title": "Toán học",
+      "subtitle": "4 bài: toán thực tế, toán số, hình phẳng và hình khối.",
+      "subject": "Toán học",
+      "icon_key": "functions",
+      "action_label": "Khám phá",
+      "status": "active",
+      "sort_order": 0
+    },
+    {
+      "id": "studio-english",
+      "title": "Tiếng Anh",
+      "subtitle": "3 bài giao tiếp: nghe, nói, đọc và viết trong từng tình huống.",
+      "subject": "Tiếng Anh",
+      "icon_key": "language",
+      "action_label": "Khám phá",
+      "status": "active",
+      "sort_order": 1
+    },
+    {
+      "id": "studio-coding",
+      "title": "Lập trình",
+      "subtitle": "3 bài tương tác: thuật toán, vòng lặp, điều kiện và sửa lỗi.",
+      "subject": "Lập trình",
+      "icon_key": "code",
+      "action_label": "Khám phá",
+      "status": "active",
+      "sort_order": 2
+    }
+  ],
+  "lessons": [
+    {
+      "id": "studio-math-01",
+      "topic_id": "studio-math",
+      "title": "Chi tiêu thực tế: ngân sách 100 nghìn",
+      "prompt": "Lập ngân sách, đọc biểu đồ và so sánh các phần của một khoản tiền.",
+      "stage": "Bài 1",
+      "hint": "Một phương án là 2 đơn vị di chuyển, 5 ăn uống và 3 dự phòng.",
+      "explanation": "Bạn đã hoàn thành 6 phần: Chi tiêu thực tế: ngân sách 100 nghìn. Hãy giải thích lại cách làm bằng lời của mình.",
+      "sort_order": 0,
+      "status": "active",
+      "mechanism": "slideLesson",
+      "config": {
+        "schema_version": 1,
+        "slides": [
+          {
+            "id": "studio-math-01-part-1",
+            "locked": true,
+            "engine": "story",
+            "title": "Một ngày với 100 nghìn",
+            "prompt": "Đọc tình huống trước khi thử nghiệm.",
+            "hint": "Ghi nhớ các dữ kiện để dùng ở phần tiếp theo.",
+            "explanation": "Bạn sẽ vận dụng các dữ kiện này bằng những tương tác tiếp theo.",
+            "config": {
+              "text": "Bạn có 100 nghìn đồng. Mỗi đơn vị ngân sách tương ứng 10 nghìn. Cần ít nhất 20 nghìn di chuyển, 50 nghìn ăn uống và 10 nghìn dự phòng. Hãy phân bổ hết số tiền, không vay thêm.",
+              "image_url": "",
+              "image_alt": ""
+            }
+          },
+          {
+            "id": "studio-math-01-part-2",
+            "locked": true,
+            "engine": "resourceBudget",
+            "title": "Tự chia ngân sách",
+            "prompt": "Phân bổ đủ 10 đơn vị. Di chuyển ít nhất 2, ăn uống ít nhất 5, dự phòng ít nhất 1 đơn vị.",
+            "hint": "Một phương án là 2 đơn vị di chuyển, 5 ăn uống và 3 dự phòng.",
+            "explanation": "2 + 5 + 3 = 10 đơn vị, tương ứng 100 nghìn; mọi mức tối thiểu đều được đáp ứng. Có nhiều phương án đúng.",
+            "config": {
+              "items": ["Di chuyển", "Ăn uống", "Dự phòng"],
+              "minima": [2, 5, 1]
+            }
+          },
+          {
+            "id": "studio-math-01-part-3",
+            "locked": true,
+            "engine": "numberInput",
+            "title": "Tính số tiền còn lại",
+            "prompt": "Sau khi chi 20 nghìn đi lại và 50 nghìn ăn uống, bạn còn bao nhiêu nghìn đồng? Nhập số.",
+            "hint": "Lấy 100 trừ tổng hai khoản đã chi.",
+            "explanation": "100 − (20 + 50) = 30 nghìn đồng.",
+            "config": {
+              "target_value": 30
+            }
+          },
+          {
+            "id": "studio-math-01-part-4",
+            "locked": true,
+            "engine": "barChart",
+            "title": "Biểu đồ ngân sách",
+            "prompt": "Điều chỉnh 3 cột thành phương án: di chuyển 20 nghìn, ăn uống 50 nghìn, dự phòng 30 nghìn. Đơn vị cột là 10 nghìn.",
+            "hint": "Chia mỗi số tiền cho 10 để tìm chiều cao cột.",
+            "explanation": "Ba cột lần lượt cao 2, 5 và 3 đơn vị; tổng bằng 10.",
+            "config": {
+              "labels": ["Di chuyển", "Ăn uống", "Dự phòng"],
+              "target_values": [2, 5, 3]
+            }
+          },
+          {
+            "id": "studio-math-01-part-5",
+            "locked": true,
+            "engine": "fractionCompare",
+            "title": "Khoản nào lớn hơn?",
+            "prompt": "So sánh phần ngân sách đi lại 2/10 với phần dự phòng 3/10 trong phương án trên.",
+            "hint": "Cùng mẫu số thì so sánh tử số.",
+            "explanation": "2 < 3 nên 2/10 < 3/10.",
+            "config": {
+              "left_numerator": 2,
+              "left_denominator": 10,
+              "right_numerator": 3,
+              "right_denominator": 10
+            }
+          },
+          {
+            "id": "studio-math-01-part-6",
+            "locked": true,
+            "engine": "quiz",
+            "title": "Kiểm tra kế hoạch",
+            "prompt": "Theo thứ tự di chuyển, ăn uống, dự phòng, phương án nào đáp ứng đủ ngân sách và mọi mức tối thiểu?",
+            "hint": "Kiểm tra tổng bằng 10 rồi kiểm tra từng mức tối thiểu.",
+            "explanation": "Phương án 2,5,3 có tổng 10 và đủ từng mục. 5,4,1 thiếu tiền ăn; 2,8,1 vượt ngân sách.",
+            "config": {
+              "choices": ["2, 5, 3 đơn vị", "5, 4, 1 đơn vị", "2, 8, 1 đơn vị"],
+              "answer": 0
+            }
+          }
+        ]
+      },
+      "revision": 0
+    },
+    {
+      "id": "studio-math-02",
+      "topic_id": "studio-math",
+      "title": "Số nguyên và phân số",
+      "prompt": "Khám phá số âm, biểu diễn phân số và kiểm tra các phép tính.",
+      "stage": "Bài 2",
+      "hint": "Từ 0 đi 4 đơn vị sang trái.",
+      "explanation": "Bạn đã hoàn thành 6 phần: Số nguyên và phân số. Hãy giải thích lại cách làm bằng lời của mình.",
+      "sort_order": 1,
+      "status": "active",
+      "mechanism": "slideLesson",
+      "config": {
+        "schema_version": 1,
+        "slides": [
+          {
+            "id": "studio-math-02-part-1",
+            "locked": true,
+            "engine": "story",
+            "title": "Các cách biểu diễn số",
+            "prompt": "Đọc tình huống trước khi thử nghiệm.",
+            "hint": "Ghi nhớ các dữ kiện để dùng ở phần tiếp theo.",
+            "explanation": "Bạn sẽ vận dụng các dữ kiện này bằng những tương tác tiếp theo.",
+            "config": {
+              "text": "Trên trục số, đi sang trái thì số giảm. Phân số 3/4 nghĩa là chọn 3 trong 4 phần bằng nhau. Khi so sánh phân số khác mẫu, có thể nhân chéo các tử và mẫu.",
+              "image_url": "",
+              "image_alt": ""
+            }
+          },
+          {
+            "id": "studio-math-02-part-2",
+            "locked": true,
+            "engine": "numberLine",
+            "title": "Tìm số âm",
+            "prompt": "Di chuyển điểm tới −4 trên trục số.",
+            "hint": "Từ 0 đi 4 đơn vị sang trái.",
+            "explanation": "−4 nằm bên trái 0 đúng 4 đơn vị.",
+            "config": {
+              "min": -6,
+              "max": 6,
+              "start": 0,
+              "target": -4
+            }
+          },
+          {
+            "id": "studio-math-02-part-3",
+            "locked": true,
+            "engine": "fractionBoard",
+            "title": "Tô ba phần tư",
+            "prompt": "Chọn đúng 3 trong 4 phần bằng nhau.",
+            "hint": "Bất kỳ 3 phần nào cũng biểu diễn cùng số lượng.",
+            "explanation": "Chọn 3 trong 4 phần bằng nhau biểu diễn 3/4.",
+            "config": {
+              "numerator": 3,
+              "denominator": 4
+            }
+          },
+          {
+            "id": "studio-math-02-part-4",
+            "locked": true,
+            "engine": "fractionCompare",
+            "title": "Hai phần ba hay ba phần tư?",
+            "prompt": "So sánh 2/3 với 3/4.",
+            "hint": "Tính 2 × 4 và 3 × 3.",
+            "explanation": "2 × 4 = 8 < 9 = 3 × 3 nên 2/3 < 3/4.",
+            "config": {
+              "left_numerator": 2,
+              "left_denominator": 3,
+              "right_numerator": 3,
+              "right_denominator": 4
+            }
+          },
+          {
+            "id": "studio-math-02-part-5",
+            "locked": true,
+            "engine": "numberInput",
+            "title": "Đi qua số 0",
+            "prompt": "Tính −3 + 8. Nhập kết quả.",
+            "hint": "Bắt đầu ở −3 và đi 8 đơn vị sang phải.",
+            "explanation": "−3 + 8 = 5. Đi 3 bước tới 0 rồi 5 bước tới 5.",
+            "config": {
+              "target_value": 5
+            }
+          },
+          {
+            "id": "studio-math-02-part-6",
+            "locked": true,
+            "engine": "evidenceBoard",
+            "title": "Chọn nhận định đúng",
+            "prompt": "Chọn tất cả các nhận định đúng.",
+            "hint": "Đối chiếu với trục số và hai phép tính vừa thực hiện.",
+            "explanation": "Hai nhận định đầu đúng. −3 + 8 = 5, không phải −11.",
+            "config": {
+              "items": ["−4 < 0", "3/4 > 2/3", "−3 + 8 = −11"],
+              "answer_values": [0, 1]
+            }
+          }
+        ]
+      },
+      "revision": 0
+    },
+    {
+      "id": "studio-math-03",
+      "topic_id": "studio-math",
+      "title": "Hình phẳng: diện tích và chu vi",
+      "prompt": "Kéo đỉnh, nhận diện hình, vẽ đối xứng và phân biệt diện tích với chu vi.",
+      "stage": "Bài 3",
+      "hint": "Thử chiều dài 3 và chiều rộng 2.",
+      "explanation": "Bạn đã hoàn thành 6 phần: Hình phẳng: diện tích và chu vi. Hãy giải thích lại cách làm bằng lời của mình.",
+      "sort_order": 2,
+      "status": "active",
+      "mechanism": "slideLesson",
+      "config": {
+        "schema_version": 1,
+        "slides": [
+          {
+            "id": "studio-math-03-part-1",
+            "locked": true,
+            "engine": "story",
+            "title": "Hàng rào và mặt sân",
+            "prompt": "Đọc tình huống trước khi thử nghiệm.",
+            "hint": "Ghi nhớ các dữ kiện để dùng ở phần tiếp theo.",
+            "explanation": "Bạn sẽ vận dụng các dữ kiện này bằng những tương tác tiếp theo.",
+            "config": {
+              "text": "Một sân hình chữ nhật dài 3 đơn vị, rộng 2 đơn vị. Diện tích đo phần mặt sân: dài × rộng. Chu vi đo đường bao: 2 × (dài + rộng). Đối xứng gương giữ khoảng cách tới trục.",
+              "image_url": "",
+              "image_alt": ""
+            }
+          },
+          {
+            "id": "studio-math-03-part-2",
+            "locked": true,
+            "engine": "polygonVertices",
+            "title": "Tự dựng mặt sân",
+            "prompt": "Kéo các đỉnh trên lưới để tạo hình chữ nhật có diện tích 6 đơn vị vuông.",
+            "hint": "Thử chiều dài 3 và chiều rộng 2.",
+            "explanation": "Hình chữ nhật 3 × 2 có diện tích 6; hình 2 × 3 cũng đúng.",
+            "config": {
+              "target_area": 6
+            }
+          },
+          {
+            "id": "studio-math-03-part-3",
+            "locked": true,
+            "engine": "shapeMatch",
+            "title": "Nhận diện tam giác",
+            "prompt": "Chọn hình có đúng 3 cạnh thẳng.",
+            "hint": "Đếm số cạnh, đừng chỉ nhìn hướng xoay.",
+            "explanation": "Tam giác có 3 cạnh thẳng và 3 đỉnh.",
+            "config": {
+              "target_shape": "triangle"
+            }
+          },
+          {
+            "id": "studio-math-03-part-4",
+            "locked": true,
+            "engine": "symmetryMirror",
+            "title": "Vẽ qua gương",
+            "prompt": "Bấm 3 ô phía bên kia trục để tạo ảnh đối xứng của các ô đã cho.",
+            "hint": "Hai ô đối xứng nằm cùng hàng, cách trục bằng nhau.",
+            "explanation": "Mỗi ô nguồn được phản chiếu sang bên phải với khoảng cách tới trục giữ nguyên.",
+            "config": {}
+          },
+          {
+            "id": "studio-math-03-part-5",
+            "locked": true,
+            "engine": "numberInput",
+            "title": "Độ dài hàng rào",
+            "prompt": "Sân dài 3, rộng 2 đơn vị. Cần hàng rào dài bao nhiêu đơn vị để bao quanh sân?",
+            "hint": "Cộng cả bốn cạnh: 3 + 2 + 3 + 2.",
+            "explanation": "Chu vi = 2 × (3 + 2) = 10 đơn vị.",
+            "config": {
+              "target_value": 10
+            }
+          },
+          {
+            "id": "studio-math-03-part-6",
+            "locked": true,
+            "engine": "quiz",
+            "title": "Đơn vị nào đúng?",
+            "prompt": "Với sân 3 × 2, phát biểu nào đúng?",
+            "hint": "Diện tích đo mặt phẳng, chu vi đo đường bao.",
+            "explanation": "Diện tích 3 × 2 = 6 đơn vị vuông; chu vi 2 × (3 + 2) = 10 đơn vị.",
+            "config": {
+              "choices": [
+                "Diện tích 6 đơn vị vuông, chu vi 10 đơn vị",
+                "Diện tích 10 đơn vị, chu vi 6 đơn vị vuông",
+                "Diện tích và chu vi đều bằng 6"
+              ],
+              "answer": 0
+            }
+          }
+        ]
+      },
+      "revision": 0
+    },
+    {
+      "id": "studio-math-04",
+      "topic_id": "studio-math",
+      "title": "Khối hộp: từ diện tích đến thể tích",
+      "prompt": "Điều chỉnh khối 3D, tính diện tích toàn phần và suy luận khi đổi chiều cao.",
+      "stage": "Bài 4",
+      "hint": "Thử dài 4, cao 3, sâu 2.",
+      "explanation": "Bạn đã hoàn thành 6 phần: Khối hộp: từ diện tích đến thể tích. Hãy giải thích lại cách làm bằng lời của mình.",
+      "sort_order": 3,
+      "status": "active",
+      "mechanism": "slideLesson",
+      "config": {
+        "schema_version": 1,
+        "slides": [
+          {
+            "id": "studio-math-04-part-1",
+            "locked": true,
+            "engine": "story",
+            "title": "Xếp các khối nhỏ",
+            "prompt": "Đọc tình huống trước khi thử nghiệm.",
+            "hint": "Ghi nhớ các dữ kiện để dùng ở phần tiếp theo.",
+            "explanation": "Bạn sẽ vận dụng các dữ kiện này bằng những tương tác tiếp theo.",
+            "config": {
+              "text": "Hộp dài 4, cao 3, sâu 2 đơn vị. Mỗi lớp đáy có 4 × 2 = 8 khối lập phương đơn vị; 3 lớp cho thể tích 24. Diện tích toàn phần gồm 3 cặp mặt bằng nhau.",
+              "image_url": "",
+              "image_alt": ""
+            }
+          },
+          {
+            "id": "studio-math-04-part-2",
+            "locked": true,
+            "engine": "solid3D",
+            "title": "Xây hộp thể tích 24",
+            "prompt": "Điều chỉnh dài, cao và sâu để thể tích bằng 24. Xoay khối để quan sát các mặt.",
+            "hint": "Thử dài 4, cao 3, sâu 2.",
+            "explanation": "4 × 3 × 2 = 24 đơn vị khối. Những bộ kích thước khác cùng tích cũng đúng.",
+            "config": {
+              "target_volume": 24
+            }
+          },
+          {
+            "id": "studio-math-04-part-3",
+            "locked": true,
+            "engine": "numberInput",
+            "title": "Tính diện tích toàn phần",
+            "prompt": "Với hộp dài 4, cao 3, sâu 2, tính 2 × (4×3 + 4×2 + 3×2).",
+            "hint": "Ba diện tích mặt khác nhau là 12, 8 và 6.",
+            "explanation": "2 × (12 + 8 + 6) = 52 đơn vị vuông.",
+            "config": {
+              "target_value": 52
+            }
+          },
+          {
+            "id": "studio-math-04-part-4",
+            "locked": true,
+            "engine": "barChart",
+            "title": "Đọc ba kích thước",
+            "prompt": "Đặt cột dài bằng 4, cao bằng 3, sâu bằng 2.",
+            "hint": "Biểu đồ biểu diễn độ dài từng chiều, không phải thể tích.",
+            "explanation": "Ba kích thước là 4,3,2; tích của chúng mới bằng thể tích 24.",
+            "config": {
+              "labels": ["Dài", "Cao", "Sâu"],
+              "target_values": [4, 3, 2]
+            }
+          },
+          {
+            "id": "studio-math-04-part-5",
+            "locked": true,
+            "engine": "sequenceTiles",
+            "title": "Xếp các bước tính thể tích",
+            "prompt": "Sắp xếp các thẻ theo đúng trình tự từ trên xuống dưới.",
+            "hint": "Tính một lớp trước rồi nhân số lớp.",
+            "explanation": "Diện tích đáy × chiều cao cho thể tích khối hộp.",
+            "config": {
+              "items": [
+                "Tính diện tích đáy: 4 × 2 = 8",
+                "Xác định có 3 lớp theo chiều cao",
+                "Nhân 8 × 3 = 24"
+              ],
+              "answer_values": [0, 1, 2]
+            }
+          },
+          {
+            "id": "studio-math-04-part-6",
+            "locked": true,
+            "engine": "quiz",
+            "title": "Nếu tăng gấp đôi chiều cao?",
+            "prompt": "Giữ dài 4 và sâu 2, tăng chiều cao từ 3 lên 6. Thể tích mới là bao nhiêu?",
+            "hint": "Số lớp tăng gấp đôi; mỗi lớp vẫn có 8 khối.",
+            "explanation": "4 × 6 × 2 = 48; thể tích tăng gấp đôi.",
+            "config": {
+              "choices": ["24 đơn vị khối", "48 đơn vị khối", "52 đơn vị khối"],
+              "answer": 1
+            }
+          }
+        ]
+      },
+      "revision": 0
+    },
+    {
+      "id": "studio-english-01",
+      "topic_id": "studio-english",
+      "title": "Hello! Giới thiệu bản thân",
+      "prompt": "Đọc hội thoại, nghe thông tin, nói và viết lời giới thiệu.",
+      "stage": "Bài 1",
+      "hint": "Bấm Nghe mẫu hoặc Nghe chậm. Có bản chữ thay thế khi không dùng được âm thanh.",
+      "explanation": "Bạn đã hoàn thành 6 phần: Hello! Giới thiệu bản thân. Hãy giải thích lại cách làm bằng lời của mình.",
+      "sort_order": 0,
+      "status": "active",
+      "mechanism": "slideLesson",
+      "config": {
+        "schema_version": 1,
+        "slides": [
+          {
+            "id": "studio-english-01-part-1",
+            "locked": true,
+            "engine": "story",
+            "title": "Meet Mia",
+            "prompt": "Đọc tình huống trước khi thử nghiệm.",
+            "hint": "Ghi nhớ các dữ kiện để dùng ở phần tiếp theo.",
+            "explanation": "Bạn sẽ vận dụng các dữ kiện này bằng những tương tác tiếp theo.",
+            "config": {
+              "text": "Mia: Hello! My name is Mia.\nBen: Hi, Mia! How old are you?\nMia: I am twelve years old.\nGhi nhớ: “My name is …” để giới thiệu tên; “I am … years old” để nói tuổi.",
+              "image_url": "",
+              "image_alt": ""
+            }
+          },
+          {
+            "id": "studio-english-01-part-2",
+            "locked": true,
+            "engine": "listeningChoice",
+            "title": "Mia bao nhiêu tuổi?",
+            "prompt": "Nghe đoạn giới thiệu rồi chọn tuổi của Mia.",
+            "hint": "Bấm Nghe mẫu hoặc Nghe chậm. Có bản chữ thay thế khi không dùng được âm thanh.",
+            "explanation": "Câu nghe: My name is Mia. I am twelve years old.",
+            "config": {
+              "text": "My name is Mia. I am twelve years old.",
+              "choices": [
+                "Ten years old.",
+                "Twelve years old.",
+                "Fourteen years old."
+              ],
+              "answer": 1
+            }
+          },
+          {
+            "id": "studio-english-01-part-3",
+            "locked": true,
+            "engine": "speechPractice",
+            "title": "Đến lượt bạn nói",
+            "prompt": "Nghe mẫu rồi bấm micro để nói câu này. Có thể nhập lại câu nếu thiết bị chưa nhận được giọng nói.",
+            "hint": "Giữ đúng các từ và thứ tự của câu mẫu; dấu câu và hoa/thường không ảnh hưởng.",
+            "explanation": "Câu mẫu: Hello. My name is Mia. Bài này đối chiếu nội dung câu, không chấm chất lượng phát âm.",
+            "config": {
+              "text": "Hello. My name is Mia."
+            }
+          },
+          {
+            "id": "studio-english-01-part-4",
+            "locked": true,
+            "engine": "clozeBank",
+            "title": "Chọn am hay are",
+            "prompt": "Điền từ phù hợp vào hai câu.",
+            "hint": "I đi với am; you đi với are.",
+            "explanation": "I am Mia. You are my friend.",
+            "config": {
+              "items": ["I ___ Mia.", "You ___ my friend."],
+              "choices": ["am", "are", "is"],
+              "answer_values": [0, 1]
+            }
+          },
+          {
+            "id": "studio-english-01-part-5",
+            "locked": true,
+            "engine": "textEntry",
+            "title": "Viết bằng tiếng Anh",
+            "prompt": "Viết: “Xin chào. Tên tôi là Mia.”",
+            "hint": "Dùng mẫu câu trong bài; viết thành một câu hoặc hai câu trọn ý.",
+            "explanation": "Các cách viết được chấp nhận: Hello. My name is Mia. / Hi. My name is Mia.",
+            "config": {
+              "accepted_answers": [
+                "Hello. My name is Mia.",
+                "Hi. My name is Mia."
+              ]
+            }
+          },
+          {
+            "id": "studio-english-01-part-6",
+            "locked": true,
+            "engine": "quiz",
+            "title": "Đọc và trả lời",
+            "prompt": "Trong hội thoại, câu trả lời nào phù hợp với “How old are you?”",
+            "hint": "Câu hỏi có “old” đang hỏi về tuổi.",
+            "explanation": "“I am twelve years old” trả lời tuổi; “My name is Mia” trả lời tên.",
+            "config": {
+              "choices": [
+                "I am twelve years old.",
+                "My name is Mia.",
+                "Hello, Ben!"
+              ],
+              "answer": 0
+            }
+          }
+        ]
+      },
+      "revision": 0
+    },
+    {
+      "id": "studio-english-02",
+      "topic_id": "studio-english",
+      "title": "My day: thói quen hằng ngày",
+      "prompt": "Đọc lịch buổi sáng, nghe giờ, nói và viết hoạt động hằng ngày.",
+      "stage": "Bài 2",
+      "hint": "Bấm Nghe mẫu hoặc Nghe chậm. Có bản chữ thay thế khi không dùng được âm thanh.",
+      "explanation": "Bạn đã hoàn thành 6 phần: My day: thói quen hằng ngày. Hãy giải thích lại cách làm bằng lời của mình.",
+      "sort_order": 1,
+      "status": "active",
+      "mechanism": "slideLesson",
+      "config": {
+        "schema_version": 1,
+        "slides": [
+          {
+            "id": "studio-english-02-part-1",
+            "locked": true,
+            "engine": "story",
+            "title": "Leo’s morning",
+            "prompt": "Đọc tình huống trước khi thử nghiệm.",
+            "hint": "Ghi nhớ các dữ kiện để dùng ở phần tiếp theo.",
+            "explanation": "Bạn sẽ vận dụng các dữ kiện này bằng những tương tác tiếp theo.",
+            "config": {
+              "text": "Leo: I get up at seven. I have breakfast. I go to school at eight.\n“Get up” là thức dậy; “have breakfast” là ăn sáng; “go to school” là đi học. Leo thức dậy, ăn sáng rồi đi học.",
+              "image_url": "",
+              "image_alt": ""
+            }
+          },
+          {
+            "id": "studio-english-02-part-2",
+            "locked": true,
+            "engine": "listeningChoice",
+            "title": "Leo đi học lúc mấy giờ?",
+            "prompt": "Nghe và chọn thời gian Leo đi học.",
+            "hint": "Bấm Nghe mẫu hoặc Nghe chậm. Có bản chữ thay thế khi không dùng được âm thanh.",
+            "explanation": "Câu nghe: I get up at seven. I go to school at eight.",
+            "config": {
+              "text": "I get up at seven. I go to school at eight.",
+              "choices": ["At seven.", "At eight.", "At nine."],
+              "answer": 1
+            }
+          },
+          {
+            "id": "studio-english-02-part-3",
+            "locked": true,
+            "engine": "speechPractice",
+            "title": "Đến lượt bạn nói",
+            "prompt": "Nghe mẫu rồi bấm micro để nói câu này. Có thể nhập lại câu nếu thiết bị chưa nhận được giọng nói.",
+            "hint": "Giữ đúng các từ và thứ tự của câu mẫu; dấu câu và hoa/thường không ảnh hưởng.",
+            "explanation": "Câu mẫu: I go to school at eight. Bài này đối chiếu nội dung câu, không chấm chất lượng phát âm.",
+            "config": {
+              "text": "I go to school at eight."
+            }
+          },
+          {
+            "id": "studio-english-02-part-4",
+            "locked": true,
+            "engine": "sequenceTiles",
+            "title": "Sắp xếp buổi sáng",
+            "prompt": "Sắp xếp các thẻ theo đúng trình tự từ trên xuống dưới.",
+            "hint": "Theo thứ tự trong đoạn đọc về Leo.",
+            "explanation": "Leo gets up, has breakfast, then goes to school.",
+            "config": {
+              "items": ["Get up", "Have breakfast", "Go to school"],
+              "answer_values": [0, 1, 2]
+            }
+          },
+          {
+            "id": "studio-english-02-part-5",
+            "locked": true,
+            "engine": "textEntry",
+            "title": "Viết bằng tiếng Anh",
+            "prompt": "Viết: “Tôi ăn sáng lúc bảy giờ.”",
+            "hint": "Dùng mẫu câu trong bài; viết thành một câu hoặc hai câu trọn ý.",
+            "explanation": "Các cách viết được chấp nhận: I have breakfast at seven. / I eat breakfast at seven.",
+            "config": {
+              "accepted_answers": [
+                "I have breakfast at seven.",
+                "I eat breakfast at seven."
+              ]
+            }
+          },
+          {
+            "id": "studio-english-02-part-6",
+            "locked": true,
+            "engine": "evidenceBoard",
+            "title": "Đọc kỹ lịch của Leo",
+            "prompt": "Chọn tất cả những câu đúng theo đoạn đọc.",
+            "hint": "“Before school” nghĩa là trước khi đi học.",
+            "explanation": "Leo thức dậy lúc 7 và ăn sáng trước khi đi học lúc 8. Midnight là nửa đêm, không xuất hiện trong lịch.",
+            "config": {
+              "items": [
+                "Leo gets up at seven.",
+                "Leo goes to school at midnight.",
+                "Leo has breakfast before school."
+              ],
+              "answer_values": [0, 2]
+            }
+          }
+        ]
+      },
+      "revision": 0
+    },
+    {
+      "id": "studio-english-03",
+      "topic_id": "studio-english",
+      "title": "Around town: hỏi và chỉ đường",
+      "prompt": "Luyện nghe hướng đi, hỏi đường, đọc lệnh và viết câu giao tiếp.",
+      "stage": "Bài 3",
+      "hint": "Bấm Nghe mẫu hoặc Nghe chậm. Có bản chữ thay thế khi không dùng được âm thanh.",
+      "explanation": "Bạn đã hoàn thành 6 phần: Around town: hỏi và chỉ đường. Hãy giải thích lại cách làm bằng lời của mình.",
+      "sort_order": 2,
+      "status": "active",
+      "mechanism": "slideLesson",
+      "config": {
+        "schema_version": 1,
+        "slides": [
+          {
+            "id": "studio-english-03-part-1",
+            "locked": true,
+            "engine": "story",
+            "title": "At the library",
+            "prompt": "Đọc tình huống trước khi thử nghiệm.",
+            "hint": "Ghi nhớ các dữ kiện để dùng ở phần tiếp theo.",
+            "explanation": "Bạn sẽ vận dụng các dữ kiện này bằng những tương tác tiếp theo.",
+            "config": {
+              "text": "A: Excuse me. Where is the library?\nB: Go straight and turn right at the bookshop.\n“Excuse me” mở lời lịch sự; “where” hỏi vị trí. Right là phải, left là trái, straight là đi thẳng. Mỗi chỉ dẫn phụ thuộc địa điểm được nêu.",
+              "image_url": "",
+              "image_alt": ""
+            }
+          },
+          {
+            "id": "studio-english-03-part-2",
+            "locked": true,
+            "engine": "listeningChoice",
+            "title": "Nghe hướng rẽ",
+            "prompt": "Trong chỉ dẫn này, bạn phải rẽ hướng nào ở thư viện?",
+            "hint": "Bấm Nghe mẫu hoặc Nghe chậm. Có bản chữ thay thế khi không dùng được âm thanh.",
+            "explanation": "Câu nghe: Go straight and turn right at the library.",
+            "config": {
+              "text": "Go straight and turn right at the library.",
+              "choices": ["Turn left.", "Turn right.", "Go back."],
+              "answer": 1
+            }
+          },
+          {
+            "id": "studio-english-03-part-3",
+            "locked": true,
+            "engine": "speechPractice",
+            "title": "Đến lượt bạn nói",
+            "prompt": "Nghe mẫu rồi bấm micro để nói câu này. Có thể nhập lại câu nếu thiết bị chưa nhận được giọng nói.",
+            "hint": "Giữ đúng các từ và thứ tự của câu mẫu; dấu câu và hoa/thường không ảnh hưởng.",
+            "explanation": "Câu mẫu: Excuse me. Where is the library? Bài này đối chiếu nội dung câu, không chấm chất lượng phát âm.",
+            "config": {
+              "text": "Excuse me. Where is the library?"
+            }
+          },
+          {
+            "id": "studio-english-03-part-4",
+            "locked": true,
+            "engine": "pairs",
+            "title": "Từ chỉ hướng",
+            "prompt": "Ghép mỗi từ với ý nghĩa tương ứng.",
+            "hint": "Đọc từng cặp rồi kiểm tra lại tất cả kết nối.",
+            "explanation": "left: trái; right: phải; straight: thẳng",
+            "config": {
+              "pairs": [
+                {
+                  "left": "left",
+                  "right": "trái"
+                },
+                {
+                  "left": "right",
+                  "right": "phải"
+                },
+                {
+                  "left": "straight",
+                  "right": "thẳng"
+                }
+              ]
+            }
+          },
+          {
+            "id": "studio-english-03-part-5",
+            "locked": true,
+            "engine": "textEntry",
+            "title": "Viết bằng tiếng Anh",
+            "prompt": "Viết câu hỏi: “Xin lỗi, thư viện ở đâu?”",
+            "hint": "Dùng mẫu câu trong bài; viết thành một câu hoặc hai câu trọn ý.",
+            "explanation": "Các cách viết được chấp nhận: Excuse me. Where is the library? / Where is the library?",
+            "config": {
+              "accepted_answers": [
+                "Excuse me. Where is the library?",
+                "Where is the library?"
+              ]
+            }
+          },
+          {
+            "id": "studio-english-03-part-6",
+            "locked": true,
+            "engine": "robotRoute",
+            "title": "Lập trình đường đi",
+            "prompt": "Đọc lệnh tiếng Anh và lập trình robot: “Go right three times, then go down three times.” R = right, D = down. Tránh đá tại (1,1).",
+            "hint": "Đi 3 ô sang phải trước, rồi đi 3 ô xuống dưới để tránh đá tại (1,1).",
+            "explanation": "Chuỗi R,R,R,D,D,D đi từ (0,0) đến (3,3), không qua đá và dùng đúng 6 lệnh.",
+            "config": {
+              "max_commands": 6
+            }
+          }
+        ]
+      },
+      "revision": 0
+    },
+    {
+      "id": "studio-coding-01",
+      "topic_id": "studio-coding",
+      "title": "Thuật toán: điều khiển robot",
+      "prompt": "Tạo chuỗi lệnh, theo dõi biến và phân biệt thuật toán với kết quả.",
+      "stage": "Bài 1",
+      "hint": "Đi 3 ô sang phải trước, rồi đi 3 ô xuống dưới để tránh đá tại (1,1).",
+      "explanation": "Bạn đã hoàn thành 6 phần: Thuật toán: điều khiển robot. Hãy giải thích lại cách làm bằng lời của mình.",
+      "sort_order": 0,
+      "status": "active",
+      "mechanism": "slideLesson",
+      "config": {
+        "schema_version": 1,
+        "slides": [
+          {
+            "id": "studio-coding-01-part-1",
+            "locked": true,
+            "engine": "story",
+            "title": "Máy làm đúng từng bước",
+            "prompt": "Đọc tình huống trước khi thử nghiệm.",
+            "hint": "Ghi nhớ các dữ kiện để dùng ở phần tiếp theo.",
+            "explanation": "Bạn sẽ vận dụng các dữ kiện này bằng những tương tác tiếp theo.",
+            "config": {
+              "text": "Thuật toán là các bước có thứ tự để đạt mục tiêu. Robot bắt đầu (0,0). R tăng x một đơn vị; D tăng y một đơn vị. Đá nằm tại (1,1), đích tại (3,3). Trong bài tính biến, dấu = gán giá trị mới.",
+              "image_url": "",
+              "image_alt": ""
+            }
+          },
+          {
+            "id": "studio-coding-01-part-2",
+            "locked": true,
+            "engine": "robotRoute",
+            "title": "Lập trình đường đi",
+            "prompt": "Tạo đường từ (0,0) đến (3,3) bằng đúng 6 lệnh, tránh đá (1,1).",
+            "hint": "Đi 3 ô sang phải trước, rồi đi 3 ô xuống dưới để tránh đá tại (1,1).",
+            "explanation": "Chuỗi R,R,R,D,D,D đi từ (0,0) đến (3,3), không qua đá và dùng đúng 6 lệnh.",
+            "config": {
+              "max_commands": 6
+            }
+          },
+          {
+            "id": "studio-coding-01-part-3",
+            "locked": true,
+            "engine": "sequenceTiles",
+            "title": "Thiết kế một thuật toán",
+            "prompt": "Sắp xếp các thẻ theo đúng trình tự từ trên xuống dưới.",
+            "hint": "Hiểu mục tiêu trước khi viết lệnh.",
+            "explanation": "Đọc dữ kiện → xây chuỗi lệnh → chạy thử giúp tìm và sửa sai.",
+            "config": {
+              "items": [
+                "Đọc điểm xuất phát và đích",
+                "Chọn chuỗi lệnh",
+                "Chạy thử và sửa lỗi"
+              ],
+              "answer_values": [0, 1, 2]
+            }
+          },
+          {
+            "id": "studio-coding-01-part-4",
+            "locked": true,
+            "engine": "numberInput",
+            "title": "Theo dõi giá trị biến",
+            "prompt": "Mã giả: x = 2; x = x + 3; print(x). Màn hình in số nào?",
+            "hint": "Lấy giá trị cũ của x cộng 3 rồi gán lại cho x.",
+            "explanation": "x bắt đầu bằng 2, sau phép gán trở thành 5; print(x) in 5.",
+            "config": {
+              "target_value": 5
+            }
+          },
+          {
+            "id": "studio-coding-01-part-5",
+            "locked": true,
+            "engine": "pairs",
+            "title": "Hiểu các khái niệm",
+            "prompt": "Ghép mỗi từ với ý nghĩa tương ứng.",
+            "hint": "Đọc từng cặp rồi kiểm tra lại tất cả kết nối.",
+            "explanation": "Lệnh: Một thao tác cụ thể; Thuật toán: Các bước có thứ tự; Lỗi: Kết quả lệch mục tiêu",
+            "config": {
+              "pairs": [
+                {
+                  "left": "Lệnh",
+                  "right": "Một thao tác cụ thể"
+                },
+                {
+                  "left": "Thuật toán",
+                  "right": "Các bước có thứ tự"
+                },
+                {
+                  "left": "Lỗi",
+                  "right": "Kết quả lệch mục tiêu"
+                }
+              ]
+            }
+          },
+          {
+            "id": "studio-coding-01-part-6",
+            "locked": true,
+            "engine": "quiz",
+            "title": "Phát hiện đường đi lỗi",
+            "prompt": "Từ (0,0), lệnh R rồi D đưa robot tới đâu nếu chỉ xét tọa độ?",
+            "hint": "R tăng x, D tăng y.",
+            "explanation": "Sau R là (1,0); sau D là (1,1), nên đường này đụng đá và cần sửa.",
+            "config": {
+              "choices": [
+                "(1,1), đúng vị trí đá",
+                "(3,3), vị trí đích",
+                "(0,0), vị trí đầu"
+              ],
+              "answer": 0
+            }
+          }
+        ]
+      },
+      "revision": 0
+    },
+    {
+      "id": "studio-coding-02",
+      "topic_id": "studio-coding",
+      "title": "Vòng lặp và biến",
+      "prompt": "Lắp vòng lặp, đếm số lệnh và tính giá trị biến sau nhiều lần cập nhật.",
+      "stage": "Bài 2",
+      "hint": "Đặt lệnh thứ nhất là R, thứ hai là D, rồi tăng số lần lên 3.",
+      "explanation": "Bạn đã hoàn thành 6 phần: Vòng lặp và biến. Hãy giải thích lại cách làm bằng lời của mình.",
+      "sort_order": 1,
+      "status": "active",
+      "mechanism": "slideLesson",
+      "config": {
+        "schema_version": 1,
+        "slides": [
+          {
+            "id": "studio-coding-02-part-1",
+            "locked": true,
+            "engine": "story",
+            "title": "Lặp lại một mẫu",
+            "prompt": "Đọc tình huống trước khi thử nghiệm.",
+            "hint": "Ghi nhớ các dữ kiện để dùng ở phần tiếp theo.",
+            "explanation": "Bạn sẽ vận dụng các dữ kiện này bằng những tương tác tiếp theo.",
+            "config": {
+              "text": "repeat [R,D] 3 lần thực hiện R,D,R,D,R,D: 6 lệnh. Số lệnh thực hiện = độ dài thân × số vòng. Một biến có thể được cập nhật sau mỗi vòng; luôn dùng giá trị mới của vòng trước.",
+              "image_url": "",
+              "image_alt": ""
+            }
+          },
+          {
+            "id": "studio-coding-02-part-2",
+            "locked": true,
+            "engine": "loopBuilder",
+            "title": "Lắp vòng lặp",
+            "prompt": "Chọn thân gồm R rồi D, số lần lặp bằng 3. Đây là mô hình chuỗi lệnh, không phải bản đồ tránh đá.",
+            "hint": "Đặt lệnh thứ nhất là R, thứ hai là D, rồi tăng số lần lên 3.",
+            "explanation": "Thân [R,D] được lặp 3 lần tạo R,D,R,D,R,D, tổng 6 lệnh.",
+            "config": {
+              "target_body": ["R", "D"],
+              "target_repeat": 3
+            }
+          },
+          {
+            "id": "studio-coding-02-part-3",
+            "locked": true,
+            "engine": "numberInput",
+            "title": "Biến đổi qua bốn vòng",
+            "prompt": "Bắt đầu x = 1. Lặp x = x + 2 đúng 4 lần. Giá trị cuối của x là bao nhiêu?",
+            "hint": "Liệt kê 1 → 3 → 5 → 7 → 9.",
+            "explanation": "Sau bốn lần tăng 2: x = 1 + 4 × 2 = 9.",
+            "config": {
+              "target_value": 9
+            }
+          },
+          {
+            "id": "studio-coding-02-part-4",
+            "locked": true,
+            "engine": "clozeBank",
+            "title": "Đếm số lần thực thi",
+            "prompt": "Điền số phù hợp vào hai chỗ trống.",
+            "hint": "Thân có 2 lệnh; tổng bằng 2 nhân số vòng.",
+            "explanation": "3 vòng × 2 lệnh = 6 lần thực hiện lệnh.",
+            "config": {
+              "items": [
+                "repeat [R,D] ___ lần tạo 6 bước",
+                "2 lệnh lặp 3 lần thực hiện ___ lệnh"
+              ],
+              "choices": ["3", "6", "repeat"],
+              "answer_values": [0, 1]
+            }
+          },
+          {
+            "id": "studio-coding-02-part-5",
+            "locked": true,
+            "engine": "barChart",
+            "title": "Số lệnh theo số vòng",
+            "prompt": "Thân có 2 lệnh. Đặt chiều cao cột bằng tổng số lệnh khi chạy 1, 2 và 3 vòng.",
+            "hint": "Tính 2×1, 2×2 và 2×3.",
+            "explanation": "Tổng số lệnh lần lượt là 2,4,6; mỗi vòng thêm 2 lệnh.",
+            "config": {
+              "labels": ["1 vòng", "2 vòng", "3 vòng"],
+              "target_values": [2, 4, 6]
+            }
+          },
+          {
+            "id": "studio-coding-02-part-6",
+            "locked": true,
+            "engine": "quiz",
+            "title": "Vòng lặp tiết kiệm điều gì?",
+            "prompt": "Hai lệnh trong thân được lặp 3 lần. Có bao nhiêu lần thực hiện lệnh?",
+            "hint": "Viết tắt mã không làm giảm số lệnh robot thực hiện.",
+            "explanation": "Vòng lặp giúp viết gọn; robot vẫn thực hiện 2 × 3 = 6 lệnh.",
+            "config": {
+              "choices": ["2 lần", "3 lần", "6 lần"],
+              "answer": 2
+            }
+          }
+        ]
+      },
+      "revision": 0
+    },
+    {
+      "id": "studio-coding-03",
+      "topic_id": "studio-coding",
+      "title": "Điều kiện và sửa lỗi",
+      "prompt": "Phân loại theo điều kiện, kết hợp hai quy tắc và kiểm tra giá trị biên.",
+      "stage": "Bài 3",
+      "hint": "Đặc biệt chú ý trường hợp bằng 12.",
+      "explanation": "Bạn đã hoàn thành 6 phần: Điều kiện và sửa lỗi. Hãy giải thích lại cách làm bằng lời của mình.",
+      "sort_order": 2,
+      "status": "active",
+      "mechanism": "slideLesson",
+      "config": {
+        "schema_version": 1,
+        "slides": [
+          {
+            "id": "studio-coding-03-part-1",
+            "locked": true,
+            "engine": "story",
+            "title": "Đúng, sai và giá trị biên",
+            "prompt": "Đọc tình huống trước khi thử nghiệm.",
+            "hint": "Ghi nhớ các dữ kiện để dùng ở phần tiếp theo.",
+            "explanation": "Bạn sẽ vận dụng các dữ kiện này bằng những tương tác tiếp theo.",
+            "config": {
+              "text": "Mã giả: if age >= 12 thì mở khóa, else tiếp tục luyện tập. >= nghĩa là lớn hơn hoặc bằng; tuổi 12 cũng được mở. Để sửa lỗi: tái hiện lỗi, đối chiếu điều kiện, sửa rồi kiểm thử lại cả trường hợp đúng và sai.",
+              "image_url": "",
+              "image_alt": ""
+            }
+          },
+          {
+            "id": "studio-coding-03-part-2",
+            "locked": true,
+            "engine": "categorySort",
+            "title": "Phân nhánh theo tuổi",
+            "prompt": "Gán mỗi tuổi vào nhánh tương ứng với điều kiện age >= 12.",
+            "hint": "Đặc biệt chú ý trường hợp bằng 12.",
+            "explanation": "10 thuộc nhánh chưa đủ; 12 và 15 thuộc nhánh từ 12 trở lên.",
+            "config": {
+              "items": ["age = 10", "age = 12", "age = 15"],
+              "choices": ["Chưa đủ 12", "Từ 12 trở lên"],
+              "answer_values": [0, 1, 1]
+            }
+          },
+          {
+            "id": "studio-coding-03-part-3",
+            "locked": true,
+            "engine": "vennDiagram",
+            "title": "Kết hợp hai điều kiện",
+            "prompt": "Quy ước A: chia hết cho 2; B: chia hết cho 3. Đưa mỗi số vào A, B, cả hai hoặc ngoài cả hai.",
+            "hint": "6 chia hết cho cả 2 lẫn 3; 5 không chia hết cho số nào.",
+            "explanation": "4 chỉ thuộc A, 9 chỉ thuộc B, 6 thuộc cả hai, 5 nằm ngoài.",
+            "config": {
+              "items": ["4", "9", "6", "5"],
+              "answer_values": [1, 2, 3, 0]
+            }
+          },
+          {
+            "id": "studio-coding-03-part-4",
+            "locked": true,
+            "engine": "sequenceTiles",
+            "title": "Quy trình sửa lỗi",
+            "prompt": "Sắp xếp các thẻ theo đúng trình tự từ trên xuống dưới.",
+            "hint": "Đừng sửa trước khi hiểu lỗi xảy ra với đầu vào nào.",
+            "explanation": "Ví dụ nhỏ → xác định nguyên nhân → sửa và kiểm thử lại.",
+            "config": {
+              "items": [
+                "Tái hiện lỗi bằng ví dụ nhỏ",
+                "Đối chiếu kết quả với điều kiện mong muốn",
+                "Sửa điều kiện và kiểm thử lại"
+              ],
+              "answer_values": [0, 1, 2]
+            }
+          },
+          {
+            "id": "studio-coding-03-part-5",
+            "locked": true,
+            "engine": "evidenceBoard",
+            "title": "Kiểm tra điều kiện",
+            "prompt": "Chọn tất cả phát biểu đúng.",
+            "hint": "Dấu >= bao gồm trường hợp bằng nhau.",
+            "explanation": "12 thỏa điều kiện, 10 không thỏa. Khi if sai, else chạy.",
+            "config": {
+              "items": [
+                "12 >= 12 là đúng",
+                "10 >= 12 là đúng",
+                "Điều kiện sai thì nhánh else chạy"
+              ],
+              "answer_values": [0, 2]
+            }
+          },
+          {
+            "id": "studio-coding-03-part-6",
+            "locked": true,
+            "engine": "quiz",
+            "title": "Sửa lỗi ở giá trị biên",
+            "prompt": "Muốn chấp nhận điểm từ 5 trở lên nhưng mã đang dùng score > 5. Cần sửa thế nào?",
+            "hint": "Hãy thử riêng đầu vào score = 5.",
+            "explanation": "score >= 5 chấp nhận cả 5; score > 5 loại sai giá trị biên này.",
+            "config": {
+              "choices": ["Đổi > thành >=", "Đổi > thành <", "Đổi 5 thành 6"],
+              "answer": 0
+            }
+          }
+        ]
+      },
+      "revision": 0
+    }
+  ],
+  "solutions": {
+    "studio-math-01": {
+      "studio-math-01-part-1": {
+        "ack": true
+      },
+      "studio-math-01-part-2": {
+        "values": [2, 5, 3]
+      },
+      "studio-math-01-part-3": {
+        "value": "30"
+      },
+      "studio-math-01-part-4": {
+        "values": [2, 5, 3]
+      },
+      "studio-math-01-part-5": {
+        "comparison": 0
+      },
+      "studio-math-01-part-6": {
+        "answer": 0
+      }
+    },
+    "studio-math-02": {
+      "studio-math-02-part-1": {
+        "ack": true
+      },
+      "studio-math-02-part-2": {
+        "position": -4
+      },
+      "studio-math-02-part-3": {
+        "selected": [0, 1, 2]
+      },
+      "studio-math-02-part-4": {
+        "comparison": 0
+      },
+      "studio-math-02-part-5": {
+        "value": "5"
+      },
+      "studio-math-02-part-6": {
+        "selected": [0, 1]
+      }
+    },
+    "studio-math-03": {
+      "studio-math-03-part-1": {
+        "ack": true
+      },
+      "studio-math-03-part-2": {
+        "points": [
+          [0, 0],
+          [3, 0],
+          [3, 2],
+          [0, 2]
+        ]
+      },
+      "studio-math-03-part-3": {
+        "shape": "triangle"
+      },
+      "studio-math-03-part-4": {
+        "cells": [11, 16, 23]
+      },
+      "studio-math-03-part-5": {
+        "value": "10"
+      },
+      "studio-math-03-part-6": {
+        "answer": 0
+      }
+    },
+    "studio-math-04": {
+      "studio-math-04-part-1": {
+        "ack": true
+      },
+      "studio-math-04-part-2": {
+        "width": 4,
+        "height": 3,
+        "depth": 2
+      },
+      "studio-math-04-part-3": {
+        "value": "52"
+      },
+      "studio-math-04-part-4": {
+        "values": [4, 3, 2]
+      },
+      "studio-math-04-part-5": {
+        "values": [0, 1, 2]
+      },
+      "studio-math-04-part-6": {
+        "answer": 1
+      }
+    },
+    "studio-english-01": {
+      "studio-english-01-part-1": {
+        "ack": true
+      },
+      "studio-english-01-part-2": {
+        "answer": 1,
+        "experienced": true
+      },
+      "studio-english-01-part-3": {
+        "response": "Hello. My name is Mia."
+      },
+      "studio-english-01-part-4": {
+        "values": [0, 1]
+      },
+      "studio-english-01-part-5": {
+        "response": "Hello. My name is Mia."
+      },
+      "studio-english-01-part-6": {
+        "answer": 0
+      }
+    },
+    "studio-english-02": {
+      "studio-english-02-part-1": {
+        "ack": true
+      },
+      "studio-english-02-part-2": {
+        "answer": 1,
+        "experienced": true
+      },
+      "studio-english-02-part-3": {
+        "response": "I go to school at eight."
+      },
+      "studio-english-02-part-4": {
+        "values": [0, 1, 2]
+      },
+      "studio-english-02-part-5": {
+        "response": "I have breakfast at seven."
+      },
+      "studio-english-02-part-6": {
+        "selected": [0, 2]
+      }
+    },
+    "studio-english-03": {
+      "studio-english-03-part-1": {
+        "ack": true
+      },
+      "studio-english-03-part-2": {
+        "answer": 1,
+        "experienced": true
+      },
+      "studio-english-03-part-3": {
+        "response": "Excuse me. Where is the library?"
+      },
+      "studio-english-03-part-4": {
+        "values": [0, 1, 2]
+      },
+      "studio-english-03-part-5": {
+        "response": "Excuse me. Where is the library?"
+      },
+      "studio-english-03-part-6": {
+        "commands": ["R", "R", "R", "D", "D", "D"]
+      }
+    },
+    "studio-coding-01": {
+      "studio-coding-01-part-1": {
+        "ack": true
+      },
+      "studio-coding-01-part-2": {
+        "commands": ["R", "R", "R", "D", "D", "D"]
+      },
+      "studio-coding-01-part-3": {
+        "values": [0, 1, 2]
+      },
+      "studio-coding-01-part-4": {
+        "value": "5"
+      },
+      "studio-coding-01-part-5": {
+        "values": [0, 1, 2]
+      },
+      "studio-coding-01-part-6": {
+        "answer": 0
+      }
+    },
+    "studio-coding-02": {
+      "studio-coding-02-part-1": {
+        "ack": true
+      },
+      "studio-coding-02-part-2": {
+        "body": ["R", "D"],
+        "repeat": 3
+      },
+      "studio-coding-02-part-3": {
+        "value": "9"
+      },
+      "studio-coding-02-part-4": {
+        "values": [0, 1]
+      },
+      "studio-coding-02-part-5": {
+        "values": [2, 4, 6]
+      },
+      "studio-coding-02-part-6": {
+        "answer": 2
+      }
+    },
+    "studio-coding-03": {
+      "studio-coding-03-part-1": {
+        "ack": true
+      },
+      "studio-coding-03-part-2": {
+        "values": [0, 1, 1]
+      },
+      "studio-coding-03-part-3": {
+        "values": [1, 2, 3, 0]
+      },
+      "studio-coding-03-part-4": {
+        "values": [0, 1, 2]
+      },
+      "studio-coding-03-part-5": {
+        "selected": [0, 2]
+      },
+      "studio-coding-03-part-6": {
+        "answer": 0
+      }
+    }
+  }
+}

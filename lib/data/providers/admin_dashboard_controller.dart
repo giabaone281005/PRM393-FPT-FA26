@@ -104,7 +104,7 @@ class AdminDashboardController extends ChangeNotifier {
         repository.read(owner, 'overview'),
         repository.read(
           owner,
-          requestedSection,
+          requestedSection == 'builder' ? 'topics' : requestedSection,
           search: requestedSearch,
           offset: requestedOffset,
         ),
@@ -177,7 +177,7 @@ class AdminDashboardController extends ChangeNotifier {
   void selectSection(String value) {
     if (!allowed ||
         section == value ||
-        !['accounts', 'topics'].contains(value)) {
+        !['accounts', 'topics', 'builder'].contains(value)) {
       return;
     }
     section = value;
@@ -234,6 +234,113 @@ class AdminDashboardController extends ChangeNotifier {
       _mutate('account.status', {'id': account.id, 'status': status});
   Future<bool> saveTopic(AdminTopic topic) =>
       _mutate('topic.save', topic.toPayload());
+
+  Future<List<Map<String, dynamic>>> loadLessons(String topicId) async {
+    if (!allowed) return [];
+    final owner = _owner!, epoch = _epoch;
+    try {
+      final data = await repository.read(owner, 'lessons:$topicId');
+      if (_disposed || epoch != _epoch || !allowed) return [];
+      return (data['items'] as List)
+          .map((row) => Map<String, dynamic>.from(row as Map))
+          .toList();
+    } catch (error) {
+      if (!_disposed && epoch == _epoch) {
+        _failure(error);
+        _emit();
+      }
+      rethrow;
+    }
+  }
+
+  Future<bool> saveLesson(Map<String, dynamic> payload) =>
+      _mutate('lesson.save', payload);
+
+  Future<bool> saveBuilderDraft(Map<String, dynamic> payload) =>
+      _mutate('lesson.draft', payload);
+  Future<List<Map<String, dynamic>>> loadBuilderDrafts(String topic) async {
+    if (!allowed) return [];
+    final owner = _owner!, epoch = _epoch;
+    try {
+      final response = await repository.read(owner, 'drafts:$topic');
+      if (_disposed || epoch != _epoch || !allowed) return [];
+      return (response['items'] as List)
+          .map((s) => Map<String, dynamic>.from(s as Map))
+          .toList();
+    } catch (error) {
+      if (!_disposed && epoch == _epoch) {
+        _failure(error);
+        _emit();
+      }
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>?> generateSlides(
+    String prompt,
+    String topic,
+    Map<String, dynamic> design,
+  ) async {
+    final generator = repository;
+    if (!allowed || busy || generator is! AdminSlideGenerator) return null;
+    final owner = _owner!, epoch = _epoch;
+    busy = true;
+    message = null;
+    _emit();
+    try {
+      final slides = await (generator as AdminSlideGenerator).generateSlides(
+        owner,
+        prompt,
+        topic,
+        design,
+      );
+      if (_disposed || epoch != _epoch || !allowed) return null;
+      return slides;
+    } catch (error) {
+      if (!_disposed && epoch == _epoch) {
+        _failure(error);
+        _emit();
+      }
+      return null;
+    } finally {
+      if (!_disposed && epoch == _epoch) {
+        busy = false;
+        _emit();
+      }
+    }
+  }
+
+  Future<Map<String, dynamic>?> generateLesson(
+    String prompt,
+    String topic,
+  ) async {
+    final generator = repository;
+    if (!allowed || busy || generator is! AdminLessonGenerator) return null;
+    final owner = _owner!, epoch = _epoch;
+    busy = true;
+    message = null;
+    _emit();
+    try {
+      final draft = await (generator as AdminLessonGenerator).generateLesson(
+        owner,
+        prompt,
+        topic,
+      );
+      if (_disposed || epoch != _epoch || !allowed) return null;
+      return draft;
+    } catch (error) {
+      if (!_disposed && epoch == _epoch) {
+        _failure(error);
+        _emit();
+      }
+      return null;
+    } finally {
+      if (!_disposed && epoch == _epoch) {
+        busy = false;
+        _emit();
+      }
+    }
+  }
 
   Future<void> signIn(String email, String password) async {
     if (busy) return;
